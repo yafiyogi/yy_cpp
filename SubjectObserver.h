@@ -31,7 +31,7 @@ SOFTWARE.
 #include <unordered_map>
 #include <algorithm>
 
-#include "yy_func_traits.h"
+#include "yafiyogi/cpp/yy_func_traits.h"
 
 namespace yafiyogi {
 
