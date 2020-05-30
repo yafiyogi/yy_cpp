@@ -1,4 +1,4 @@
-// g++ -Wall -g2 --std=c++11 Dispatcher.cpp
+// g++ -Wall -std=c++11 -I ../.. demo.cpp && ./a.out
 
 #include "SubjectObserver.h"
 #include <iostream>

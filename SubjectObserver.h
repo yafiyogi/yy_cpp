@@ -1,4 +1,3 @@
-// g++ -std=c++11 -I ../.. demo.cpp && ./a.out
 /*
 
   MIT License
