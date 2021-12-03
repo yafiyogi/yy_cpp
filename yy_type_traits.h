@@ -35,19 +35,7 @@
 
 namespace yafiyogi {
 
-template<typename T>
-struct yy_is_vector:
-    public std::false_type
-{
-};
-
-template<typename T>
-inline constexpr bool yy_is_vector_v = yy_is_vector<T>::value;
-
-template<typename T>
-using yy_is_vector_t = typename yy_is_vector<T>::type;
-
-template<typename T>
+Template<typename T>
 struct yy_is_string:
     std::false_type
 {
