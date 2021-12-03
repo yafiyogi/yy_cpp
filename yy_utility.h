@@ -27,6 +27,8 @@ SOFTWARE.
 #ifndef yy_utility_h
 # define yy_utility_h
 
+#include <array>
+
 namespace yafiyogi {
 
 template<typename I>
@@ -60,6 +62,26 @@ auto make_range( I && b,
   return Range<I>{ std::forward<I>( b),
     std::forward<I>( e)};
 }
+
+template<typename T>
+struct ArraySize
+{
+  static constexpr size_t size = 0;
+};
+
+template<typename T,
+         size_t Size>
+struct ArraySize<T[Size]>
+{
+  static constexpr size_t size = Size;
+};
+
+template<typename T,
+         size_t Size>
+struct ArraySize<std::array<T, Size>>
+{
+  static constexpr size_t size = Size;
+};
 
 } // namespace yafiyogi
 
