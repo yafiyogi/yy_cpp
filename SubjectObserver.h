@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2019 Yafiyogi
+  Copyright (c) 2019-2022 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -39,8 +39,14 @@ template<typename R, typename... Args>
 class ObserverBase
 {
 public:
-    virtual ~ObserverBase() {}
-    typedef std::unique_ptr< ObserverBase<R, Args...>> Ptr;
+  ObserverBase() = default;
+  ObserverBase(const ObserverBase&) = default;
+  ObserverBase(ObserverBase&&) noexcept = default;
+  ObserverBase & operator=(const ObserverBase&) = default;
+  ObserverBase & operator=(ObserverBase&&) noexcept = default;
+
+    virtual ~ObserverBase() = default;
+    using ptr_type = std::unique_ptr< ObserverBase<R, Args...>>;
 
     virtual R event( const void * data, const Args & ...args) = 0;
 };
@@ -50,11 +56,11 @@ class ObserverMP:
         public ObserverBase<R, Args...>
 {
 public:
-    typedef R (T::*MethodPtr)(const A *, const Args & ...);
-    typedef std::shared_ptr<T> ObjPtr;
+    using method_ptr = R (T::*)(const A *, const Args & ...);
+    using object_ptr = std::shared_ptr<T>;
 
-    ObserverMP( const ObjPtr & obj,
-               MethodPtr method):
+    ObserverMP( const object_ptr & obj,
+               method_ptr method):
         m_obj( obj),
         m_method( method) {}
 
@@ -66,24 +72,24 @@ public:
     }
 
 private:
-    ObjPtr m_obj;
-    MethodPtr m_method;
+    object_ptr m_obj;
+    method_ptr m_method;
 };
 
 template<typename T, typename R, typename... Args>
-class ObserverFunc:
+class ObserverSP:
         public ObserverBase<R, Args...>
 {
 public:
-    typedef yy_func_traits<T> traits;
-    typedef typename traits::template arg<0> arg;
+    using traits = yy_func_traits<T>;
+    using arg_type = typename traits::template arg_type<0>;
 
-    ObserverFunc( T func):
+    ObserverSP( T func):
         m_func( func) {}
 
     R event( const void * data, const Args & ...args) override
     {
-        return m_func( reinterpret_cast<const typename arg::type>( data), args...);
+      return m_func( reinterpret_cast<const arg_type>( data), args...);
     }
 
 private:
@@ -94,16 +100,16 @@ template< typename K, typename R, typename... Args>
 class Subject
 {
 public:
-    typedef typename ObserverBase<R, Args...>::Ptr observer_ptr;
-    typedef std::unordered_map<K, observer_ptr> Map;
+    using observer_type = ObserverBase<R, Args...>;
+    using map_type = std::unordered_map<K, typename observer_type::ptr_type>;
 
     std::tuple<bool, R> event( const K & key,
                               const void * data,
                               const Args & ...args)
     {
-        auto && found = m_observers.find( key);
+        auto found = m_observers.find( key);
 
-        R rv = R();
+        auto rv = R{};
 
         const bool call = m_observers.end() != found;
         if( call)
@@ -114,21 +120,26 @@ public:
     }
 
     template<typename T, typename A>
-    void add( const K & key,
+    bool add( const K & key,
              typename std::shared_ptr<T> & obj,
              R (T::*method)( const A *, const Args & ...args))
     {
+        bool rv = false;
         if( obj)
         {
-            m_observers.emplace( key, observer_ptr( new ObserverMP<T, R, A, Args...>( obj, method)));
+          typename map_type::iterator not_used;
+          std::tie(not_used, rv) = m_observers.try_emplace( key, std::make_unique<ObserverMP<T, R, A, Args...>>(obj, method));
         }
+        return rv;
     }
 
     template<typename T>
-    void add( const K & key,
+    bool add( const K & key,
              T && func)
     {
-        m_observers.emplace( key, observer_ptr( new ObserverFunc<T, R>( func)));
+        auto [not_used, rv] = m_observers.try_emplace( key, std::make_unique<ObserverSP<T, R>>( std::forward<T>( func)));
+
+        return rv;
     }
 
     void erase( const K & key)
@@ -136,19 +147,19 @@ public:
         m_observers.erase( key);
     }
 
-    Map m_observers;
+    map_type m_observers;
 };
 
 template< typename K, typename... Args>
 class Subject<K, void, Args...>
 {
 public:
-    typedef typename ObserverBase<void, Args...>::Ptr observer_ptr;
-    typedef std::unordered_map<K, observer_ptr> Map;
+    using observer_ptr = typename ObserverBase<void, Args...>::ptr_type;
+    using map_type = std::unordered_map<K, observer_ptr>;
 
     bool event( const K & key,
                const void * data,
-               Args & ...args)
+               const Args & ...args)
     {
         auto found = m_observers.find( key);
 
@@ -162,21 +173,26 @@ public:
     }
 
     template<typename T, typename A>
-    void add( const K & key,
+    bool add( const K & key,
              typename std::shared_ptr<T> & obj,
              void (T::*method)( const A *, const Args & ...args))
     {
+        bool rv = false;
         if( obj)
         {
-            m_observers.emplace( key, observer_ptr( new ObserverMP<T, void, A, Args...>( obj, method)));
+          typename map_type::iterator not_used;
+          std::tie(not_used, rv) = m_observers.try_emplace( key, std::make_unique<ObserverMP<T, void, A, Args...>>( obj, method));
         }
+        return rv;
     }
 
     template<typename T>
-    void add( const K & key,
+    bool add( const K & key,
              T func)
     {
-        m_observers.emplace( key, observer_ptr( new ObserverFunc<T, void, Args...>( func)));
+      auto [not_used, rv] = m_observers.try_emplace( key, std::make_unique<ObserverSP<T, void, Args...>>( func));
+
+      return rv;
     }
 
     void erase( const K & key)
@@ -184,8 +200,9 @@ public:
         m_observers.erase( key);
     }
 
-    Map m_observers;
+    map_type m_observers;
 };
+
 } // Namespace yafiyogi
 
 #endif // SubjectObserver_h
