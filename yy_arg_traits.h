@@ -2,7 +2,7 @@
 
 MIT License
 
-Copyright (c) 2019-2022 Yafiyogi
+Copyright (c) 2022 Yafiyogi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,55 +24,30 @@ SOFTWARE.
 
 */
 
-#include <climits>
-#include <cstddef>
 #include <tuple>
 
-#ifndef yy_func_traits_h
-# define yy_func_traits_h
-
-# ifndef yy_arg_traits_h
-#  include "yy_arg_traits.h"
-# endif
+#ifndef yy_arg_traits_h
+# define yy_arg_traits_h
 
 namespace yafiyogi::yy_traits {
 
-template<typename T>
-struct func_traits:
-    public func_traits<decltype(&T::operator())>
+template<typename... Args>
+struct arg_traits
 {
+    using tuple_type = std::tuple<Args...>;
+    static constexpr std::size_t size = std::tuple_size<tuple_type>::value;
+
+    template<std::size_t N>
+    struct arg
+    {
+      using type = std::decay_t<typename std::tuple_element<N, tuple_type>::type>;
+    };
+
+    template<std::size_t N>
+    using arg_type = typename arg<N>::type;
 };
 
-template<typename C, typename R, typename... Args>
-struct func_traits<R(C::*)(Args...)>
-{
-  using result_type = std::decay_t<R>;
-    using class_type = std::decay_t<C>;
-};
-
-template<typename C, typename R, typename... Args>
-struct func_traits<R(C::*)(Args...) const>:
-    arg_traits<Args...>
-{
-    using result_type = std::decay_t<R>;
-    using class_type = std::decay_t<C>;
-};
-
-template<typename C, typename... Args>
-struct func_traits<void(C::*)(Args...)>:
-    arg_traits<Args...>
-{
-    using result_type = void;
-    using class_type = std::decay_t<C>;
-};
-
-template<typename C, typename... Args>
-struct func_traits<void(C::*)(Args...) const>:
-    arg_traits<Args...>
-{
-    using result_type = void;
-    using class_type = std::decay_t<C>;
-};
 
 } // namespace yafiyogi
-#endif // yy_func_traits_h
+
+#endif // yy_arg_traits_h
