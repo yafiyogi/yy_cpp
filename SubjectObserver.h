@@ -81,7 +81,7 @@ class ObserverSP:
         public ObserverBase<R, Args...>
 {
 public:
-    using traits = yy_func_traits<T>;
+    using traits = yy_traits::func_traits<T>;
     using arg_type = typename traits::template arg_type<0>;
 
     ObserverSP( T func):
