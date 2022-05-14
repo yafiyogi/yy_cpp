@@ -33,17 +33,51 @@
 #include <string_view>
 #include <type_traits>
 
-#include "yy_conntainer_traits.h"
+#include "yy_container_traits.h"
 
 namespace yafiyogi::yy_traits {
 
+/** @brief is_std_string type trait */
+template<typename T>
+struct is_std_string: std::false_type
+{
+};
+
+template<>
+struct is_std_string<std::string>: std::true_type
+{
+};
+
+template<typename T>
+inline constexpr bool is_std_string_v = is_std_string<T>::value;
+
+template<typename T>
+using is_std_string_t = typename is_std_string<T>::type;
+
+/** @brief is_std_string_view type trait */
+template<typename T>
+struct is_std_string_view: std::false_type
+{
+};
+
+template<>
+struct is_std_string_view<std::string_view>: std::true_type
+{
+};
+
+template<typename T>
+inline constexpr bool is_std_string_view_v = is_std_string_view<T>::value;
+
+template<typename T>
+using is_std_string_view_t = typename is_std_string_view<T>::type;
+
+/** @brief is_string type trait */
 template<typename T>
 struct is_string:
     std::false_type
 {
 };
 
-/** @brief is_string type trait */
 template<>
 struct is_string<char *>:
     std::true_type

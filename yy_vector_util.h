@@ -81,8 +81,8 @@ template<typename T,
          typename Enable = void>
 struct DefaultComp
 {
-  int operator()(const auto T & item,
-                 const auto T & v)
+  int operator()(const T & item,
+                 const T & v)
   {
     int rv = 1;
 
@@ -101,22 +101,23 @@ struct DefaultComp
 
 template<typename T>
 struct DefaultComp<T,
-                   std::enable_if_t<yy_traits::is_std_string_v<std::decay_t<T> || yy_traits::is_string_view_v<std::decay_t<T>>, bool> = true>>
+                   std::enable_if_t<yafiyogi::yy_traits::is_std_string_v<std::decay_t<T>>
+                                    || yafiyogi::yy_traits::is_std_string_view_v<std::decay_t<T>>>>
 {
-  int operator()(const auto T & item,
-                 const auto T & v)
+  int operator()(const T & item,
+                 const T & v)
   {
     return item.compare(v);
   }
-}
+};
 
 } // namespace detail
 
 template<typename T,
          typename V,
-         typename C = detail::DefaultComp,
-         std::enable_if_t<yy_traits::is_vector_v<std::decay_t<T> || yy_traits::is_array_v<std::decay_t<T>>, bool> = true>>
-auto Find(T && container, const V & value, C && comp = detail::Comp{})
+         typename C = detail::DefaultComp<T>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<std::decay_t<T>> || yafiyogi::yy_traits::is_array_v<std::decay_t<T>>, bool> = true>
+auto Find(T && container, const V & value, C && comp = C{})
 {
   using value_type = yy_traits::container_type_t<std::decay_t<T>>;
   using less_than = detail::LessThanComp<V, value_type, C>;
@@ -133,9 +134,9 @@ auto Find(T && container, const V & value, C && comp = detail::Comp{})
 
 template<typename T,
          typename V,
-         typename C = detail::DefaultComp,
-         std::enable_if_t<yy_traits::is_vector_v<std::decay_t<T> || yy_traits::is_array_v<std::decay_t<T>>, bool> = true>>
-void Sort(T && container, const V & value, C && comp = detail::Comp{})
+         typename C = detail::DefaultComp<T>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<std::decay_t<T>> || yafiyogi::yy_traits::is_array_v<std::decay_t<T>>, bool> = true>
+void Sort(T && container, const V & value, C && comp = C{})
 {
   using value_type = yy_traits::container_type_t<std::decay_t<T>>;
   using less_than = detail::LessThanComp<V, value_type, C>;
