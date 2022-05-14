@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021 Yafiyogi
+  Copyright (c) 2021-2022 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ struct LockTypeVisitor
 
 template<typename Value,
          typename Visitor>
-struct LockTypeVisitor<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value> || is_smart_ptr_v<Value>>>
+struct LockTypeVisitor<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value> || yy_traits::is_smart_ptr_v<Value>>>
 {
   static void visit(Value && value,
                     Visitor && visitor)
@@ -62,7 +62,7 @@ struct LockTypeVisitor<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value>
 
 template<typename Value,
          typename Visitor>
-struct LockTypeVisitor<Value, Visitor, std::enable_if_t<is_optional_v<Value>>>
+struct LockTypeVisitor<Value, Visitor, std::enable_if_t<yy_traits::is_optional_v<Value>>>
 {
   static void visit(Value && value,
                     Visitor && visitor)

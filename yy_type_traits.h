@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021 Yafiyogi
+  Copyright (c) 2021-2022 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -33,113 +33,85 @@
 #include <string_view>
 #include <type_traits>
 
-namespace yafiyogi {
+#include "yy_conntainer_traits.h"
+
+namespace yafiyogi::yy_traits {
 
 template<typename T>
-struct yy_is_vector:
-    public std::false_type
-{
-};
-
-template<typename T>
-inline constexpr bool yy_is_vector_v = yy_is_vector<T>::value;
-
-template<typename T>
-using yy_is_vector_t = typename yy_is_vector<T>::type;
-
-template<typename T>
-struct yy_is_string:
+struct is_string:
     std::false_type
 {
 };
 
+/** @brief is_string type trait */
 template<>
-struct yy_is_string<char *>:
+struct is_string<char *>:
     std::true_type
 {
 };
 
 template<std::size_t N>
-struct yy_is_string<char[N]>:
+struct is_string<char[N]>:
     std::true_type
 {
 };
 
 template<>
-struct yy_is_string<std::string>:
+struct is_string<std::string>:
     std::true_type
 {
 };
 
 template<>
-struct yy_is_string<std::string_view>:
+struct is_string<std::string_view>:
     std::true_type
 {
 };
 
 template<typename T>
-inline constexpr bool yy_is_string_v = yy_is_string<T>::value;
+inline constexpr bool is_string_v = is_string<T>::value;
 
 template<typename T>
-using yy_is_string_t = typename yy_is_string<T>::type;
-
-template<typename T>
-struct yy_is_container:
-    std::false_type
-{
-};
+using is_string_t = typename is_string<T>::type;
 
 template<>
-struct yy_is_container<std::string>:
+struct is_container<std::string>:
     std::true_type
 {
 };
 
 template<typename T>
-inline constexpr bool yy_is_container_v = yy_is_container<T>::value;
-
-template<typename T>
-using yy_is_container_t = typename yy_is_container<T>::type;
-
-
-template<typename T>
-struct yy_container_type
-{
-  using type = void;
-};
-
-template<typename T>
-struct yy_container_type<std::basic_string<T>>
+struct container_type<std::basic_string<T>>
 {
   using type = T;
 };
 
 template<typename T>
-struct yy_container_type<std::basic_string_view<T>>
+struct container_type<std::basic_string_view<T>>
 {
   using type = T;
 };
 
 template<>
-struct yy_container_type<const char *>
+struct container_type<const char *>
 {
   using type = char;
 };
 
 template<>
-struct yy_container_type<char *>
+struct container_type<char *>
 {
   using type = char;
 };
 
 template<std::size_t N>
-struct yy_container_type<char[N]>
+struct container_type<char[N]>
 {
   using type = char;
 };
 
 template<typename T>
-using yy_container_type_t = typename yy_container_type<T>::type;
+using container_type_t = typename container_type<T>::type;
 
 template<typename T>
 struct is_smart_ptr:
@@ -183,5 +155,6 @@ inline constexpr bool is_optional_v = is_optional<T>::value;
 template<typename T>
 using is_optional_t = typename is_optional<T>::type;
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_traits
+
 #endif // yy_type_traits_h

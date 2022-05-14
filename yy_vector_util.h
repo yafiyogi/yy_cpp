@@ -1,26 +1,26 @@
 /*
 
-MIT License
+  MIT License
 
-Copyright (c) 2021 Yafiyogi
+  Copyright (c) 2021-2022 Yafiyogi
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 
 */
 
@@ -28,12 +28,9 @@ SOFTWARE.
 # define yy_vector_util_h
 
 #include <tuple>
-#include <type_traits>
-#include <array>
-#include <vector>
 #include <algorithm>
 
-#include "yy_type_traits.h"
+#include "yy_vector_traits.h"
 
 namespace yafiyogi {
 namespace detail {
@@ -44,8 +41,8 @@ template<typename V,
 class LessThanComp
 {
 public:
-  LessThanComp(C comp):
-    m_comp(std::move(comp))
+  LessThanComp(C && comp):
+    m_comp(comp)
   {
   }
 
@@ -65,8 +62,8 @@ template<typename V,
 class EqualToComp
 {
 public:
-  EqualToComp(C comp):
-    m_comp(std::move(comp))
+  EqualToComp(C && comp):
+    m_comp(comp)
   {
   }
 
@@ -80,54 +77,48 @@ private:
   C m_comp;
 };
 
+template<typename T,
+         typename Enable = void>
+struct DefaultComp
+{
+  int operator()(const auto T & item,
+                 const auto T & v)
+  {
+    int rv = 1;
+
+    if(v == item)
+    {
+      rv = 0;
+    }
+    else if(v < item)
+    {
+      rv = -1;
+    }
+
+    return rv;
+  };
+};
+
+template<typename T>
+struct DefaultComp<T,
+                   std::enable_if_t<yy_traits::is_std_string_v<std::decay_t<T> || yy_traits::is_string_view_v<std::decay_t<T>>, bool> = true>>
+{
+  int operator()(const auto T & item,
+                 const auto T & v)
+  {
+    return item.compare(v);
+  }
+}
+
 } // namespace detail
 
 template<typename T,
-         std::size_t N>
-struct yy_is_vector<std::array<T, N>>:
-    public std::true_type
-{
-};
-
-template<typename T,
-         std::size_t N>
-struct yy_is_container<std::array<T, N>>:
-    std::true_type
-{
-};
-
-template<typename T,
-         std::size_t N>
-struct yy_container_type<std::array<T, N>>
-{
-  using type = typename std::array<T, N>::value_type;
-};
-
-template<typename T>
-struct yy_is_vector<std::vector<T>>:
-    public std::true_type
-{
-};
-
-template<typename T>
-struct yy_is_container<std::vector<T>>:
-    std::true_type
-{
-};
-
-template<typename T>
-struct yy_container_type<std::vector<T>>
-{
-  using type = typename std::vector<T>::value_type;
-};
-
-template<typename T,
          typename V,
-         typename C,
-         std::enable_if_t<yy_is_vector_v<std::remove_cv_t<std::remove_reference_t<T>>>, bool> = true>
-auto Find(T & container, const V & value, C && comp)
+         typename C = detail::DefaultComp,
+         std::enable_if_t<yy_traits::is_vector_v<std::decay_t<T> || yy_traits::is_array_v<std::decay_t<T>>, bool> = true>>
+auto Find(T && container, const V & value, C && comp = detail::Comp{})
 {
-  using value_type = yy_container_type_t<std::remove_cv_t<std::remove_reference_t<T>>>;
+  using value_type = yy_traits::container_type_t<std::decay_t<T>>;
   using less_than = detail::LessThanComp<V, value_type, C>;
   using equal_to = detail::EqualToComp<V, value_type, C>;
 
@@ -136,35 +127,25 @@ auto Find(T & container, const V & value, C && comp)
                                 value,
                                 less_than{comp});
   bool found = (iter != container.end()) && equal_to{comp}(*iter, value);
-  return std::make_tuple(iter, found);
+
+  return std::make_tuple(std::move(iter), found);
 }
 
 template<typename T,
          typename V,
-         std::enable_if_t<yy_is_vector_v<std::remove_cv_t<std::remove_reference_t<T>>>, bool> = true>
-auto Find(T & container, const V & value)
+         typename C = detail::DefaultComp,
+         std::enable_if_t<yy_traits::is_vector_v<std::decay_t<T> || yy_traits::is_array_v<std::decay_t<T>>, bool> = true>>
+void Sort(T && container, const V & value, C && comp = detail::Comp{})
 {
-  using value_type = yy_container_type_t<std::remove_cv_t<std::remove_reference_t<T>>>;
+  using value_type = yy_traits::container_type_t<std::decay_t<T>>;
+  using less_than = detail::LessThanComp<V, value_type, C>;
 
-  auto comp = [](const auto & item,
-                 const auto & v) -> int
-  {
-    if(v < item)
-    {
-      return -1;
-    }
-    return 0;
-  };
-
-  using less_than = detail::LessThanComp<V, value_type, decltype(comp)>;
-
-  auto iter = std::lower_bound( container.begin(),
-                                container.end(),
-                                value,
-                                less_than{comp});
-  bool found = (iter != container.end()) && (*iter == value);
-  return std::make_tuple(iter, found);
+  auto iter = std::sort( container.begin(),
+                         container.end(),
+                         value,
+                         less_than{comp});
 }
 
 } // namespace yafiyogi
+
 #endif // yy_vector_util_h

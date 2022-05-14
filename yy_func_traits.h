@@ -2,7 +2,7 @@
 
 MIT License
 
-Copyright (c) 2019 Yafiyogi
+Copyright (c) 2019-2022 Yafiyogi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,16 +31,16 @@ SOFTWARE.
 #ifndef yy_func_traits_h
 # define yy_func_traits_h
 
-namespace yafiyogi {
+namespace yafiyogi::yy_traits {
 
 template<typename T>
-struct yy_func_traits:
-    public yy_func_traits<decltype(&T::operator())>
+struct func_traits:
+    public func_traits<decltype(&T::operator())>
 {
 };
 
 template<typename C, typename R, typename... Args>
-struct yy_func_traits<R(C::*)(Args...)>
+struct func_traits<R(C::*)(Args...)>
 {
     using result_type = R;
     using tuple_type = std::tuple<Args...>;
@@ -57,7 +57,7 @@ struct yy_func_traits<R(C::*)(Args...)>
 };
 
 template<typename C, typename R, typename... Args>
-struct yy_func_traits<R(C::*)(Args...) const>
+struct func_traits<R(C::*)(Args...) const>
 {
     using result_type = R;
     using class_type = C;
@@ -75,7 +75,7 @@ struct yy_func_traits<R(C::*)(Args...) const>
 };
 
 template<typename C, typename... Args>
-struct yy_func_traits<void(C::*)(Args...)>
+struct func_traits<void(C::*)(Args...)>
 {
     using result_type = void;
     using class_type = C;
@@ -93,7 +93,7 @@ struct yy_func_traits<void(C::*)(Args...)>
 };
 
 template<typename C, typename... Args>
-struct yy_func_traits<void(C::*)(Args...) const>
+struct func_traits<void(C::*)(Args...) const>
 {
     using result_type = void;
     using class_type = C;
@@ -110,5 +110,6 @@ struct yy_func_traits<void(C::*)(Args...) const>
     using arg_type = typename arg<N>::type;
 };
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_traits
+
 #endif // yy_func_traits_h
