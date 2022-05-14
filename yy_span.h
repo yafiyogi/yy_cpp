@@ -36,7 +36,7 @@ SOFTWARE.
 namespace yafiyogi {
 
 template<typename T,
-         std::enable_if_t<yy_is_string_v<std::remove_cv_t<std::remove_reference_t<T>>>, bool> = true>
+         std::enable_if_t<yy_traits::is_string_v<std::decay<T>>, bool> = true>
 class  yy_span:
   public std::string_view
 {
