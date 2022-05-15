@@ -18,9 +18,10 @@
   SOFTWARE.
 */
 
-#include "yy_aho_corasick.h"
 #include <string>
 #include <iostream>
+
+#include "yy_aho_corasick.h"
 
 using namespace yafiyogi;
 

@@ -23,130 +23,54 @@
   SOFTWARE.
 
 */
-
 #ifndef yy_type_traits_h
 # define yy_type_traits_h
 
 #include <memory>
 #include <optional>
-#include <string>
-#include <string_view>
 #include <type_traits>
-
-#include "yy_container_traits.h"
 
 namespace yafiyogi::yy_traits {
 
-/** @brief is_std_string type trait */
+/**
+ * @brief remove_rcv_t type trait. Removes reference, const & volitile from type.
+ */
 template<typename T>
-struct is_std_string: std::false_type
-{
-};
+using remove_rcv_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
-template<>
-struct is_std_string<std::string>: std::true_type
-{
-};
+namespace detail {
 
 template<typename T>
-inline constexpr bool is_std_string_v = is_std_string<T>::value;
-
-template<typename T>
-using is_std_string_t = typename is_std_string<T>::type;
-
-/** @brief is_std_string_view type trait */
-template<typename T>
-struct is_std_string_view: std::false_type
-{
-};
-
-template<>
-struct is_std_string_view<std::string_view>: std::true_type
-{
-};
-
-template<typename T>
-inline constexpr bool is_std_string_view_v = is_std_string_view<T>::value;
-
-template<typename T>
-using is_std_string_view_t = typename is_std_string_view<T>::type;
-
-/** @brief is_string type trait */
-template<typename T>
-struct is_string:
+struct container_traits:
     std::false_type
 {
+  using value_type = void;
 };
 
-template<>
-struct is_string<char *>:
-    std::true_type
-{
-};
+} // nameaspace detail
 
-template<std::size_t N>
-struct is_string<char[N]>:
-    std::true_type
-{
-};
-
-template<>
-struct is_string<std::string>:
-    std::true_type
-{
-};
-
-template<>
-struct is_string<std::string_view>:
-    std::true_type
+/**
+ * @brief is_container type trait
+ */
+template<typename T>
+struct is_container:
+    detail::container_traits<yy_traits::remove_rcv_t<T>>
 {
 };
 
 template<typename T>
-inline constexpr bool is_string_v = is_string<T>::value;
+inline constexpr bool is_container_v = is_container<T>::value;
 
 template<typename T>
-using is_string_t = typename is_string<T>::type;
-
-template<>
-struct is_container<std::string>:
-    std::true_type
-{
-};
+using is_container_t = typename is_container<T>::type;
 
 template<typename T>
-struct container_type<std::basic_string<T>>
-{
-  using type = T;
-};
+using container_type_t = typename detail::container_traits<remove_rcv_t<T>>::value_type;
 
-template<typename T>
-struct container_type<std::basic_string_view<T>>
-{
-  using type = T;
-};
 
-template<>
-struct container_type<const char *>
-{
-  using type = char;
-};
-
-template<>
-struct container_type<char *>
-{
-  using type = char;
-};
-
-template<std::size_t N>
-struct container_type<char[N]>
-{
-  using type = char;
-};
-
-template<typename T>
-using container_type_t = typename container_type<T>::type;
-
+/**
+ * @brief is_smart_ptr type trait
+ */
 template<typename T>
 struct is_smart_ptr:
     std::false_type
@@ -171,6 +95,9 @@ inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
 template<typename T>
 using is_smart_ptr_t = typename is_smart_ptr<T>::type;
 
+/**
+ * @brief is_optional type trait
+ */
 template<typename T>
 struct is_optional:
     std::false_type

@@ -30,59 +30,70 @@
 #include <tuple>
 #include <algorithm>
 
+#include "yy_string_traits.h"
 #include "yy_vector_traits.h"
 
 namespace yafiyogi {
 namespace detail {
 
-template<typename V,
-         typename O,
+template<typename T,
+         typename V,
          typename C>
 class LessThanComp
 {
 public:
-  LessThanComp(C && comp):
+  using container_value_type = yy_traits::remove_rcv_t<T>;
+  using value_type = yy_traits::remove_rcv_t<V>;
+
+  LessThanComp(const C & comp):
     m_comp(comp)
   {
   }
 
-  bool operator()(const O & o,
-                  const V & v) const
+  bool operator()(const container_value_type & cv,
+                  const value_type & v) const
   {
-    return m_comp(o, v) < 0;
+    return m_comp(cv, v) < 0;
   }
 
 private:
-  C m_comp;
+  const C & m_comp;
 };
 
-template<typename V,
-         typename O,
+template<typename T,
+         typename V,
          typename C>
 class EqualToComp
 {
 public:
-  EqualToComp(C && comp):
+  using container_value_type = yy_traits::remove_rcv_t<T>;
+  using value_type = yy_traits::remove_rcv_t<V>;
+
+  EqualToComp(const C & comp):
     m_comp(comp)
   {
   }
 
-  bool operator()(const O & o,
-                  const V & v) const
+  bool operator()(const container_value_type & cv,
+                  const value_type & v) const
   {
-    return 0 == m_comp(o, v);
+    return 0 == m_comp(cv, v);
   }
 
 private:
-  C m_comp;
+  const C m_comp;
 };
 
 template<typename T,
+         typename V,
          typename Enable = void>
 struct DefaultComp
 {
-  int operator()(const T & item,
-                 const T & v)
+  using container_value_type = yy_traits::remove_rcv_t<T>;
+  using value_type = yy_traits::remove_rcv_t<V>;
+
+  int operator()(const container_value_type & item,
+                 const value_type & v) const
   {
     int rv = 1;
 
@@ -99,13 +110,15 @@ struct DefaultComp
   };
 };
 
-template<typename T>
+template<typename T,
+         typename V>
 struct DefaultComp<T,
-                   std::enable_if_t<yafiyogi::yy_traits::is_std_string_v<std::decay_t<T>>
-                                    || yafiyogi::yy_traits::is_std_string_view_v<std::decay_t<T>>>>
+                   V,
+                   typename std::enable_if_t<(yy_traits::is_std_string_v<T> || yy_traits::is_std_string_view_v<T>)
+                                    && (yy_traits::is_std_string_v<V> || yy_traits::is_std_string_view_v<V>)>>
 {
   int operator()(const T & item,
-                 const T & v)
+                 const V & v) const
   {
     return item.compare(v);
   }
@@ -115,13 +128,14 @@ struct DefaultComp<T,
 
 template<typename T,
          typename V,
-         typename C = detail::DefaultComp<T>,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<std::decay_t<T>> || yafiyogi::yy_traits::is_array_v<std::decay_t<T>>, bool> = true>
-auto Find(T && container, const V & value, C && comp = C{})
+         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::remove_rcv_t<V>>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T> || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
+auto Find(T && container, V && value, C && comp = C{})
 {
-  using value_type = yy_traits::container_type_t<std::decay_t<T>>;
-  using less_than = detail::LessThanComp<V, value_type, C>;
-  using equal_to = detail::EqualToComp<V, value_type, C>;
+  using container_value_type = yy_traits::container_type_t<T>;
+  using value_type = yy_traits::remove_rcv_t<V>;
+  using less_than = detail::LessThanComp<container_value_type, value_type, C>;
+  using equal_to = detail::EqualToComp<container_value_type, value_type, C>;
 
   auto iter = std::lower_bound( container.begin(),
                                 container.end(),
@@ -133,18 +147,29 @@ auto Find(T && container, const V & value, C && comp = C{})
 }
 
 template<typename T,
-         typename V,
-         typename C = detail::DefaultComp<T>,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<std::decay_t<T>> || yafiyogi::yy_traits::is_array_v<std::decay_t<T>>, bool> = true>
-void Sort(T && container, const V & value, C && comp = C{})
+         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T> || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
+void Sort(T && container, C && comp = C{})
 {
-  using value_type = yy_traits::container_type_t<std::decay_t<T>>;
-  using less_than = detail::LessThanComp<V, value_type, C>;
+  using container_value_type = yy_traits::container_type_t<T>;
+  using less_than = detail::LessThanComp<container_value_type, container_value_type, C>;
 
-  auto iter = std::sort( container.begin(),
-                         container.end(),
-                         value,
-                         less_than{comp});
+  std::sort( container.begin(),
+             container.end(),
+             less_than{comp});
+}
+
+template<typename T,
+         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
+void Unique(T && container, C && comp = C{})
+{
+  using container_value_type = yy_traits::container_type_t<T>;
+  using less_than = detail::LessThanComp<container_value_type, container_value_type, C>;
+
+  container.erase(std::unique(container.begin(),
+                              container.end()),
+                  container.end());
 }
 
 } // namespace yafiyogi

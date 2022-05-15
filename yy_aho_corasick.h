@@ -32,13 +32,12 @@
 #include <vector>
 #include <deque>
 #include <stdexcept>
+#include <utility>
 
 #include "yy_type_traits.h"
 #include "yy_utility.h"
 #include "yy_vector_util.h"
 #include "yy_span.h"
-
-using namespace std;
 
 namespace yafiyogi {
 namespace detail {
@@ -53,11 +52,11 @@ struct trie_node_shim;
 
 template<typename K,
          typename PayloadType,
-         std::enable_if_t<yy_is_container_v<K>, bool> = true>
+         std::enable_if_t<yy_traits::is_container_v<K>, bool> = true>
 struct trie_node_traits
 {
   using key_type = K;
-  using node_key_type = yy_container_type_t<key_type>;
+  using node_key_type = yy_traits::container_type_t<key_type>;
   using node_type = trie_node<key_type, PayloadType>;
   using node_ptr = std::shared_ptr<node_type>;
   using node_shim = trie_node_shim<key_type, PayloadType>;
@@ -69,6 +68,7 @@ template<typename K,
          typename PayloadType>
 struct trie_node_shim
 {
+public:
   using traits = trie_node_traits<K, PayloadType>;
   using node_key_type = typename traits::node_key_type;
   using node_ptr = typename traits::node_ptr;
@@ -136,7 +136,7 @@ public:
     }
     else
     {
-      auto && shim = *iter;
+      auto & shim = *iter;
       std::swap( shim.node->m_fail, child.node->m_fail);
       std::swap( shim.node->m_children, child.node->m_children);
       shim = child;
@@ -188,7 +188,7 @@ public:
   template<typename V>
   void visit(V && visitor)
   {
-    for( auto && child: m_children)
+    for( auto & child: m_children)
     {
       visitor.visit(child);
     }
@@ -222,7 +222,7 @@ private:
       return 0;
     }
     return 1;
-  };
+  }
 
   node_ptr m_fail;
   std::vector<node_shim> m_children;
@@ -327,7 +327,7 @@ public:
 
       while(true)
       {
-        auto && child = node->get( ch);
+        const node_ptr child = node->get( ch);
 
         if( child)
         {
@@ -342,6 +342,48 @@ public:
       }
 
       m_state = std::move(node);
+    }
+
+    template<typename Container,
+             typename std::enable_if_t<std::is_same_v<yy_traits::container_type_t<Container>, node_key_type>, bool> = true>
+    bool word( const Container & key)
+    {
+      if(!key.empty())
+      {
+        auto begin = key.begin();
+        auto ch = *begin;
+        next(ch);
+
+        if(m_state != m_root)
+        {
+          ++begin;
+          const auto end = key.end();
+
+          auto node = m_state;
+
+          while(begin != end)
+          {
+            const auto & child = node->get( ch);
+
+            if( !child)
+            {
+              // Not found child node.
+              return false;
+            }
+
+            node = child;
+          }
+
+          m_state = std::move(node);
+
+          if( end == begin)
+          {
+            return empty();
+          }
+        }
+      }
+
+      return false;
     }
 
     bool empty() const
@@ -370,7 +412,7 @@ public:
       {
         if( !node.empty())
         {
-          auto && payload = static_cast<Payload &>( *m_state);
+          const auto & payload = static_cast<Payload &>( *m_state);
 
           visitor( payload.value());
         }
@@ -397,8 +439,8 @@ public:
     {
       node_ptr parent = m_root;
 
-      for( auto && key : make_range( word.begin(),
-                                     std::prev( word.end())))
+      for(const auto & key : make_range( word.begin(),
+                                         std::prev( word.end())))
       {
         parent = parent->add( key, m_root);
       }
@@ -419,7 +461,7 @@ public:
     {
       auto shim = queue.front();
       queue.pop_front();
-      auto && node = shim.node;
+      const node_ptr node = shim.node;
 
       node->visit(detail::compile_visitor<key_type, payload_type>(&queue, node->fail(), m_root));
 
