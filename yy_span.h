@@ -44,23 +44,15 @@ class  yy_span:
 public:
   using value_type = typename std::string_view::value_type;
 
-  yy_span():
-    std::string_view()
-  {
-  }
+  constexpr yy_span() noexcept = default;
 
-  yy_span(const std::string_view & str):
+  constexpr yy_span(const char * str) noexcept:
     std::string_view(str)
   {
   }
 
-  yy_span(const char * str):
-    std::string_view(str)
-  {
-  }
-
-  yy_span(const std::string & str):
-    std::string_view(str)
+  constexpr yy_span(std::string_view str) noexcept:
+    std::string_view(std::move(str))
   {
   }
 };
