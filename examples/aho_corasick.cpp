@@ -56,6 +56,8 @@ int main()
   }
 
 
+  auto rv = bot.word("she");
+
 
   return 0;
 }
