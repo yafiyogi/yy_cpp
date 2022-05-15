@@ -2,11 +2,7 @@
 
   MIT License
 
-  <<<<<<< HEAD
   Copyright (c) 2019-2022 Yafiyogi
-  =======
-  Copyright (c) 2019-2022 Yafiyogi
-  >>>>>>> ebcd86cd762e3240995942a3dd2ecab431a42b85
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
