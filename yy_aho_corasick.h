@@ -344,9 +344,12 @@ public:
       m_state = std::move(node);
     }
 
-    template<typename Container,
-             typename std::enable_if_t<std::is_same_v<yy_traits::container_type_t<Container>, node_key_type>, bool> = true>
-    bool word( const Container & key)
+    bool word( const node_key_type * key)
+    {
+      return word(yy_span<key_type>(key));
+    }
+
+    bool word( const yy_span<key_type> key)
     {
       if(!key.empty())
       {
@@ -432,7 +435,12 @@ public:
     m_root->fail( m_root);
   }
 
-  void add( yy_span<key_type> word,
+  void add(const node_key_type * word)
+  {
+    add(yy_span<key_type>(word));
+  }
+
+  void add( const yy_span<key_type> word,
             PayloadType && value)
   {
     if( !word.empty())
