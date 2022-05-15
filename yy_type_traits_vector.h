@@ -24,66 +24,41 @@
 
 */
 
-#ifndef yy_utility_h
-# define yy_utility_h
+#include <type_traits>
+#include <vector>
 
-#include <utility>
-#include <array>
+#ifndef yy_type_traits_vector_h
+# define yy_type_traits_vector_h
+
+#include <type_traits>
 
 namespace yafiyogi {
 
-template<typename I>
-class Range
+template<typename T>
+struct yy_is_vector:
+    public std::false_type
 {
-public:
-  Range( I && b,
-         I && e):
-    m_begin( std::forward<I>( b)),
-    m_end( std::forward<I>( e)) {}
-
-  auto & begin() const
-  {
-    return m_begin;
-  }
-
-  auto & end() const
-  {
-    return m_end;
-  }
-
-private:
-  I m_begin;
-  I m_end;
 };
 
-template<typename I>
-auto make_range( I && b,
-                 I && e)
+template<typename T,
+         size_t Size>
+struct yy_is_vector<T[Size]>:
+  public std::true_type
 {
-  return Range<I>{ std::forward<I>( b),
-                   std::forward<I>( e)};
-}
+};
 
 template<typename T>
-struct ArraySize
+struct yy_is_vector<std::vector<T>>:
+  public std::true_type
 {
-  static constexpr size_t size = 0;
 };
 
-template<typename T,
-         size_t Size>
-struct ArraySize<T[Size]>
-{
-  static constexpr size_t size = Size;
-};
+template<typename T>
+inline constexpr bool yy_is_vector_v = yy_is_vector<T>::value;
 
-template<typename T,
-         size_t Size>
-struct ArraySize<std::array<T, Size>>
-{
-  static constexpr size_t size = Size;
-};
+template<typename T>
+using yy_is_vector_t = typename yy_is_vector<T>::type;
 
 } // namespace yafiyogi
 
-#endif // yy_utility_h
+#endif // yy_type_traits_vector_h
