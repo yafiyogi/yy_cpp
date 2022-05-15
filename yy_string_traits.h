@@ -129,7 +129,16 @@ struct is_string:
 
 template<typename T>
 struct is_string<T,
-                 typename std::enable_if_t<std::is_same_v<remove_rcv_t<T>, char *>>>:
+                 typename std::enable_if_t<std::is_pointer_v<T>
+                                           && std::is_same_v<yafiyogi::yy_traits::remove_rcv_t<std::remove_pointer_t<T>>, char>>>:
+    std::true_type
+{
+};
+
+template<typename T>
+struct is_string<T,
+                 typename std::enable_if_t<std::is_array_v<T>
+                                           && std::is_same_v<remove_rcv_t<std::remove_all_extents_t<T>>, char>>>:
     std::true_type
 {
 };
