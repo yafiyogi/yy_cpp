@@ -28,7 +28,7 @@ using namespace yafiyogi;
 int main()
 {
 
-  auto trie = yafiyogi::trie<std::string, std::string>{};
+  auto trie = yafiyogi::yy_data::ac_trie<std::string, std::string>{};
 
 
   trie.add( "his", "his");
@@ -48,7 +48,7 @@ int main()
 
     if( !bot.empty())
     {
-      bot.visit([](auto value)
+      bot.visit([](const auto & value)
       {
         std::cout << value << std::endl;
       });

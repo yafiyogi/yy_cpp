@@ -35,7 +35,7 @@ template<typename... Args>
 struct arg_traits
 {
     using tuple_type = std::tuple<Args...>;
-    static constexpr std::size_t size = std::tuple_size<tuple_type>::value;
+    static constexpr std::size_t value = std::tuple_size<tuple_type>::value;
 
     template<std::size_t N>
     struct arg
@@ -47,6 +47,11 @@ struct arg_traits
     using arg_type = typename arg<N>::type;
 };
 
+template<typename... Args>
+inline constexpr bool arg_traits_v = arg_traits<Args...>::value;
+
+template<std::size_t N, typename... Args>
+using arg_traits_t = typename arg_traits<Args...>::template arg_type<N>;
 
 } // namespace yafiyogi
 

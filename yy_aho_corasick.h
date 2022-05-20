@@ -39,7 +39,7 @@
 #include "yy_vector_util.h"
 #include "yy_span.h"
 
-namespace yafiyogi {
+namespace yafiyogi::yy_data {
 namespace detail {
 
 template<typename K,
@@ -102,6 +102,8 @@ public:
   trie_node() = delete;
   trie_node(const trie_node & node) = delete;
   trie_node(trie_node && node) = delete;
+  trie_node operator=(const trie_node & node) = delete;
+  trie_node operator=(trie_node && node) = delete;
   virtual ~trie_node() = default;
 
   trie_node(node_ptr fail):
@@ -111,7 +113,7 @@ public:
 
   node_ptr add( node_key_type key, const node_ptr & fail)
   {
-    auto [iter, found] = Find( m_children, key, comp);
+    auto [iter, found] = yy_util::find( m_children, key, comp);
 
     if(found)
     {
@@ -128,7 +130,7 @@ public:
   void add( node_shim child)
   {
     auto & key = child.key;
-    auto [iter, found] = Find( m_children, key, comp);
+    auto [iter, found] = yy_util::find( m_children, key, comp);
 
     if(!found)
     {
@@ -145,7 +147,7 @@ public:
 
   node_ptr get( const node_key_type & key) const
   {
-    auto [iter, found] = Find( m_children, key, comp);
+    auto [iter, found] = yy_util::find( m_children, key, comp);
     node_ptr node;
 
     if( !found)
@@ -170,7 +172,7 @@ public:
 
   node_ptr exists( const node_key_type & key) const
   {
-    auto [iter, found] = Find( m_children, key, comp);
+    auto [iter, found] = yy_util::find( m_children, key, comp);
 
     return found;
   }
@@ -302,7 +304,7 @@ private:
 
 template<typename K,
          typename PayloadType>
-class trie
+class ac_trie
 {
 public:
   using traits = typename detail::trie_node_traits<K,PayloadType>;
@@ -346,10 +348,10 @@ public:
 
     bool word( const node_key_type * key)
     {
-      return word(yy_span<key_type>(key));
+      return word(yy_util::span<key_type>(key));
     }
 
-    bool word( const yy_span<key_type> key)
+    bool word( const yy_util::span<key_type> key)
     {
       if(!key.empty())
       {
@@ -429,7 +431,7 @@ public:
     node_ptr m_state;
   };
 
-  trie():
+  ac_trie():
     m_root( std::make_shared<RootNode>())
   {
     m_root->fail( m_root);
@@ -437,17 +439,17 @@ public:
 
   void add(const node_key_type * word)
   {
-    add(yy_span<key_type>(word));
+    add(yy_util::span<key_type>(word));
   }
 
-  void add( const yy_span<key_type> word,
+  void add( const yy_util::span<key_type> word,
             PayloadType && value)
   {
     if( !word.empty())
     {
       node_ptr parent = m_root;
 
-      for(const auto & key : make_range( word.begin(),
+      for(const auto & key : yy_util::make_range( word.begin(),
                                          std::prev( word.end())))
       {
         parent = parent->add( key, m_root);
@@ -528,6 +530,6 @@ private:
   node_ptr m_root;
 };
 
-} // namespace yafiyogi
+} // namespace yafiyogi::algo
 
 #endif // yy_aho_corasick_h

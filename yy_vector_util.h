@@ -33,19 +33,19 @@
 #include "yy_string_traits.h"
 #include "yy_vector_traits.h"
 
-namespace yafiyogi {
+namespace yafiyogi::yy_util {
 namespace detail {
 
 template<typename T,
          typename V,
          typename C>
-class LessThanComp
+class less_than_comp
 {
 public:
   using container_value_type = yy_traits::remove_rcv_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
 
-  LessThanComp(const C & comp):
+  less_than_comp(const C & comp):
     m_comp(comp)
   {
   }
@@ -63,13 +63,13 @@ private:
 template<typename T,
          typename V,
          typename C>
-class EqualToComp
+class equal_to_comp
 {
 public:
   using container_value_type = yy_traits::remove_rcv_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
 
-  EqualToComp(const C & comp):
+  equal_to_comp(const C & comp):
     m_comp(comp)
   {
   }
@@ -87,7 +87,7 @@ private:
 template<typename T,
          typename V,
          typename Enable = void>
-struct DefaultComp
+struct default_comp
 {
   using container_value_type = yy_traits::remove_rcv_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
@@ -112,7 +112,7 @@ struct DefaultComp
 
 template<typename T,
          typename V>
-struct DefaultComp<T,
+struct default_comp<T,
                    V,
                    typename std::enable_if_t<(yy_traits::is_std_string_v<T> || yy_traits::is_std_string_view_v<T>)
                                     && (yy_traits::is_std_string_v<V> || yy_traits::is_std_string_view_v<V>)>>
@@ -128,14 +128,14 @@ struct DefaultComp<T,
 
 template<typename T,
          typename V,
-         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::remove_rcv_t<V>>,
+         typename C = detail::default_comp<yy_traits::container_type_t<T>, yy_traits::remove_rcv_t<V>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T> || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
-auto Find(T && container, V && value, C && comp = C{})
+auto find(T && container, V && value, C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
-  using less_than = detail::LessThanComp<container_value_type, value_type, C>;
-  using equal_to = detail::EqualToComp<container_value_type, value_type, C>;
+  using less_than = detail::less_than_comp<container_value_type, value_type, C>;
+  using equal_to = detail::equal_to_comp<container_value_type, value_type, C>;
 
   auto iter = std::lower_bound( container.begin(),
                                 container.end(),
@@ -147,12 +147,12 @@ auto Find(T && container, V && value, C && comp = C{})
 }
 
 template<typename T,
-         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
+         typename C = detail::default_comp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T> || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
-void Sort(T && container, C && comp = C{})
+void sort(T && container, C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
-  using less_than = detail::LessThanComp<container_value_type, container_value_type, C>;
+  using less_than = detail::less_than_comp<container_value_type, container_value_type, C>;
 
   std::sort( container.begin(),
              container.end(),
@@ -160,18 +160,22 @@ void Sort(T && container, C && comp = C{})
 }
 
 template<typename T,
-         typename C = detail::DefaultComp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
+         typename C = detail::default_comp<yy_traits::container_type_t<T>, yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
-void Unique(T && container, C && comp = C{})
+void unique(T && container, C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
-  using less_than = detail::LessThanComp<container_value_type, container_value_type, C>;
+  using equal_to = detail::equal_to_comp<container_value_type, container_value_type, C>;
 
   container.erase(std::unique(container.begin(),
-                              container.end()),
-                  container.end());
+                              container.end(),
+                              [](const container_value_type & a,
+                                 const container_value_type & b) -> bool{
+                                return equal_to(a, b);
+                              }),
+                              container.end());
 }
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_util
 
 #endif // yy_vector_util_h

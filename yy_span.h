@@ -34,29 +34,29 @@
 
 #include "yy_string_traits.h"
 
-namespace yafiyogi {
+namespace yafiyogi::yy_util {
 
 template<typename T,
          typename std::enable_if_t<yy_traits::is_string_v<T>, bool> = true>
-class  yy_span:
+class  span:
     public std::string_view
 {
 public:
   using value_type = typename std::string_view::value_type;
 
-  constexpr yy_span() noexcept = default;
+  constexpr span() noexcept = default;
 
-  constexpr yy_span(const char * str) noexcept:
+  constexpr span(const char * str) noexcept:
     std::string_view(str)
   {
   }
 
-  constexpr yy_span(std::string_view str) noexcept:
+  constexpr span(std::string_view str) noexcept:
     std::string_view(std::move(str))
   {
   }
 };
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_util
 
 #endif // yy_span_h

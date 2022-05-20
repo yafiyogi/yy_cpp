@@ -26,8 +26,8 @@
 using namespace std;
 using namespace yafiyogi;
 
-using LockableInt = LockableValue<int, std::mutex>;
-using LockInt = LockType<LockableInt, std::unique_lock<LockableInt::mutex_type>>;
+using LockableInt = yy_util::lockable_value<int, std::mutex>;
+using LockInt = yy_util::lock_type<LockableInt, std::unique_lock<LockableInt::mutex_type>>;
 
 struct Thing
 {
@@ -37,8 +37,8 @@ struct Thing
 };
 using ThingPtr = std::shared_ptr<Thing>;
 
-using LockableThingPtr = LockableValue<ThingPtr, std::mutex>;
-using LockThingPtr = LockType<LockableThingPtr, std::unique_lock<LockableThingPtr::mutex_type>>;
+using LockableThingPtr = yy_util::lockable_value<ThingPtr, std::mutex>;
+using LockThingPtr = yy_util::lock_type<LockableThingPtr, std::unique_lock<LockableThingPtr::mutex_type>>;
 
 int main()
 {

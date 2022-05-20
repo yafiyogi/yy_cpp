@@ -31,26 +31,41 @@
 
 #include "yy_type_traits.h"
 
-namespace yafiyogi {
+namespace yafiyogi::yy_util {
 namespace traits {
 
 template<typename Value,
          typename Visitor,
          typename Enable=void>
-struct LockTypeVisitor
+struct lockable_value_visitor_traits
 {
-  static void visit(Value && value,
+  static void visit(Value & value,
                     Visitor && visitor)
   {
-    visitor(std::forward<Value>(value));
+    visitor(value);
+  }
+
+  static void visit(const Value & value,
+                    Visitor && visitor)
+  {
+    visitor(value);
   }
 };
 
 template<typename Value,
          typename Visitor>
-struct LockTypeVisitor<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value> || yy_traits::is_smart_ptr_v<Value>>>
+struct lockable_value_visitor_traits<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value> || yy_traits::is_smart_ptr_v<Value>>>
 {
-  static void visit(Value && value,
+  static void visit(Value & value,
+                    Visitor && visitor)
+  {
+    if(value)
+    {
+      visitor(*value);
+    }
+  }
+
+  static void visit(const Value & value,
                     Visitor && visitor)
   {
     if(value)
@@ -62,9 +77,18 @@ struct LockTypeVisitor<Value, Visitor, std::enable_if_t<std::is_pointer_v<Value>
 
 template<typename Value,
          typename Visitor>
-struct LockTypeVisitor<Value, Visitor, std::enable_if_t<yy_traits::is_optional_v<Value>>>
+struct lockable_value_visitor_traits<Value, Visitor, std::enable_if_t<yy_traits::is_optional_v<Value>>>
 {
-  static void visit(Value && value,
+  static void visit(Value & value,
+                    Visitor && visitor)
+  {
+    if(value.has_value())
+    {
+      visitor(value.value());
+    }
+  }
+
+  static void visit(const Value & value,
                     Visitor && visitor)
   {
     if(value.has_value())
@@ -78,18 +102,18 @@ struct LockTypeVisitor<Value, Visitor, std::enable_if_t<yy_traits::is_optional_v
 
 template<typename ValueType,
          typename MutexType>
-class LockableValue
+class lockable_value
 {
 public:
   using value_type = ValueType;
   using mutex_type = MutexType;
 
-  LockableValue() = default;
-  LockableValue(const LockableValue &) = delete;
-  LockableValue(LockableValue &&) = default;
+  lockable_value() = default;
+  lockable_value(const lockable_value &) = delete;
+  lockable_value(lockable_value &&) = default;
 
-  LockableValue & operator=(const LockableValue &) = delete;
-  LockableValue & operator=(const LockableValue && rhs)
+  lockable_value & operator=(const lockable_value &) = delete;
+  lockable_value & operator=(const lockable_value && rhs)
   {
     if( this != &rhs)
     {
@@ -101,7 +125,7 @@ public:
   }
 
   template<typename... Args>
-  LockableValue(Args && ...args):
+  lockable_value(Args && ...args):
     m_value(std::forward<Args>(args)...),
     m_mtx() {}
 
@@ -131,6 +155,28 @@ public:
     return value;
   }
 
+  template<typename LockType,
+           typename Visitor>
+  void visit(Visitor && visitor) const
+  {
+    LockType lck(m_mtx);
+
+    using visitor_traits = traits::lockable_value_visitor_traits<value_type, Visitor>;
+
+    visitor_traits::visit(m_value, visitor);
+  }
+
+  template<typename LockType,
+           typename Visitor>
+  void visit(Visitor && visitor)
+  {
+    LockType lck(m_mtx);
+
+    using visitor_traits = traits::lockable_value_visitor_traits<value_type, Visitor>;
+
+    visitor_traits::visit(m_value, visitor);
+  }
+
 private:
   value_type m_value;
   mutable mutex_type m_mtx;
@@ -138,40 +184,43 @@ private:
 
 template<typename LockableValue,
          typename GuardType>
-class LockType
+class lock_type
 {
 public:
   using value_type = typename LockableValue::value_type;
-  using lock_type = GuardType;
+  using guard_type = GuardType;
 
   static value_type get(const LockableValue & lockable)
   {
-    return lockable.template get<lock_type>();
+    return lockable.template get<guard_type>();
   }
 
   static value_type set(LockableValue & lockable,
                         value_type value)
   {
-    return lockable.template set<lock_type>(std::move(value));
+    return lockable.template set<guard_type>(std::move(value));
   }
 
   static value_type exchange(LockableValue & lockable, value_type value)
   {
-    return lockable.template exchange<lock_type>(std::move(value));
+    return lockable.template exchange<guard_type>(std::move(value));
   }
 
   template<typename Visitor>
   static void visit(const LockableValue & lockable,
                     Visitor && visitor)
   {
-    using Traits = traits::LockTypeVisitor<typename LockableValue::value_type, Visitor>;
+    lockable.template visit<guard_type>( visitor);
+  }
 
-    auto value = get(lockable);
-
-    Traits::visit(std::move(value), std::forward<Visitor>(visitor));
+  template<typename Visitor>
+  static void locked_visit(LockableValue & lockable,
+                           Visitor && visitor)
+  {
+    lockable.template visit<guard_type>( visitor);
   }
 };
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_util
 
 #endif // yy_lockable_value_h

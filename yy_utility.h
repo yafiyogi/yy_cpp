@@ -30,7 +30,7 @@
 #include <utility>
 #include <array>
 
-namespace yafiyogi {
+namespace yafiyogi::yy_util {
 
 template<typename I>
 class Range
@@ -84,6 +84,6 @@ struct ArraySize<std::array<T, Size>>
   static constexpr size_t size = Size;
 };
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_util
 
 #endif // yy_utility_h
