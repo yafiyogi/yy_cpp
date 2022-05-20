@@ -102,9 +102,9 @@ public:
     }
 };
 
-Subject<int, void> m_sub_v;
-Subject<int, int> m_sub_i;
-Subject<int, void, Param> m_sub_vs;
+yy_data::subject<int, void> m_sub_v;
+yy_data::subject<int, int> m_sub_i;
+yy_data::subject<int, void, Param> m_sub_vs;
 
 shared_ptr<obs> o( new obs);
 
