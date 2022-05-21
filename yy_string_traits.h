@@ -25,11 +25,11 @@
 */
 
 #ifndef yy_string_traits_h
-# define yy_string_traits_h
+#define yy_string_traits_h
 
-#include <type_traits>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 #include "yy_type_traits.h"
 
@@ -37,38 +37,35 @@ namespace yafiyogi::yy_traits {
 namespace detail {
 
 template<typename T>
-struct container_traits<std::basic_string<T>>:
-    std::true_type
+struct container_traits<std::basic_string<T>>: std::true_type
 {
-  using value_type = yy_traits::remove_rcv_t<typename std::basic_string<T>::value_type>;
+    using value_type =
+      yy_traits::remove_rcv_t<typename std::basic_string<T>::value_type>;
 };
 
 template<typename T>
-struct container_traits<std::basic_string_view<T>>:
-    std::true_type
+struct container_traits<std::basic_string_view<T>>: std::true_type
 {
-  using value_type = yy_traits::remove_rcv_t<typename std::basic_string_view<T>::value_type>;
+    using value_type =
+      yy_traits::remove_rcv_t<typename std::basic_string_view<T>::value_type>;
 };
 
 template<>
-struct container_traits<const char *>:
-    std::true_type
+struct container_traits<const char *>: std::true_type
 {
-  using value_type = char;
+    using value_type = char;
 };
 
 template<>
-struct container_traits<char *>:
-    std::true_type
+struct container_traits<char *>: std::true_type
 {
-  using value_type = char;
+    using value_type = char;
 };
 
 template<std::size_t N>
-struct container_traits<char[N]>:
-    std::true_type
+struct container_traits<char[N]>: std::true_type
 {
-  using value_type = char;
+    using value_type = char;
 };
 
 } // namespace detail
@@ -76,16 +73,16 @@ struct container_traits<char[N]>:
 /**
  * @brief is_std_string type trait
  */
-template<typename T,
-         typename Enable = void>
+template<typename T, typename Enable = void>
 struct is_std_string: std::false_type
 {
 };
 
 template<typename T>
-struct is_std_string<T,
-                     typename std::enable_if_t<std::is_base_of_v<std::string, remove_rcv_t<T>>>>:
-    std::true_type
+struct is_std_string<
+  T,
+  typename std::enable_if_t<std::is_base_of_v<std::string, remove_rcv_t<T>>>>:
+  std::true_type
 {
 };
 
@@ -98,16 +95,16 @@ using is_std_string_t = typename is_std_string<T>::type;
 /**
  * @brief is_std_string_view type trait
  */
-template<typename T,
-         typename Enable = void>
+template<typename T, typename Enable = void>
 struct is_std_string_view: std::false_type
 {
 };
 
 template<typename T>
-struct is_std_string_view<T,
-                          typename std::enable_if_t<std::is_base_of_v<std::string_view, remove_rcv_t<T>>>>:
-    std::true_type
+struct is_std_string_view<
+  T,
+  typename std::enable_if_t<
+    std::is_base_of_v<std::string_view, remove_rcv_t<T>>>>: std::true_type
 {
 };
 
@@ -120,33 +117,36 @@ using is_std_string_view_t = typename is_std_string_view<T>::type;
 /**
  * @brief is_string type trait
  */
-template<typename T,
-         typename Enable = void>
-struct is_string:
-    std::false_type
+template<typename T, typename Enable = void>
+struct is_string: std::false_type
 {
 };
 
 template<typename T>
-struct is_string<T,
-                 typename std::enable_if_t<std::is_pointer_v<T>
-                                           && std::is_same_v<yafiyogi::yy_traits::remove_rcv_t<std::remove_pointer_t<T>>, char>>>:
-    std::true_type
+struct is_string<
+  T,
+  typename std::enable_if_t<
+    std::is_pointer_v<
+      T> && std::is_same_v<yafiyogi::yy_traits::remove_rcv_t<std::remove_pointer_t<T>>, char>>>:
+  std::true_type
 {
 };
 
 template<typename T>
-struct is_string<T,
-                 typename std::enable_if_t<std::is_array_v<T>
-                                           && std::is_same_v<remove_rcv_t<std::remove_all_extents_t<T>>, char>>>:
-    std::true_type
+struct is_string<
+  T,
+  typename std::enable_if_t<
+    std::is_array_v<
+      T> && std::is_same_v<remove_rcv_t<std::remove_all_extents_t<T>>, char>>>:
+  std::true_type
 {
 };
 
 template<typename T>
-struct is_string<T,
-                 typename std::enable_if_t<is_std_string_v<T> || is_std_string_view_v<T>>>:
-    std::true_type
+struct is_string<
+  T,
+  typename std::enable_if_t<is_std_string_v<T> || is_std_string_view_v<T>>>:
+  std::true_type
 {
 };
 

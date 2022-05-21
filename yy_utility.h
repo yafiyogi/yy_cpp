@@ -25,63 +25,60 @@
 */
 
 #ifndef yy_utility_h
-# define yy_utility_h
+#define yy_utility_h
 
-#include <utility>
 #include <array>
+#include <utility>
 
 namespace yafiyogi::yy_util {
 
 template<typename I>
 class Range
 {
-public:
-  Range( I && b,
-         I && e):
-    m_begin( std::forward<I>( b)),
-    m_end( std::forward<I>( e)) {}
+  public:
+    Range(I && b, I && e) :
+      m_begin(std::forward<I>(b)),
+      m_end(std::forward<I>(e))
+    {
+    }
 
-  auto & begin() const
-  {
-    return m_begin;
-  }
+    auto & begin() const
+    {
+      return m_begin;
+    }
 
-  auto & end() const
-  {
-    return m_end;
-  }
+    auto & end() const
+    {
+      return m_end;
+    }
 
-private:
-  I m_begin;
-  I m_end;
+  private:
+    I m_begin;
+    I m_end;
 };
 
 template<typename I>
-auto make_range( I && b,
-                 I && e)
+auto make_range(I && b, I && e)
 {
-  return Range<I>{ std::forward<I>( b),
-                   std::forward<I>( e)};
+  return Range<I>{std::forward<I>(b), std::forward<I>(e)};
 }
 
 template<typename T>
 struct ArraySize
 {
-  static constexpr size_t size = 0;
+    static constexpr size_t size = 0;
 };
 
-template<typename T,
-         size_t Size>
+template<typename T, size_t Size>
 struct ArraySize<T[Size]>
 {
-  static constexpr size_t size = Size;
+    static constexpr size_t size = Size;
 };
 
-template<typename T,
-         size_t Size>
+template<typename T, size_t Size>
 struct ArraySize<std::array<T, Size>>
 {
-  static constexpr size_t size = Size;
+    static constexpr size_t size = Size;
 };
 
 } // namespace yafiyogi::yy_util

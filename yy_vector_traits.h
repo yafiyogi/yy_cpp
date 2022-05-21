@@ -25,53 +25,46 @@
 */
 
 #ifndef yy_vector_traits_h
-# define yy_vector_traits_h
+#define yy_vector_traits_h
 
 #include <array>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_traits {
 namespace detail {
 
-template<typename T,
-         std::size_t N>
-struct container_traits<std::array<T, N>>:
-    std::true_type
+template<typename T, std::size_t N>
+struct container_traits<std::array<T, N>>: std::true_type
 {
-  using value_type = remove_rcv_t<typename std::array<T, N>::value_type>;
+    using value_type = remove_rcv_t<typename std::array<T, N>::value_type>;
 };
 
 template<typename T>
-struct container_traits<std::vector<T>>:
-    std::true_type
+struct container_traits<std::vector<T>>: std::true_type
 {
-  using value_type = remove_rcv_t<typename std::vector<T>::value_type>;
+    using value_type = remove_rcv_t<typename std::vector<T>::value_type>;
 };
 
 template<typename T>
-struct vector_traits:
-    std::false_type
+struct vector_traits: std::false_type
 {
 };
 
 template<typename T>
-struct vector_traits<std::vector<T>>:
-    std::true_type
+struct vector_traits<std::vector<T>>: std::true_type
 {
 };
 
 template<typename T>
-struct array_traits:
-    std::false_type
+struct array_traits: std::false_type
 {
 };
 
 template<typename T, std::size_t N>
-struct array_traits<std::array<T, N>>:
-    std::true_type
+struct array_traits<std::array<T, N>>: std::true_type
 {
 };
 
@@ -79,8 +72,7 @@ struct array_traits<std::array<T, N>>:
 
 /** @brief is_vector type trait */
 template<typename T>
-struct is_vector:
-    detail::vector_traits<remove_rcv_t<T>>
+struct is_vector: detail::vector_traits<remove_rcv_t<T>>
 {
 };
 
@@ -90,11 +82,9 @@ inline constexpr bool is_vector_v = is_vector<T>::value;
 template<typename T>
 using is_vector_t = typename is_vector<T>::type;
 
-
 /** @brief is_array type trait */
 template<typename T>
-struct is_array:
-    detail::array_traits<remove_rcv_t<T>>
+struct is_array: detail::array_traits<remove_rcv_t<T>>
 {
 };
 

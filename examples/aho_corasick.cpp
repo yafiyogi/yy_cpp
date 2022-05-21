@@ -18,8 +18,8 @@
   SOFTWARE.
 */
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include "yy_aho_corasick.h"
 
@@ -27,14 +27,12 @@ using namespace yafiyogi;
 
 int main()
 {
-
   auto trie = yafiyogi::yy_data::ac_trie<std::string, std::string>{};
 
-
-  trie.add( "his", "his");
-  trie.add( "he", "he");
-  trie.add( "she", "she");
-  trie.add( "hers", "hers");
+  trie.add("his", "his");
+  trie.add("he", "he");
+  trie.add("she", "she");
+  trie.add("hers", "hers");
 
   trie.compile();
 
@@ -46,18 +44,15 @@ int main()
   {
     bot.next(ch);
 
-    if( !bot.empty())
+    if(!bot.empty())
     {
-      bot.visit([](const auto & value)
-      {
+      bot.visit([](const auto & value) {
         std::cout << value << std::endl;
       });
     }
   }
 
-
   auto rv = bot.word("she");
-
 
   return 0;
 }

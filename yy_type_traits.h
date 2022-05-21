@@ -24,7 +24,7 @@
 
 */
 #ifndef yy_type_traits_h
-# define yy_type_traits_h
+#define yy_type_traits_h
 
 #include <memory>
 #include <optional>
@@ -41,20 +41,18 @@ using remove_rcv_t = std::remove_cv_t<std::remove_reference_t<T>>;
 namespace detail {
 
 template<typename T>
-struct container_traits:
-    std::false_type
+struct container_traits: std::false_type
 {
-  using value_type = void;
+    using value_type = void;
 };
 
-} // nameaspace detail
+} // namespace detail
 
 /**
  * @brief is_container type trait
  */
 template<typename T>
-struct is_container:
-    detail::container_traits<yy_traits::remove_rcv_t<T>>
+struct is_container: detail::container_traits<yy_traits::remove_rcv_t<T>>
 {
 };
 
@@ -65,27 +63,24 @@ template<typename T>
 using is_container_t = typename is_container<T>::type;
 
 template<typename T>
-using container_type_t = typename detail::container_traits<remove_rcv_t<T>>::value_type;
-
+using container_type_t =
+  typename detail::container_traits<remove_rcv_t<T>>::value_type;
 
 /**
  * @brief is_smart_ptr type trait
  */
 template<typename T>
-struct is_smart_ptr:
-    std::false_type
+struct is_smart_ptr: std::false_type
 {
 };
 
 template<typename T>
-struct is_smart_ptr<std::shared_ptr<T>>:
-    std::true_type
+struct is_smart_ptr<std::shared_ptr<T>>: std::true_type
 {
 };
 
 template<typename T>
-struct is_smart_ptr<std::unique_ptr<T>>:
-    std::true_type
+struct is_smart_ptr<std::unique_ptr<T>>: std::true_type
 {
 };
 
@@ -99,14 +94,12 @@ using is_smart_ptr_t = typename is_smart_ptr<T>::type;
  * @brief is_optional type trait
  */
 template<typename T>
-struct is_optional:
-    std::false_type
+struct is_optional: std::false_type
 {
 };
 
 template<typename T>
-struct is_optional<std::optional<T>>:
-    std::true_type
+struct is_optional<std::optional<T>>: std::true_type
 {
 };
 

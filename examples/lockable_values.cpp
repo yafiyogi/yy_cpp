@@ -19,26 +19,33 @@
 */
 
 #include "yy_lockable_value.h"
-#include <mutex>
 #include <iostream>
 #include <memory>
+#include <mutex>
 
 using namespace std;
 using namespace yafiyogi;
 
 using LockableInt = yy_util::lockable_value<int, std::mutex>;
-using LockInt = yy_util::lock_type<LockableInt, std::unique_lock<LockableInt::mutex_type>>;
+using LockInt =
+  yy_util::lock_type<LockableInt, std::unique_lock<LockableInt::mutex_type>>;
 
 struct Thing
 {
-  Thing(int v):
-    value(v) {}
-  int value;
+    Thing(int v) :
+      value(v)
+    {
+    }
+
+    int value;
 };
+
 using ThingPtr = std::shared_ptr<Thing>;
 
 using LockableThingPtr = yy_util::lockable_value<ThingPtr, std::mutex>;
-using LockThingPtr = yy_util::lock_type<LockableThingPtr, std::unique_lock<LockableThingPtr::mutex_type>>;
+using LockThingPtr =
+  yy_util::lock_type<LockableThingPtr,
+                     std::unique_lock<LockableThingPtr::mutex_type>>;
 
 int main()
 {
@@ -46,23 +53,19 @@ int main()
 
   LockInt::set(v, 14);
 
-  LockInt::visit(v,[](auto && v)
-  {
+  LockInt::visit(v, [](auto && v) {
     cout << v << endl;
   });
 
-
   LockableThingPtr thing;
 
-  LockThingPtr::visit(thing,[](auto && v)
-  {
+  LockThingPtr::visit(thing, [](auto && v) {
     cout << v.value << endl;
   });
 
   LockThingPtr::set(thing, std::make_shared<Thing>(12));
 
-  LockThingPtr::visit(thing,[](auto && v)
-  {
+  LockThingPtr::visit(thing, [](auto && v) {
     cout << v.value << endl;
   });
   return 0;

@@ -40,7 +40,8 @@ struct arg_traits
     template<std::size_t N>
     struct arg
     {
-      using type = std::decay_t<typename std::tuple_element<N, tuple_type>::type>;
+        using type =
+          std::decay_t<typename std::tuple_element<N, tuple_type>::type>;
     };
 
     template<std::size_t N>
@@ -53,6 +54,6 @@ inline constexpr bool arg_traits_v = arg_traits<Args...>::value;
 template<std::size_t N, typename... Args>
 using arg_traits_t = typename arg_traits<Args...>::template arg_type<N>;
 
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_traits
 
 #endif // yy_arg_traits_h
