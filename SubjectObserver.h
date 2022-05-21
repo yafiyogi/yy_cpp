@@ -33,8 +33,7 @@
 
 #include "yafiyogi/cpp/yy_func_traits.h"
 
-namespace yafiyogi::yy_data
-{
+namespace yafiyogi::yy_data {
 
 template<typename R, typename... Args>
 class observer_base
