@@ -25,7 +25,7 @@
 
 */
 
-#include "SubjectObserver.h"
+#include "subject_observer.h"
 #include <iostream>
 
 using namespace std;
