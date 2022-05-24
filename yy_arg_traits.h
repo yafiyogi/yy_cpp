@@ -29,6 +29,8 @@ SOFTWARE.
 #ifndef yy_arg_traits_h
 # define yy_arg_traits_h
 
+#include "yy_type_traits.h"
+
 namespace yafiyogi::yy_traits {
 
 template<typename... Args>
@@ -38,14 +40,7 @@ struct arg_traits
     static constexpr std::size_t value = std::tuple_size<tuple_type>::value;
 
     template<std::size_t N>
-    struct arg
-    {
-        using type =
-          std::decay_t<typename std::tuple_element<N, tuple_type>::type>;
-    };
-
-    template<std::size_t N>
-    using arg_type = typename arg<N>::type;
+    using arg_type = remove_rcv_t<typename std::tuple_element<N, tuple_type>::type>;
 };
 
 template<typename... Args>
