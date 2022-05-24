@@ -68,23 +68,38 @@ struct container_traits<char[N]>: std::true_type
     using value_type = char;
 };
 
+template<typename T, typename Enable = void>
+struct is_std_string_traits: std::false_type
+{
+};
+
+template<typename T>
+struct is_std_string_traits<
+  T,
+  typename std::enable_if_t<std::is_base_of_v<std::string, T>>>: std::true_type
+{
+};
+
+template<typename T, typename Enable = void>
+struct is_std_string_view_traits: std::false_type
+{
+};
+
+template<typename T>
+struct is_std_string_view_traits<
+  T,
+  typename std::enable_if_t<std::is_base_of_v<std::string_view, T>>>:
+  std::true_type
+{
+};
+
 } // namespace detail
 
 /**
  * @brief is_std_string type trait
  */
-template<typename T, typename Enable = void>
-struct is_std_string: std::false_type
-{
-};
-
 template<typename T>
-struct is_std_string<
-  T,
-  typename std::enable_if_t<std::is_base_of_v<std::string, remove_rcv_t<T>>>>:
-  std::true_type
-{
-};
+using is_std_string = detail::is_std_string_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_std_string_v = is_std_string<T>::value;
@@ -95,18 +110,8 @@ using is_std_string_t = typename is_std_string<T>::type;
 /**
  * @brief is_std_string_view type trait
  */
-template<typename T, typename Enable = void>
-struct is_std_string_view: std::false_type
-{
-};
-
 template<typename T>
-struct is_std_string_view<
-  T,
-  typename std::enable_if_t<
-    std::is_base_of_v<std::string_view, remove_rcv_t<T>>>>: std::true_type
-{
-};
+using is_std_string_view = detail::is_std_string_view_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_std_string_view_v = is_std_string_view<T>::value;

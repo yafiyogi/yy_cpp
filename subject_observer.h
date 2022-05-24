@@ -31,7 +31,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "yafiyogi/cpp/yy_func_traits.h"
+#include "yy_func_traits.h"
 
 namespace yafiyogi::yy_data {
 
