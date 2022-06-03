@@ -46,15 +46,38 @@ struct container_traits: std::false_type
     using value_type = void;
 };
 
+template<typename T>
+struct is_smart_ptr_traits: std::false_type
+{
+};
+
+template<typename T>
+struct is_smart_ptr_traits<std::shared_ptr<T>>: std::true_type
+{
+};
+
+template<typename T>
+struct is_smart_ptr_traits<std::unique_ptr<T>>: std::true_type
+{
+};
+
+template<typename T>
+struct is_optional_traits: std::false_type
+{
+};
+
+template<typename T>
+struct is_optional_traits<std::optional<T>>: std::true_type
+{
+};
+
 } // namespace detail
 
 /**
  * @brief is_container type trait
  */
 template<typename T>
-struct is_container: detail::container_traits<yy_traits::remove_rcv_t<T>>
-{
-};
+using is_container = detail::container_traits<yy_traits::remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_container_v = is_container<T>::value;
@@ -70,19 +93,7 @@ using container_type_t =
  * @brief is_smart_ptr type trait
  */
 template<typename T>
-struct is_smart_ptr: std::false_type
-{
-};
-
-template<typename T>
-struct is_smart_ptr<std::shared_ptr<T>>: std::true_type
-{
-};
-
-template<typename T>
-struct is_smart_ptr<std::unique_ptr<T>>: std::true_type
-{
-};
+using is_smart_ptr = detail::is_smart_ptr_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
@@ -94,14 +105,7 @@ using is_smart_ptr_t = typename is_smart_ptr<T>::type;
  * @brief is_optional type trait
  */
 template<typename T>
-struct is_optional: std::false_type
-{
-};
-
-template<typename T>
-struct is_optional<std::optional<T>>: std::true_type
-{
-};
+using is_optional = detail::is_optional_traits<yy_traits::remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_optional_v = is_optional<T>::value;

@@ -72,9 +72,7 @@ struct array_traits<std::array<T, N>>: std::true_type
 
 /** @brief is_vector type trait */
 template<typename T>
-struct is_vector: detail::vector_traits<remove_rcv_t<T>>
-{
-};
+using is_vector = detail::vector_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_vector_v = is_vector<T>::value;
@@ -84,9 +82,7 @@ using is_vector_t = typename is_vector<T>::type;
 
 /** @brief is_array type trait */
 template<typename T>
-struct is_array: detail::array_traits<remove_rcv_t<T>>
-{
-};
+using is_array = detail::array_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_array_v = is_array<T>::value;
