@@ -175,6 +175,18 @@ void unique(T && container, C && comp = C{})
                   container.end());
 }
 
+template<typename C>
+void shrink(C & c)
+{
+  C{c}.swap{c};
+}
+
+template<typename C>
+void shrink(const C & src, C & dst)
+{
+  C{src}.swap{dst};
+}
+
 } // namespace yafiyogi::yy_util
 
 #endif // yy_vector_util_h
