@@ -42,32 +42,44 @@ struct func_traits: public func_traits<decltype(&T::operator())>
 {
 };
 
+template<typename R, typename... Args>
+struct func_traits<R (*)(Args...)>
+{
+    using result_type = remove_rcv_t<R>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = void;
+};
+
 template<typename C, typename R, typename... Args>
 struct func_traits<R (C::*)(Args...)>
 {
-    using result_type = std::decay_t<R>;
-    using class_type = std::decay_t<C>;
+    using result_type = remove_rcv_t<R>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = remove_rcv_t<C>;
 };
 
 template<typename C, typename R, typename... Args>
 struct func_traits<R (C::*)(Args...) const>: arg_traits<Args...>
 {
-    using result_type = std::decay_t<R>;
-    using class_type = std::decay_t<C>;
+    using result_type = remove_rcv_t<R>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = remove_rcv_t<C>;
 };
 
 template<typename C, typename... Args>
 struct func_traits<void (C::*)(Args...)>: arg_traits<Args...>
 {
     using result_type = void;
-    using class_type = std::decay_t<C>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = remove_rcv_t<C>;
 };
 
 template<typename C, typename... Args>
 struct func_traits<void (C::*)(Args...) const>: arg_traits<Args...>
 {
     using result_type = void;
-    using class_type = std::decay_t<C>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = remove_rcv_t<C>;
 };
 
 } // namespace yafiyogi::yy_traits
