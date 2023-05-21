@@ -49,6 +49,11 @@ class span: public std::string_view
     {
     }
 
+    constexpr span(const char * str, const size_t size) noexcept :
+      std::string_view(str, size)
+    {
+    }
+
     constexpr span(std::string_view str) noexcept :
       std::string_view(std::move(str))
     {
