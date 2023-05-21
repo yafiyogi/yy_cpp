@@ -40,7 +40,7 @@ struct arg_traits
     static constexpr std::size_t value = std::tuple_size<tuple_type>::value;
 
     template<std::size_t N>
-    using arg_type = remove_rcv_t<typename std::tuple_element<N, tuple_type>::type>;
+    using arg_type = typename std::tuple_element<N, tuple_type>::type;
 };
 
 template<typename... Args>
