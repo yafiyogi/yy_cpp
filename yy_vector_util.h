@@ -37,14 +37,14 @@ namespace yafiyogi::yy_util {
 namespace detail {
 
 template<typename T, typename V, typename C>
-class less_than_comp
+class less_than_comp final
 {
   public:
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    less_than_comp(const C & comp) :
-      m_comp(comp)
+    less_than_comp(C comp) :
+      m_comp(std::move(comp))
     {
     }
 
@@ -54,18 +54,18 @@ class less_than_comp
     }
 
   private:
-    const C & m_comp;
+    const C m_comp;
 };
 
 template<typename T, typename V, typename C>
-class equal_to_comp
+class equal_to_comp final
 {
   public:
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    equal_to_comp(const C & comp) :
-      m_comp(comp)
+    equal_to_comp(C comp) :
+      m_comp(std::move(comp))
     {
     }
 
@@ -79,7 +79,7 @@ class equal_to_comp
 };
 
 template<typename T, typename V, typename Enable = void>
-struct default_comp
+struct default_comp final
 {
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
@@ -108,7 +108,7 @@ struct default_comp<
   V,
   typename std::enable_if_t<
     (yy_traits::is_std_string_v<T> || yy_traits::is_std_string_view_v<T>) &&(
-      yy_traits::is_std_string_v<V> || yy_traits::is_std_string_view_v<V>)>>
+      yy_traits::is_std_string_v<V> || yy_traits::is_std_string_view_v<V>)>> final
 {
     int operator()(const T & item, const V & v) const
     {
@@ -147,7 +147,7 @@ template<typename T,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<
                             T> || yafiyogi::yy_traits::is_array_v<T>,
                           bool> = true>
-void sort(T && container, C && comp = C{})
+void sort(T & container, C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using less_than =
@@ -160,7 +160,7 @@ template<typename T,
          typename C = detail::default_comp<yy_traits::container_type_t<T>,
                                            yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
-void unique(T && container, C && comp = C{})
+void unique(T & container, C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using equal_to =
@@ -168,23 +168,20 @@ void unique(T && container, C && comp = C{})
 
   container.erase(std::unique(container.begin(),
                               container.end(),
-                              [](const container_value_type & a,
-                                 const container_value_type & b) -> bool {
-                                return equal_to(a, b);
-                              }),
+                              equal_to{comp}),
                   container.end());
 }
 
-template<typename C>
-void shrink(C & c)
+template<typename T>
+void shrink(T & container)
 {
-  C{c}.swap{c};
+  T{container}.swap(container);
 }
 
-template<typename C>
-void shrink(const C & src, C & dst)
+template<typename T>
+void shrink(const T & src, T & dst)
 {
-  C{src}.swap{dst};
+  T{src}.swap(dst);
 }
 
 } // namespace yafiyogi::yy_util
