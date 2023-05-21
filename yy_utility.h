@@ -36,9 +36,9 @@ template<typename I>
 class Range
 {
   public:
-    Range(I && b, I && e) :
-      m_begin(std::forward<I>(b)),
-      m_end(std::forward<I>(e))
+    Range(I b, I e) :
+      m_begin(std::move(b)),
+      m_end(std::move(e))
     {
     }
 
