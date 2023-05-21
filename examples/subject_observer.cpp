@@ -1,4 +1,4 @@
-// g++ -Wall -std=c++17 -I ../.. demo.cpp && ./a.out
+// g++ -Wall -std=c++17 -I .. subject_observer.cpp && ./a.out
 /*
 
   MIT License
@@ -25,8 +25,8 @@
 
 */
 
-#include "subject_observer.h"
 #include <iostream>
+#include "subject_observer.h"
 
 using namespace std;
 using namespace yafiyogi;
@@ -35,19 +35,19 @@ class Param
 {
   public:
     Param() :
-      type("default"),
+      type("Param default"),
       version(0)
     {
     }
 
     Param(const Param & p) :
-      type("copy"),
+      type("Param copy"),
       version(p.version + 1)
     {
     }
 
     Param(const Param && p) noexcept :
-      type("move"),
+      type("Param move"),
       version(p.version)
     {
     }
@@ -105,9 +105,14 @@ class obs
 
 yy_data::subject<int, void> m_sub_v;
 yy_data::subject<int, int> m_sub_i;
-yy_data::subject<int, void, Param> m_sub_vs;
+yy_data::subject<int, void, const Param &> m_sub_vp;
 
 shared_ptr<obs> o(new obs);
+
+void func_do(const double * d, const Param & p)
+{
+  cout << "func_do( const double *d, const Param & p) " << *d << endl;
+}
 
 int main()
 {
@@ -121,17 +126,46 @@ int main()
     cout << "void []( const double *d) " << *d << endl;
   });
 
-  m_sub_vs.add(5, o, &obs::handleInt_vs);
+  m_sub_vp.add(5, [](const double * d, const Param & p) {
+     cout << "void []( const double *d, const Param & p) " << *d << endl;
+  });
+
+  m_sub_vp.add(6, func_do);
+
+
+  m_sub_vp.add(7, o, &obs::handleInt_vs);
 
   int i = 3;
   double d = 3.7;
+  Param p;
+  const Param p2;
+
+  cout << "Test1\n";
   m_sub_v.event(1, &i);
+  cout << "\nTest2\n";
   m_sub_v.event(2, &d);
+  cout << "\nTest3\n";
   m_sub_v.event(3, &d);
+  cout << "\nTest4\n";
   m_sub_v.event(4, &d);
 
-  Param p;
-  m_sub_vs.event(5, &i, p);
+  cout << "\nTest5a\n";
+  m_sub_vp.event(5, &d, p);
+
+  cout << "\nTest5b\n";
+  m_sub_vp.event(5, &d, p2);
+
+  cout << "\nTest5c\n";
+  m_sub_vp.event(5, &d, Param{});
+
+  cout << "\nTest6a\n";
+  m_sub_vp.event(6, &i, p);
+
+  cout << "\nTest6b\n";
+  m_sub_vp.event(6, &i, p2);
+
+  cout << "\nTest6c\n";
+  m_sub_vp.event(6, &i, Param{});
 
   m_sub_i.add(1, o, &obs::handleInt_i);
   m_sub_i.add(2, o, &obs::handleDouble_i);
@@ -140,9 +174,13 @@ int main()
     return o->handleDouble_i(d);
   });
 
+  cout << "\nTest9";
   cout << "\nrv=" << std::get<1>(m_sub_i.event(1, &i));
+  cout << "\n\nTest10";
   cout << "\nrv=" << std::get<1>(m_sub_i.event(2, &d));
+  cout << "\n\nTest11";
   cout << "\nrv=" << std::get<1>(m_sub_i.event(3, &d));
+  cout << "\n\nTest12";
   cout << "\nrv=" << std::get<1>(m_sub_i.event(4, &d));
   cout << endl;
   return 0;
