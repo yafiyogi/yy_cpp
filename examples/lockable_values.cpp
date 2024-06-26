@@ -49,11 +49,11 @@ using LockThingPtr =
 
 int main()
 {
-  LockableInt v;
+  LockableInt val;
 
-  LockInt::set(v, 14);
+  LockInt::set(val, 14);
 
-  LockInt::visit(v, [](auto && v) {
+  LockInt::visit(val, [](auto && v) {
     cout << v << endl;
   });
 

@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2019-2022 Yafiyogi
+  Copyright (c) 2019-2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -35,40 +35,66 @@
 
 namespace yafiyogi::yy_data {
 
-template<typename R, typename... Args>
+template<typename ReturnType,
+         typename... OtherArgs>
 class observer_base
 {
   public:
-    observer_base() = default;
-    observer_base(const observer_base &) = default;
-    observer_base(observer_base &&) noexcept = default;
-    observer_base & operator=(const observer_base &) = default;
-    observer_base & operator=(observer_base &&) noexcept = default;
+    using ptr_type = std::unique_ptr<observer_base<ReturnType,
+                                                   OtherArgs...>>;
 
-    virtual ~observer_base() = default;
-    using ptr_type = std::unique_ptr<observer_base<R, Args...>>;
+    observer_base() noexcept = default;
+    observer_base(const observer_base &) = delete;
+    observer_base(observer_base &&) = delete;
+    virtual ~observer_base() noexcept = default;
 
-    virtual R event(const void * data, Args && ...args) = 0;
+    observer_base & operator=(const observer_base &) = delete;
+    observer_base & operator=(observer_base &&) = delete;
+
+    virtual ReturnType event(const void * data, OtherArgs && ...args) = 0;
 };
 
-template<typename T, typename R, typename A, typename... Args>
-class observer_class_method final: public observer_base<R, Args...>
+template<typename T,
+         typename ReturnType,
+         typename ParamType,
+         typename... OtherArgs>
+class observer_class_method final:
+      public observer_base<ReturnType,
+                           OtherArgs...>
 {
   public:
-    using method_ptr = R (T::*)(const A *, Args &&...);
+    using method_ptr = ReturnType (T::*)(const ParamType *, OtherArgs &&...);
     using object_ptr = std::shared_ptr<T>;
 
-    observer_class_method(const object_ptr & obj, method_ptr method) :
+    explicit observer_class_method(const object_ptr & obj,
+                                   method_ptr method) noexcept:
       m_obj(obj),
-      m_method(method)
+      m_method(std::move(method))
     {
     }
 
-    R event(const void * data, Args && ...args) override
+    explicit observer_class_method(object_ptr && obj,
+                                   method_ptr method) noexcept:
+      m_obj(std::move(obj)),
+      m_method(std::move(method))
+    {
+    }
+
+    observer_class_method() = delete;
+    observer_class_method(const observer_class_method &) = delete;
+    observer_class_method(observer_class_method &&) = delete;
+    ~observer_class_method() noexcept = default;
+
+    observer_class_method & operator=(const observer_class_method &) = delete;
+    observer_class_method & operator=(observer_class_method &&) = delete;
+
+    ReturnType event(const void * data,
+                     OtherArgs && ...args) override
     {
       T * obj = m_obj.get();
 
-      return (obj->*m_method)(reinterpret_cast<const A *>(data), std::forward<Args>(args)...);
+      return (obj->*m_method)(static_cast<const ParamType *>(data),
+                              std::forward<OtherArgs>(args)...);
     }
 
   private:
@@ -76,135 +102,187 @@ class observer_class_method final: public observer_base<R, Args...>
     method_ptr m_method;
 };
 
-template<typename T, typename R, typename... Args>
-class observer_func final: public observer_base<R, Args...>
+template<typename T,
+         typename ReturnType,
+         typename... OtherArgs>
+class observer_func final:
+      public observer_base<ReturnType,
+                           OtherArgs...>
 {
   public:
     using func_traits = yy_traits::func_traits<T>;
-    using arg_type = typename func_traits::arg_types::arg_type<0>;
+    using arg_type = typename func_traits::arg_types::template arg_type<0>;
 
-    observer_func(T func) :
-      m_func(func)
+    explicit observer_func(T func) noexcept:
+      m_func(std::move(func))
     {
     }
 
-    R event(const void * data, Args && ...args) override
+    observer_func() = delete;
+    observer_func(const observer_func &) = delete;
+    observer_func(observer_func &&) = delete;
+    ~observer_func() noexcept= default;
+
+    observer_func & operator=(const observer_func &) = delete;
+    observer_func & operator=(observer_func &&) = delete;
+
+    ReturnType event(const void * data,
+                     OtherArgs && ...args) override
     {
-      return m_func(reinterpret_cast<arg_type>(data), std::forward<Args>(args)...);
+      return m_func(static_cast<arg_type>(data),
+                    std::forward<OtherArgs>(args)...);
     }
 
   private:
     T m_func;
 };
 
-template<typename K, typename R, typename... Args>
+template<typename KeyType,
+         typename ReturnType,
+         typename... OtherArgs>
 class subject
 {
   public:
-    using observer_type = observer_base<R, Args...>;
-    using map_type = std::unordered_map<K, typename observer_type::ptr_type>;
+    using observer_type = observer_base<ReturnType,
+                                        OtherArgs...>;
+    using map_type = std::unordered_map<KeyType,
+                                        typename observer_type::ptr_type>;
 
-    std::tuple<bool, R>
-    event(const K & key, const void * data, Args && ...args)
+    subject() noexcept = default;
+    subject(const subject &) = delete;
+    subject(subject &&) noexcept = default;
+    ~subject() noexcept = default;
+
+    subject & operator=(const subject &) = delete;
+    subject & operator=(subject &&) noexcept = default;
+
+    std::tuple<bool, ReturnType> event(const KeyType & key,
+                                       const void * data,
+                                       OtherArgs && ...args)
     {
       auto found = m_observers.find(key);
 
       if(m_observers.end() != found)
       {
-        return {true, found->second->event(data, std::forward<Args>(args)...)};
+        return {true, found->second->event(data,
+                                           std::forward<OtherArgs>(args)...)};
       }
-      return {false, R{}};
+      return {false, ReturnType{}};
     }
 
     // Add object method.
-    template<typename T, typename A>
-    bool add(const K & key,
+    template<typename T,
+             typename ParamType>
+    bool add(const KeyType & key,
              typename std::shared_ptr<T> & obj,
-             R (T::*method)(const A *, Args && ...args))
+             ReturnType (T::*method)(const ParamType *,
+                                     OtherArgs && ...args))
     {
-      bool rv = false;
+      bool added = false;
       if(obj)
       {
         typename map_type::iterator not_used;
-        std::tie(not_used, rv) = m_observers.try_emplace(
+        std::tie(not_used, added) = m_observers.try_emplace(
           key,
-          std::make_unique<observer_class_method<T, R, A, Args...>>(obj,
-                                                                    method));
+          std::make_unique<observer_class_method<T, ReturnType, ParamType, OtherArgs...>>(obj,
+                                                                                          method));
       }
-      return rv;
+      return added;
     }
 
     template<typename T>
-    bool add(const K & key, T && func)
+    bool add(const KeyType & key,
+             T && func)
     {
-      auto [not_used, rv] = m_observers.try_emplace(
+      auto [not_used, added] = m_observers.try_emplace(
         key,
-        std::make_unique<observer_func<T, R, Args...>>(std::forward<T>(func)));
+        std::make_unique<observer_func<T, ReturnType, OtherArgs...>>(std::forward<T>(func)));
 
-      return rv;
+      return added;
     }
 
-    void erase(const K & key)
+    void erase(const KeyType & key)
     {
       m_observers.erase(key);
     }
 
+  private:
     map_type m_observers;
 };
 
-template<typename K, typename... Args>
-class subject<K, void, Args...>
+template<typename KeyType,
+         typename... OtherArgs>
+class subject<KeyType,
+              void,
+              OtherArgs...>
 {
   public:
-    using observer_ptr = typename observer_base<void, Args...>::ptr_type;
-    using map_type = std::unordered_map<K, observer_ptr>;
+    using observer_ptr = typename observer_base<void,
+                                                OtherArgs...>::ptr_type;
+    using map_type = std::unordered_map<KeyType,
+                                        observer_ptr>;
 
-    bool event(const K & key, const void * data, Args && ...args)
+    subject() noexcept = default;
+    subject(const subject &) = delete;
+    subject(subject &&) noexcept = default;
+    ~subject() noexcept = default;
+
+    subject & operator=(const subject &) = delete;
+    subject & operator=(subject &&) noexcept = default;
+
+    bool event(const KeyType & key,
+               const void * data,
+               OtherArgs && ...args)
     {
       auto found = m_observers.find(key);
 
       const bool call = m_observers.end() != found;
       if(call)
       {
-        found->second->event(data, std::forward<Args>(args)...);
+        found->second->event(data,
+                             std::forward<OtherArgs>(args)...);
       }
 
       return call;
     }
 
     // Add object method.
-    template<typename T, typename A>
-    bool add(const K & key,
+    template<typename T,
+             typename ParamType>
+    bool add(const KeyType & key,
              typename std::shared_ptr<T> & obj,
-             void (T::*method)(const A *, Args && ...args))
+             void (T::*method)(const ParamType *,
+                               OtherArgs && ...args))
     {
-      bool rv = false;
+      bool added = false;
       if(obj)
       {
         typename map_type::iterator not_used;
-        std::tie(not_used, rv) = m_observers.try_emplace(
+        std::tie(not_used, added) = m_observers.try_emplace(
           key,
-          std::make_unique<observer_class_method<T, void, A, Args...>>(obj,
-                                                                       method));
+          std::make_unique<observer_class_method<T, void, ParamType, OtherArgs...>>(obj,
+                                                                                    std::move(method)));
       }
-      return rv;
+      return added;
     }
 
     template<typename T>
-    bool add(const K & key, T func)
+    bool add(const KeyType & key,
+             T func)
     {
-      auto [not_used, rv] = m_observers.try_emplace(
+      auto [not_used, added] = m_observers.try_emplace(
         key,
-        std::make_unique<observer_func<T, void, Args...>>(func));
+        std::make_unique<observer_func<T, void, OtherArgs...>>(std::move(func)));
 
-      return rv;
+      return added;
     }
 
-    void erase(const K & key)
+    void erase(const KeyType & key)
     {
       m_observers.erase(key);
     }
 
+  private:
     map_type m_observers;
 };
 

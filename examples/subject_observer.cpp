@@ -107,9 +107,9 @@ yy_data::subject<int, void> m_sub_v;
 yy_data::subject<int, int> m_sub_i;
 yy_data::subject<int, void, const Param &> m_sub_vp;
 
-shared_ptr<obs> o(new obs);
+shared_ptr<obs> o{std::make_shared<obs>()};
 
-void func_do(const double * d, const Param & p)
+void func_do(const double * d, const Param & /* p */)
 {
   cout << "func_do( const double *d, const Param & p) " << *d << endl;
 }
@@ -126,7 +126,7 @@ int main()
     cout << "void []( const double *d) " << *d << endl;
   });
 
-  m_sub_vp.add(5, [](const double * d, const Param & p) {
+  m_sub_vp.add(5, [](const double * d, const Param & /* p */) {
      cout << "void []( const double *d, const Param & p) " << *d << endl;
   });
 
@@ -169,9 +169,9 @@ int main()
 
   m_sub_i.add(1, o, &obs::handleInt_i);
   m_sub_i.add(2, o, &obs::handleDouble_i);
-  m_sub_i.add(3, [=](const double * d) -> int {
+  m_sub_i.add(3, [=](const double * dbl) -> int {
     cout << "int [=]( const double *d) ";
-    return o->handleDouble_i(d);
+    return o->handleDouble_i(dbl);
   });
 
   cout << "\nTest9";

@@ -27,7 +27,7 @@ using namespace yafiyogi;
 
 int main()
 {
-  auto trie = yafiyogi::yy_data::ac_trie<std::string, std::string>{};
+  auto trie = yafiyogi::yy_data::ac_trie<char, std::string>{};
 
   trie.add("his", "his");
   trie.add("he", "he");
@@ -52,7 +52,27 @@ int main()
     }
   }
 
-  auto rv = bot.word("she");
+  bool found = bot.find("she");
+
+  std::cout << "found 'she'=" << found << std::endl;
+  if(found)
+  {
+      bot.visit([](const auto & value) {
+        std::cout << value << std::endl;
+      });
+  }
+
+  found = bot.find("sh");
+
+  std::cout << "found 'sh'=" << found << std::endl;
+  if(found)
+  {
+      bot.visit([](const auto & value) {
+        std::cout << value << std::endl;
+      });
+  }
+
+
 
   return 0;
 }
