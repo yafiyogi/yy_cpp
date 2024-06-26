@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021-2022 Yafiyogi
+  Copyright (c) 2021-2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -38,46 +38,67 @@ namespace yafiyogi::yy_traits {
 template<typename T>
 using remove_rcv_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
-namespace detail {
+template<typename T>
+using remove_rpcv_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
+
+namespace traits_detail {
 
 template<typename T>
-struct container_traits: std::false_type
+struct container_traits:
+      std::false_type
 {
     using value_type = void;
 };
 
 template<typename T>
-struct is_smart_ptr_traits: std::false_type
+struct is_unique_ptr_traits:
+      std::false_type
 {
 };
 
 template<typename T>
-struct is_smart_ptr_traits<std::shared_ptr<T>>: std::true_type
+struct is_unique_ptr_traits<std::unique_ptr<T>>:
+      std::true_type
 {
 };
 
 template<typename T>
-struct is_smart_ptr_traits<std::unique_ptr<T>>: std::true_type
+struct is_smart_ptr_traits:
+      std::false_type
 {
 };
 
 template<typename T>
-struct is_optional_traits: std::false_type
+struct is_smart_ptr_traits<std::shared_ptr<T>>:
+      std::true_type
 {
 };
 
 template<typename T>
-struct is_optional_traits<std::optional<T>>: std::true_type
+struct is_smart_ptr_traits<std::unique_ptr<T>>:
+      std::true_type
 {
 };
 
-} // namespace detail
+template<typename T>
+struct is_optional_traits:
+      std::false_type
+{
+};
+
+template<typename T>
+struct is_optional_traits<std::optional<T>>:
+      std::true_type
+{
+};
+
+} // namespace traits_detail
 
 /**
  * @brief is_container type trait
  */
 template<typename T>
-using is_container = detail::container_traits<yy_traits::remove_rcv_t<T>>;
+using is_container = traits_detail::container_traits<yy_traits::remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_container_v = is_container<T>::value;
@@ -87,13 +108,25 @@ using is_container_t = typename is_container<T>::type;
 
 template<typename T>
 using container_type_t =
-  typename detail::container_traits<remove_rcv_t<T>>::value_type;
+  typename traits_detail::container_traits<remove_rcv_t<T>>::value_type;
+
+/**
+ * @brief is_unique_ptr type trait
+ */
+template<typename T>
+using is_unique_ptr = traits_detail::is_unique_ptr_traits<remove_rcv_t<T>>;
+
+template<typename T>
+inline constexpr bool is_unique_ptr_v = is_unique_ptr<T>::value;
+
+template<typename T>
+using is_unique_ptr_t = typename is_unique_ptr<T>::type;
 
 /**
  * @brief is_smart_ptr type trait
  */
 template<typename T>
-using is_smart_ptr = detail::is_smart_ptr_traits<remove_rcv_t<T>>;
+using is_smart_ptr = traits_detail::is_smart_ptr_traits<remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
@@ -105,7 +138,7 @@ using is_smart_ptr_t = typename is_smart_ptr<T>::type;
  * @brief is_optional type trait
  */
 template<typename T>
-using is_optional = detail::is_optional_traits<yy_traits::remove_rcv_t<T>>;
+using is_optional = traits_detail::is_optional_traits<yy_traits::remove_rcv_t<T>>;
 
 template<typename T>
 inline constexpr bool is_optional_v = is_optional<T>::value;

@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,45 +24,34 @@
 
 */
 
-#pragma once
+#include "fmt/format.h"
 
-#include <type_traits>
-#include <vector>
+#include "bench_yy_cpp.h"
 
-#include "yy_type_traits.h"
+namespace yafiyogi::benchmark {
 
-namespace yafiyogi::yy_traits {
-namespace traits_detail {
-
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+BENCHMARK_F(TrieFixtureType, map_lookup)(::benchmark::State & state)
 {
-    using value_type = typename std::vector<T>::value_type;
-};
+  size_t idx = 0;
+  std::size_t count = 0;
+  std::string query;
+  query.reserve(256);
 
-template<typename T>
-struct vector_traits:
-      std::false_type
-{
-};
+  while(state.KeepRunning())
+  {
+    auto query_view = TrieFixtureType::query(idx);
+    query.assign(query_view.begin(), query_view.end());
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
-{
-};
+    auto iter = map.find(query);
+    ::benchmark::DoNotOptimize(iter);
+    if(iter != map.end())
+    {
+        ::benchmark::DoNotOptimize(++count);
+    }
 
-} // namespace traits_detail
+    ++idx;
+    idx = (idx % TrieFixtureType::query_size());
+  }
+}
 
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::benchmark

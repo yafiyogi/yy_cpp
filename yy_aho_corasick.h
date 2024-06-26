@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021-2022 Yafiyogi
+  Copyright (c) 2021-2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -40,486 +40,593 @@
 #include "yy_vector_util.h"
 
 namespace yafiyogi::yy_data {
-namespace detail {
+namespace ac_trie_detail {
 
-template<typename K, typename PayloadType>
+template<typename LabelType,
+         typename ValueType>
 class trie_node;
 
-template<typename K, typename PayloadType>
-struct trie_node_shim;
+template<typename LabelType,
+         typename ValueType>
+struct trie_node_edge;
 
-template<typename K,
-         typename PayloadType,
-         std::enable_if_t<yy_traits::is_container_v<K>, bool> = true>
-struct trie_node_traits
+template<typename LabelType,
+         typename ValueType>
+struct trie_node_traits final
 {
-    using key_type = K;
-    using node_key_type = yy_traits::container_type_t<key_type>;
-    using node_type = trie_node<key_type, PayloadType>;
-    using node_ptr = std::shared_ptr<node_type>;
-    using node_shim = trie_node_shim<key_type, PayloadType>;
-    using node_queue = std::deque<node_shim>;
-    using payload_type = PayloadType;
+    using label_type = LabelType;
+    using value_type = ValueType;
+    using node_type = trie_node<label_type, value_type>;
+    using node_ptr = std::unique_ptr<node_type>;
+    using root_node_ptr = std::shared_ptr<node_type>;
+    using node_edge = trie_node_edge<label_type, value_type>;
+    using node_queue = std::deque<node_type *>;
 };
 
-template<typename K, typename PayloadType>
-struct trie_node_shim
+template<typename LabelType,
+         typename ValueType>
+struct trie_node_edge final
 {
   public:
-    using traits = trie_node_traits<K, PayloadType>;
-    using node_key_type = typename traits::node_key_type;
+    using traits = trie_node_traits<LabelType, ValueType>;
+    using label_type = typename traits::label_type;
     using node_ptr = typename traits::node_ptr;
 
-    node_key_type key;
-    node_ptr node;
-
-    bool operator==(const trie_node_shim & other) const
+    trie_node_edge(label_type p_label,
+                   node_ptr p_node) noexcept:
+      m_label(std::move(p_label)),
+      m_node(std::move(p_node))
     {
-      return key == other.key;
     }
 
-    bool operator==(const node_key_type & other) const
+    trie_node_edge() noexcept = default;
+    trie_node_edge(const trie_node_edge & edge) noexcept = default;
+    trie_node_edge(trie_node_edge && edge) noexcept = default;
+    ~trie_node_edge() noexcept = default;
+
+    trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
+    trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
+
+    explicit operator bool() const noexcept
     {
-      return key == other;
+      return static_cast<bool>(m_node);
     }
+
+    label_type m_label = label_type{};
+    node_ptr m_node;
 };
 
-template<typename K, typename PayloadType>
+template<typename LabelType,
+         typename ValueType>
+constexpr bool operator==(const typename trie_node_edge<LabelType, ValueType>::label_type & lhs,
+                          const trie_node_edge<LabelType, ValueType> & rhs) noexcept
+{
+  return lhs == rhs.m_label;
+}
+
+template<typename LabelType,
+         typename ValueType>
+constexpr bool operator<(const typename trie_node_edge<LabelType, ValueType>::label_type & lhs,
+                         const trie_node_edge<LabelType, ValueType> & rhs) noexcept
+{
+  return lhs < rhs.m_label;
+}
+
+template<typename LabelType,
+         typename ValueType>
 class trie_node
 {
   public:
-    using traits = trie_node_traits<K, PayloadType>;
-    using key_type = typename traits::key_type;
-    using node_key_type = typename traits::node_key_type;
-    using node_ptr = typename traits::node_ptr;
-    using payload_type = typename traits::payload_type;
-    using node_shim = typename traits::node_shim;
+    using traits = trie_node_traits<LabelType, ValueType>;
+    using label_type = typename traits::label_type;
+    using value_type = typename traits::value_type;
+    using node_type = typename traits::node_type;
+    using node_edge = typename traits::node_edge;
 
-    trie_node() = delete;
-    trie_node(const trie_node & node) = delete;
-    trie_node(trie_node && node) = delete;
-    trie_node operator=(const trie_node & node) = delete;
-    trie_node operator=(trie_node && node) = delete;
-    virtual ~trie_node() = default;
-
-    trie_node(node_ptr fail) :
-      m_fail(std::move(fail))
+    explicit trie_node(node_type * fail) noexcept:
+      m_fail(fail)
     {
     }
 
-    node_ptr add(node_key_type key, const node_ptr & fail)
+    trie_node() noexcept = default;
+    trie_node(const trie_node & node) noexcept = default;
+    trie_node(trie_node && node) noexcept = default;
+    virtual ~trie_node() = default;
+
+    trie_node & operator=(const trie_node & node) noexcept = default;
+    trie_node & operator=(trie_node && node) noexcept = default;
+
+    node_type * add(label_type label,
+                    node_type * fail)
     {
-      auto [iter, found] = yy_util::find(m_children, key, comp);
+      auto [iter, found] = yy_util::find(m_edges, label);
 
       if(found)
       {
-        return iter->node;
+        return iter->m_node.get();
       }
 
-      auto node = std::make_shared<trie_node>(fail);
+      auto node = std::make_unique<trie_node>(fail);
+      trie_node * node_rv = node.get();
 
-      m_children.emplace(iter, node_shim{std::move(key), node});
+      m_edges.emplace(iter, node_edge{std::move(label), std::move(node)});
 
-      return node;
+      return node_rv;
     }
 
-    void add(node_shim child)
+    void add(node_edge edge)
     {
-      auto & key = child.key;
-      auto [iter, found] = yy_util::find(m_children, key, comp);
+      auto [iter, found] = yy_util::find(m_edges, edge.m_label);
 
       if(!found)
       {
-        m_children.emplace(iter, std::move(child));
+        m_edges.emplace(iter, std::move(edge));
       }
       else
       {
-        auto & shim = *iter;
-        std::swap(shim.node->m_fail, child.node->m_fail);
-        std::swap(shim.node->m_children, child.node->m_children);
-        shim = child;
+        auto & found_edge = *iter;
+
+        // Overwrite found edge with new edge.
+        std::swap(found_edge.m_node->m_fail, edge.m_node->m_fail);
+        std::swap(found_edge.m_node->m_edges, edge.m_node->m_edges);
+        found_edge = std::move(edge);
       }
     }
 
-    node_ptr get(const node_key_type & key) const
+    [[nodiscard]]
+    trie_node * find(const label_type & label) const noexcept
     {
-      auto [iter, found] = yy_util::find(m_children, key, comp);
-      node_ptr node;
+      auto [iter, found] = yy_util::find(m_edges, label);
 
       if(!found)
       {
-        return node_ptr{};
+        return nullptr;
       }
 
-      return iter->node;
+      return iter->m_node.get();
     }
 
-    node_ptr get(const node_key_type & key, node_ptr def) const
-    {
-      auto node = get(key);
-
-      if(!node)
-      {
-        return def;
-      }
-
-      return node;
-    }
-
-    node_ptr exists(const node_key_type & key) const
-    {
-      auto [iter, found] = yy_util::find(m_children, key, comp);
-
-      return found;
-    }
-
-    auto & fail() const
+    [[nodiscard]]
+    node_type * fail() const noexcept
     {
       return m_fail;
     }
 
-    void fail(node_ptr f)
+    void fail(node_type * p_fail) noexcept
     {
-      m_fail = f;
+      m_fail = p_fail;
     }
 
-    template<typename V>
-    void visit(V && visitor)
+    template<typename Visitor>
+    void visit(Visitor && visitor)
     {
-      for(auto & child: m_children)
+      for(auto & edge: m_edges)
       {
-        visitor.visit(child);
+        visitor(edge);
       }
     }
 
-    virtual bool empty() const
+    [[nodiscard]]
+    virtual bool empty() const noexcept
     {
       return true;
     }
 
-    virtual const PayloadType & value() const
+    [[nodiscard]]
+    virtual const value_type & value() const
     {
       throw std::runtime_error("Invalid value");
     }
 
-    virtual PayloadType & value()
+    [[nodiscard]]
+    virtual value_type & value()
     {
       throw std::runtime_error("Invalid value");
     }
 
   private:
-    static int comp(const node_shim & shim, const node_key_type & value)
-    {
-      if(value < shim.key)
-      {
-        return -1;
-      }
-      else if(value == shim.key)
-      {
-        return 0;
-      }
-      return 1;
-    }
-
-    node_ptr m_fail;
-    std::vector<node_shim> m_children;
+    node_type * m_fail = nullptr;
+    std::vector<node_edge> m_edges;
 };
 
-template<typename K, typename PayloadType>
-class add_children_visitor
+template<typename LabelType,
+         typename ValueType>
+class Payload final:
+      public trie_node<LabelType,
+                       ValueType>
 {
   public:
-    using traits = trie_node_traits<K, PayloadType>;
+    using traits = typename trie_node<LabelType, ValueType>::traits;
+    using node_type = typename traits::node_type;
+    using label_type = typename traits::label_type;
+    using value_type = typename traits::value_type;
     using node_ptr = typename traits::node_ptr;
-    using node_queue = typename traits::node_queue;
-    using node_shim = typename traits::node_shim;
 
-    add_children_visitor(node_queue * queue) :
+    explicit Payload(node_type * fail,
+                     const value_type & payload) noexcept:
+      trie_node<LabelType, ValueType>(fail),
+      m_payload(payload)
+    {
+    }
+
+    explicit Payload(node_type * fail,
+                     value_type && payload) noexcept:
+      trie_node<LabelType, ValueType>(fail),
+      m_payload(std::move(payload))
+    {
+    }
+
+    Payload() = delete;
+    Payload(const Payload &) noexcept = default;
+    Payload(Payload &&) noexcept = default;
+    ~Payload() noexcept = default;
+
+    Payload & operator=(const Payload &) noexcept = default;
+    Payload & operator=(Payload &&) noexcept = default;
+
+    [[nodiscard]]
+    bool empty() const noexcept override
+    {
+      return false;
+    }
+
+    [[nodiscard]]
+    const value_type & value() const override
+    {
+      return m_payload;
+    }
+
+    [[nodiscard]]
+    value_type & value() override
+    {
+      return m_payload;
+    }
+
+  private:
+    value_type m_payload{};
+};
+
+template<typename LabelType,
+         typename ValueType>
+class add_edges_visitor final
+{
+  public:
+    using traits = trie_node_traits<LabelType, ValueType>;
+    using node_ptr = typename traits::node_ptr;
+    using node_edge = typename traits::node_edge;
+    using node_queue = typename traits::node_queue;
+
+    explicit add_edges_visitor(node_queue & queue) noexcept :
       m_queue(queue)
     {
     }
 
-    void visit(node_shim & child)
+    add_edges_visitor() = delete;
+    add_edges_visitor(const add_edges_visitor &) = delete;
+    add_edges_visitor(add_edges_visitor &&) = delete;
+    ~add_edges_visitor() noexcept = default;
+
+    add_edges_visitor & operator=(const add_edges_visitor &) = delete;
+    add_edges_visitor & operator=(add_edges_visitor &&) = delete;
+
+    void operator()(const node_edge & edge)
     {
-      m_queue->emplace_back(child);
+      m_queue.emplace_back(edge.m_node.get());
     }
 
   private:
-    node_queue * m_queue;
+    node_queue & m_queue;
 };
 
-template<typename K, typename PayloadType>
-class compile_visitor
+template<typename LabelType,
+         typename ValueType>
+class compile_visitor final
 {
   public:
-    using traits = trie_node_traits<K, PayloadType>;
+    using traits = trie_node_traits<LabelType, ValueType>;
     using node_ptr = typename traits::node_ptr;
+    using root_node_ptr = typename traits::root_node_ptr;
+    using node_edge = typename traits::node_edge;
+    using node_type = typename traits::node_type;
     using node_queue = typename traits::node_queue;
-    using node_shim = typename traits::node_shim;
 
-    compile_visitor(node_queue * queue, node_ptr fail, node_ptr root) :
-      m_queue(queue),
-      m_fail(std::move(fail)),
-      m_root(std::move(root))
+    explicit compile_visitor(node_queue & p_queue,
+                             node_type * p_fail,
+                             root_node_ptr p_root) :
+      m_queue(p_queue),
+      m_fail(p_fail),
+      m_root(std::move(p_root))
     {
     }
 
-    void visit(node_shim & child)
+    compile_visitor() = delete;
+    compile_visitor(const compile_visitor &) = delete;
+    compile_visitor(compile_visitor &&) = delete;
+    ~compile_visitor() noexcept = default;
+
+    compile_visitor & operator=(const compile_visitor &) = delete;
+    compile_visitor & operator=(compile_visitor &&) = delete;
+
+    void operator()(node_edge & edge)
     {
-      m_queue->emplace_back(child);
+      m_queue.emplace_back(edge.m_node.get());
 
       auto state = m_fail;
-      auto fail = m_root;
+      auto fail = m_root.get();
 
-      while(fail == m_root)
+      while(fail == m_root.get())
       {
-        fail = state->get(child.key, m_root);
+        fail = state->find(edge.m_label);
+        if(!fail)
+        {
+          fail = m_root.get();
+        }
         state = state->fail();
 
-        if(state == m_root)
+        if(state == m_root.get())
         {
           break;
         }
       }
 
-      child.node->fail(fail);
+      edge.m_node->fail(fail);
     }
 
   private:
-    node_queue * m_queue;
-    node_ptr m_fail;
-    node_ptr m_root;
+    node_queue & m_queue;
+    node_type * m_fail;
+    root_node_ptr m_root;
+};
+
+template<typename LabelType,
+         typename ValueType>
+class Automaton final
+{
+  public:
+    using traits = trie_node_traits<LabelType, ValueType>;
+    using label_type = typename traits::label_type;
+    using node_type = typename traits::node_type;
+    using value_type = typename traits::value_type;
+    using node_ptr = typename traits::node_ptr;
+    using root_node_ptr = typename traits::root_node_ptr;
+    using node_edge = typename traits::node_edge;
+
+    explicit Automaton(root_node_ptr p_root) :
+      m_root(std::move(p_root)),
+      m_state(m_root.get())
+    {
+    }
+
+    Automaton() = delete;
+    Automaton(const Automaton &) = delete;
+    Automaton(Automaton &&) noexcept = default;
+    ~Automaton() noexcept = default;
+
+    Automaton & operator=(const Automaton &) = delete;
+    Automaton & operator=(Automaton &&) noexcept = default;
+
+    template<typename T>
+    [[nodiscard]]
+    bool find(const T & label)
+    {
+      return find_span(yy_quad::make_const_span(label));
+    }
+
+    void next(const label_type p_ch)
+    {
+      auto node{m_state};
+
+      while(true)
+      {
+        const auto edge = node->find(p_ch);
+
+        if(edge)
+        {
+          node = edge;
+          break;
+        }
+
+        if(node == m_root.get())
+        {
+          break;
+        }
+        node = node->fail();
+      }
+
+      m_state = node;
+    }
+
+    [[nodiscard]]
+    bool empty() const
+    {
+      return (nullptr == m_state) || m_state->empty();
+    }
+
+    template<typename Visitor>
+    void visit(Visitor && visitor) const
+    {
+      if(m_state != m_root.get())
+      {
+        if(!m_state->empty())
+        {
+          visitor(m_state->value());
+        }
+      }
+    }
+
+    template<typename Visitor>
+    void visit_all(Visitor && visitor) const
+    {
+      auto node = m_state;
+
+      while(node != m_root.get())
+      {
+        if(node)
+        {
+          visitor(node->value());
+        }
+
+        node = node->fail();
+      }
+    }
+
+    void reset() noexcept
+    {
+      m_state = m_root.get();
+    }
+
+  private:
+    template<typename InputSpanType>
+    [[nodiscard]]
+    bool find_span(const InputSpanType label) noexcept
+    {
+      static_assert(yy_traits::is_span_v<InputSpanType>,
+                    "ac_trie::find_span(): InputSpanType is not a yy_quad::span<>");
+
+      if(!label.empty())
+      {
+        reset();
+
+        for(const auto & ch: label)
+        {
+          next(ch);
+
+          if(!m_state)
+          {
+            return false;
+          }
+
+          if(m_root.get() == m_state)
+          {
+            return false;
+          }
+
+          if(!empty())
+          {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    root_node_ptr m_root;
+    node_type * m_state = nullptr;
 };
 
 } // namespace detail
 
-template<typename K, typename PayloadType>
+template<typename LabelType,
+         typename ValueType>
 class ac_trie
 {
   public:
-    using traits = typename detail::trie_node_traits<K, PayloadType>;
-    using key_type = typename traits::key_type;
-    using node_key_type = typename traits::node_key_type;
+    using traits = typename ac_trie_detail::trie_node_traits<LabelType, ValueType>;
+    using label_type = typename traits::label_type;
+    using value_type = typename traits::value_type;
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
+    using root_node_ptr = typename traits::root_node_ptr;
+    using node_edge = typename traits::node_edge;
     using node_queue = typename traits::node_queue;
-    using node_shim = typename traits::node_shim;
-    using payload_type = typename traits::payload_type;
+    using value_node = ac_trie_detail::Payload<label_type, value_type>;
+    using Automaton = ac_trie_detail::Automaton<label_type, value_type>;
 
-    class Automaton
+    ac_trie() noexcept:
+      m_root(std::make_shared<node_type>())
     {
-      public:
-        Automaton(node_ptr root) :
-          m_root(std::move(root)),
-          m_state(m_root)
-        {
-        }
-
-        void next(const node_key_type ch)
-        {
-          auto node = m_state;
-
-          while(true)
-          {
-            const node_ptr child = node->get(ch);
-
-            if(child)
-            {
-              node = child;
-              break;
-            }
-            else if(node == m_root)
-            {
-              break;
-            }
-            node = node->fail();
-          }
-
-          m_state = std::move(node);
-        }
-
-        bool word(const node_key_type * key)
-        {
-          return word(yy_util::span<key_type>(key));
-        }
-
-        bool word(const yy_util::span<key_type> key)
-        {
-          if(!key.empty())
-          {
-            auto begin = key.begin();
-            auto ch = *begin;
-            next(ch);
-
-            if(m_state != m_root)
-            {
-              ++begin;
-              const auto end = key.end();
-
-              auto node = m_state;
-
-              while(begin != end)
-              {
-                const auto & child = node->get(ch);
-
-                if(!child)
-                {
-                  // Not found child node.
-                  return false;
-                }
-
-                node = child;
-              }
-
-              m_state = std::move(node);
-
-              if(end == begin)
-              {
-                return empty();
-              }
-            }
-          }
-
-          return false;
-        }
-
-        bool empty() const
-        {
-          return m_state->empty();
-        }
-
-        template<typename V>
-        void visit(V && visitor) const
-        {
-          if(m_state != m_root)
-          {
-            if(!m_state->empty())
-            {
-              visitor(m_state->value());
-            }
-          }
-        }
-
-        template<typename V>
-        void visit_all(V && visitor) const
-        {
-          auto node = m_state;
-
-          while(node != m_root)
-          {
-            if(!node.empty())
-            {
-              const auto & payload = static_cast<Payload &>(*m_state);
-
-              visitor(payload.value());
-            }
-
-            node = node->fail();
-          }
-        }
-
-      private:
-        const node_ptr m_root;
-        node_ptr m_state;
-    };
-
-    ac_trie() :
-      m_root(std::make_shared<RootNode>())
-    {
-      m_root->fail(m_root);
+      m_root->fail(m_root.get());
     }
 
-    void add(const node_key_type * word)
+    ac_trie(const ac_trie &) = delete;
+    ac_trie(ac_trie &&) noexcept = default;
+    ~ac_trie() noexcept = default;
+
+    ac_trie & operator=(const ac_trie &) = delete;
+    ac_trie & operator=(ac_trie &&) noexcept = delete;
+
+    template<typename Container,
+             typename Value>
+    void add(Container && label,
+             Value && value)
     {
-      add(yy_util::span<key_type>(word));
-    }
-
-    void add(const yy_util::span<key_type> word, PayloadType && value)
-    {
-      if(!word.empty())
-      {
-        node_ptr parent = m_root;
-
-        for(const auto & key:
-            yy_util::make_range(word.begin(), std::prev(word.end())))
-        {
-          parent = parent->add(key, m_root);
-        }
-
-        auto child = node_shim{
-          word.back(),
-          std::make_shared<Payload>(m_root, std::forward<PayloadType>(value))};
-
-        parent->add(std::move(child));
-      }
+      add_span(yy_quad::make_const_span(label), std::forward<Value>(value));
     }
 
     void compile()
     {
       node_queue queue;
       m_root->visit(
-        detail::add_children_visitor<key_type, payload_type>(&queue));
+        ac_trie_detail::add_edges_visitor<label_type, value_type>(queue));
 
       while(!queue.empty())
       {
-        auto shim = queue.front();
+        node_type * node = queue.front();
         queue.pop_front();
-        const node_ptr node = shim.node;
 
         node->visit(
-          detail::compile_visitor<key_type, payload_type>(&queue,
-                                                          node->fail(),
-                                                          m_root));
+          ac_trie_detail::compile_visitor<label_type, value_type>(queue,
+                                                                  node->fail(),
+                                                                  m_root));
       }
     }
 
+    [[nodiscard]]
     Automaton create_automaton()
     {
       return Automaton{m_root};
     }
 
   private:
-    class RootNode: public node_type
+    [[nodiscard]]
+    node_ptr add_node(node_ptr & node,
+                      const label_type & label)
     {
-      public:
-        RootNode() :
-          node_type(node_ptr{})
-        {
-        }
+      node_ptr new_node{std::make_shared<node_type>()};
+      node->add(node_edge{label, new_node});
 
-        RootNode(const RootNode &) = delete;
-        RootNode(RootNode &&) = delete;
-    };
+      return new_node;
+    }
 
-    class Payload: public node_type
+    template<typename InputSpanType>
+    [[nodiscard]]
+    node_type * add_empty_nodes(const InputSpanType label)
     {
-      public:
-        Payload(node_ptr fail, PayloadType && payload) :
-          node_type(std::move(fail)),
-          m_payload(std::move(payload))
-        {
-        }
+      static_assert(yy_traits::is_span_v<InputSpanType>,
+                    "ac_trie::add_empty_nodes(): InputSpanType is not a yy_quad::span<>");
 
-        bool empty() const override
-        {
-          return false;
-        }
+      node_type * node = m_root.get();
 
-        const PayloadType & value() const override
-        {
-          return m_payload;
-        }
+      for(const auto & label_part: yy_util::make_range(label.begin(), std::prev(label.end())))
+      {
+        node = node->add(label_part, m_root.get());
+      }
 
-        PayloadType & value() override
-        {
-          return m_payload;
-        }
+      return node;
+    }
 
-      private:
-        PayloadType m_payload;
-    };
+    template<typename InputSpanType,
+             typename InputValueType>
+    void add_span(InputSpanType label,
+                  InputValueType && value)
+    {
+      static_assert(yy_traits::is_span_v<InputSpanType>,
+                    "ac_trie::add_span(): InputSpanType is not a yy_quad::span<>");
 
-    node_ptr m_root;
+      if(!label.empty())
+      {
+        node_type * parent = add_empty_nodes(label);
+
+        node_edge payload{
+          label.back(),
+          std::make_unique<value_node>(m_root.get(), std::forward<InputValueType>(value))};
+
+        parent->add(std::move(payload));
+      }
+    }
+
+    root_node_ptr m_root;
 };
 
 } // namespace yafiyogi::yy_data

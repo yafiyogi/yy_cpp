@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021-2022 Yafiyogi
+  Copyright (c) 2021-2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -30,141 +30,243 @@
 #include <algorithm>
 #include <tuple>
 
+#include "yy_array_traits.h"
 #include "yy_string_traits.h"
 #include "yy_vector_traits.h"
 
 namespace yafiyogi::yy_util {
-namespace detail {
+namespace vector_detail {
 
-template<typename T, typename V, typename C>
+template<typename T,
+         typename V,
+         typename C>
 class less_than_comp final
 {
   public:
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    less_than_comp(C comp) :
+    explicit less_than_comp(C comp) noexcept:
       m_comp(std::move(comp))
     {
     }
 
-    bool operator()(const container_value_type & cv, const value_type & v) const
+    less_than_comp() = delete;
+    less_than_comp(const less_than_comp&) noexcept = default;
+    less_than_comp(less_than_comp &&) noexcept = default;
+    ~less_than_comp() noexcept = default;
+
+    less_than_comp & operator=(const less_than_comp&) = delete;
+    less_than_comp & operator=(less_than_comp &&) = delete;
+
+    bool operator()(const container_value_type & cval,
+                    const value_type & val) const noexcept
     {
-      return m_comp(cv, v) < 0;
+      return m_comp(cval, val) < 0;
     }
 
   private:
-    const C m_comp;
+    C m_comp;
 };
 
-template<typename T, typename V, typename C>
+template<typename T,
+         typename V,
+         typename C>
 class equal_to_comp final
 {
   public:
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    equal_to_comp(C comp) :
+    explicit equal_to_comp(C comp) noexcept:
       m_comp(std::move(comp))
     {
     }
 
-    bool operator()(const container_value_type & cv, const value_type & v) const
+    equal_to_comp() = delete;
+    equal_to_comp(const equal_to_comp &) noexcept = default;
+    equal_to_comp(equal_to_comp &&) noexcept = default;
+    ~equal_to_comp() noexcept = default;
+
+    equal_to_comp & operator=(const equal_to_comp&) = delete;
+    equal_to_comp & operator=(equal_to_comp &&) noexcept = delete;
+
+    bool operator()(const container_value_type & cval,
+                    const value_type & val) const noexcept
     {
-      return 0 == m_comp(cv, v);
+      return 0 == m_comp(cval, val);
     }
 
   private:
-    const C m_comp;
+    C m_comp;
 };
 
-template<typename T, typename V, typename Enable = void>
+template<typename T,
+         typename V,
+         typename Enable = void>
 struct default_comp final
 {
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
     int operator()(const container_value_type & item,
-                   const value_type & v) const
+                   const value_type & val) const noexcept
     {
-      int rv = 1;
-
-      if(v == item)
+      if(val < item)
       {
-        rv = 0;
-      }
-      else if(v < item)
-      {
-        rv = -1;
+        return 1;
       }
 
-      return rv;
+      if(val == item)
+      {
+        return 0;
+      }
+
+      return -1;
     };
 };
 
-template<typename T, typename V>
-struct default_comp<
-  T,
-  V,
-  typename std::enable_if_t<
-    (yy_traits::is_std_string_v<T> || yy_traits::is_std_string_view_v<T>) &&(
-      yy_traits::is_std_string_v<V> || yy_traits::is_std_string_view_v<V>)>> final
+template<typename T,
+         typename V>
+struct default_comp<T,
+                    V,
+                    std::enable_if_t<(yy_traits::is_std_string_v<T>
+                                               || yy_traits::is_std_string_view_v<T>)
+                                              &&(yy_traits::is_std_string_v<V>
+                                                 || yy_traits::is_std_string_view_v<V>)>> final
 {
-    int operator()(const T & item, const V & v) const
+    int operator()(const T & item, const V & val) const noexcept
     {
-      return item.compare(v);
+      return item.compare(val);
     }
 };
 
-} // namespace detail
+} // namespace vector_detail
+
+struct pos_end_type final
+{
+    std::size_t pos{};
+    bool is_end = false;
+};
 
 template<typename T,
          typename V,
-         typename C = detail::default_comp<yy_traits::container_type_t<T>,
-                                           yy_traits::remove_rcv_t<V>>,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<
-                            T> || yafiyogi::yy_traits::is_array_v<T>,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_rcv_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
                           bool> = true>
-auto find(T && container, V && value, C && comp = C{})
+pos_end_type lower_bound_pos(T && container,
+                             V && value,
+                             C && comp = C{}) noexcept
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
-  using less_than = detail::less_than_comp<container_value_type, value_type, C>;
-  using equal_to = detail::equal_to_comp<container_value_type, value_type, C>;
+  using less_than = vector_detail::less_than_comp<container_value_type, value_type, C>;
 
-  auto iter = std::lower_bound(container.begin(),
-                               container.end(),
+  const auto begin = container.data();
+  const auto end = begin + container.size();
+
+  auto iter = std::lower_bound(begin,
+                               end,
                                value,
                                less_than{comp});
-  bool found = (iter != container.end()) && equal_to{comp}(*iter, value);
+  bool is_end = end == iter;
 
-  return std::make_tuple(std::move(iter), found);
+  auto pos = std::distance(begin, iter);
+
+  return pos_end_type{static_cast<std::size_t>(pos), is_end};
+}
+
+struct pos_found_type final
+{
+    std::size_t pos{};
+    bool found = false;
+};
+
+template<typename T,
+         typename V,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_rcv_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
+                          bool> = true>
+pos_found_type find_pos(T && container,
+                        V && value,
+                        C && comp = C{}) noexcept
+{
+  using container_type = yy_traits::remove_rcv_t<T>;
+  using container_value_type = yy_traits::container_type_t<container_type>;
+  using value_type = yy_traits::remove_rcv_t<V>;
+  using equal_to = vector_detail::equal_to_comp<container_value_type, value_type, C>;
+
+  auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
+
+  const auto begin = container.data();
+  const auto iter = begin + pos;
+
+  bool found = !is_end && equal_to{comp}(*iter, value);
+
+  return pos_found_type{static_cast<std::size_t>(pos), found};
 }
 
 template<typename T,
-         typename C = detail::default_comp<yy_traits::container_type_t<T>,
-                                           yy_traits::container_type_t<T>>,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<
-                            T> || yafiyogi::yy_traits::is_array_v<T>,
+         typename V,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_rcv_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
                           bool> = true>
-void sort(T & container, C && comp = C{})
+auto lower_bound(T && container,
+                 V && value,
+                 C && comp = C{}) noexcept
+{
+  auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
+
+  return std::make_tuple(container.begin() + static_cast<std::ptrdiff_t>(pos), is_end);
+}
+
+template<typename T,
+         typename V,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_rcv_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
+                          bool> = true>
+auto find(T && container,
+          V && value,
+          C && comp = C{}) noexcept
+{
+  auto [pos, found] = find_pos(container, value, std::forward<C>(comp));
+
+  return std::make_tuple(container.begin() + static_cast<std::ptrdiff_t>(pos), found);
+}
+
+template<typename T,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::container_type_t<T>>,
+         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>
+                          || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
+void sort(T & container,
+          C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using less_than =
-    detail::less_than_comp<container_value_type, container_value_type, C>;
+    vector_detail::less_than_comp<container_value_type, container_value_type, C>;
 
-  std::sort(container.begin(), container.end(), less_than{comp});
+  std::sort(container.data(), container.data() + container.size(), less_than{comp});
 }
 
 template<typename T,
-         typename C = detail::default_comp<yy_traits::container_type_t<T>,
-                                           yy_traits::container_type_t<T>>,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
-void unique(T & container, C && comp = C{})
+void unique(T & container,
+            C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using equal_to =
-    detail::equal_to_comp<container_value_type, container_value_type, C>;
+    vector_detail::equal_to_comp<container_value_type, container_value_type, C>;
 
   container.erase(std::unique(container.begin(),
                               container.end(),

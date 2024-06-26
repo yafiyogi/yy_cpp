@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,45 +24,30 @@
 
 */
 
-#pragma once
+#include "yy_string_util.h"
 
-#include <type_traits>
-#include <vector>
+namespace yafiyogi::yy_util {
 
-#include "yy_type_traits.h"
-
-namespace yafiyogi::yy_traits {
-namespace traits_detail {
-
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+std::string_view trim_left(std::string_view str,
+                           const std::string_view chs) noexcept
 {
-    using value_type = typename std::vector<T>::value_type;
-};
+  str.remove_prefix(str.find_first_not_of(chs));
 
-template<typename T>
-struct vector_traits:
-      std::false_type
+  return str;
+}
+
+std::string_view trim_right(std::string_view str,
+                            const std::string_view chs) noexcept
 {
-};
+  str.remove_suffix(str.size() - str.find_last_not_of(chs) - 1);
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
+  return str;
+}
+
+std::string_view trim(std::string_view str,
+                      const std::string_view chs) noexcept
 {
-};
+  return trim_right(trim_left(str, chs), chs);
+}
 
-} // namespace traits_detail
-
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::yy_util

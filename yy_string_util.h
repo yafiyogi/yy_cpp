@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -26,43 +26,32 @@
 
 #pragma once
 
-#include <type_traits>
-#include <vector>
+#include <string_view>
 
-#include "yy_type_traits.h"
+namespace yafiyogi::yy_util {
 
-namespace yafiyogi::yy_traits {
-namespace traits_detail {
+inline constexpr std::string_view white_space = {" \t"};
 
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+std::string_view trim_left(std::string_view str,
+                           const std::string_view chs) noexcept;
+std::string_view trim_right(std::string_view str,
+                            const std::string_view chs) noexcept;
+std::string_view trim(std::string_view str,
+                      const std::string_view chs) noexcept;
+
+inline std::string_view trim_left(std::string_view str) noexcept
 {
-    using value_type = typename std::vector<T>::value_type;
-};
+  return trim_left(str, white_space);
+}
 
-template<typename T>
-struct vector_traits:
-      std::false_type
+inline std::string_view trim_right(std::string_view str) noexcept
 {
-};
+  return trim_left(str, white_space);
+}
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
+inline std::string_view trim(std::string_view str) noexcept
 {
-};
+  return trim_left(str, white_space);
+}
 
-} // namespace traits_detail
-
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::yy_util

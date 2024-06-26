@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021 Yafiyogi
+  Copyright (c) 2021-2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -29,38 +29,64 @@
 
 #include <array>
 #include <utility>
+#include <memory>
 
 namespace yafiyogi::yy_util {
 
-template<typename I>
-class Range
+template<typename Iterator>
+class Range final
 {
   public:
-    Range(I b, I e) :
-      m_begin(std::move(b)),
-      m_end(std::move(e))
+    using iterator = std::remove_reference_t<std::remove_volatile_t<Iterator>>;
+    constexpr explicit Range(const iterator & p_begin,
+                             const iterator & p_end) noexcept:
+      m_begin(p_begin),
+      m_end(p_end)
     {
     }
 
-    auto & begin() const
+    constexpr explicit Range(iterator && p_begin,
+                             iterator && p_end) noexcept:
+      m_begin(std::move(p_begin)),
+      m_end(std::move(p_end))
+    {
+    }
+
+    constexpr Range() = delete;
+    constexpr Range(const Range &) noexcept = default;
+    constexpr Range(Range &&) noexcept = default;
+    constexpr ~Range() noexcept = default;
+
+    constexpr Range & operator=(const Range &) noexcept = default;
+    constexpr Range & operator=(Range &&) noexcept = default;
+
+    [[nodiscard]]
+    constexpr iterator begin() const noexcept
     {
       return m_begin;
     }
 
-    auto & end() const
+    [[nodiscard]]
+    constexpr iterator end() const noexcept
     {
       return m_end;
     }
 
   private:
-    I m_begin;
-    I m_end;
+    iterator m_begin;
+    iterator m_end;
 };
 
-template<typename I>
-auto make_range(I && b, I && e)
+template<typename Iterator>
+constexpr auto make_range(const Iterator & begin, const Iterator & end) noexcept
 {
-  return Range<I>{std::forward<I>(b), std::forward<I>(e)};
+  return Range<Iterator>{begin, end};
+}
+
+template<typename Iterator>
+constexpr auto make_range(Iterator && begin, Iterator && end) noexcept
+{
+  return Range<Iterator>{std::forward<Iterator>(begin), std::forward<Iterator>(end)};
 }
 
 template<typename T>
@@ -80,6 +106,15 @@ struct ArraySize<std::array<T, Size>>
 {
     static constexpr size_t size = Size;
 };
+
+template<typename Return,
+         typename T>
+constexpr std::unique_ptr<Return> static_unique_cast(T && ptr)
+{
+  static_assert(yy_traits::is_unique_ptr_v<T>, "static_unique_cast(): parameter must be a std::unique_ptr<T>.");
+
+  return std::unique_ptr<Return>(static_cast<Return *>(ptr.release()));
+}
 
 } // namespace yafiyogi::yy_util
 

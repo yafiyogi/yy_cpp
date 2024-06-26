@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,45 +24,21 @@
 
 */
 
-#pragma once
+#include "boost/locale/conversion.hpp"
 
-#include <type_traits>
-#include <vector>
+#include "yy_string_case.h"
+#include "yy_locale.h"
 
-#include "yy_type_traits.h"
+namespace yafiyogi::yy_util {
 
-namespace yafiyogi::yy_traits {
-namespace traits_detail {
-
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+std::string to_lower(const std::string_view str)
 {
-    using value_type = typename std::vector<T>::value_type;
-};
+  return boost::locale::to_lower(str.begin(), str.end(), yy_locale::get_locale());
+}
 
-template<typename T>
-struct vector_traits:
-      std::false_type
+std::string to_upper(const std::string_view str)
 {
-};
+  return boost::locale::to_upper(str.begin(), str.end(), yy_locale::get_locale());
+}
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
-{
-};
-
-} // namespace traits_detail
-
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::yy_util

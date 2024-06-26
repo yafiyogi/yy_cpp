@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -26,43 +26,28 @@
 
 #pragma once
 
-#include <type_traits>
-#include <vector>
-
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_traits {
-namespace traits_detail {
 
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+template<typename T,
+         typename Enable = void>
+struct ref_traits
 {
-    using value_type = typename std::vector<T>::value_type;
+    using type = yy_traits::remove_rcv_t<T>;
+    using l_value_ref = std::add_lvalue_reference_t<type>;
+    using const_l_value_ref = std::add_lvalue_reference_t<std::add_const_t<type>>;
+    using r_value_ref = std::add_rvalue_reference_t<type>;
 };
 
 template<typename T>
-struct vector_traits:
-      std::false_type
+struct ref_traits<T,
+                  std::enable_if_t<std::is_trivially_copyable_v<yy_traits::remove_rcv_t<T>>>>
 {
+    using type = yy_traits::remove_rcv_t<T>;
+    using l_value_ref = type;
+    using const_l_value_ref = std::add_const_t<type>;
+    using r_value_ref = type;
 };
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
-{
-};
-
-} // namespace traits_detail
-
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::yy_traits

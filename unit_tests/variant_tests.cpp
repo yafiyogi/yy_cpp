@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2022-2024 Yafiyogi
+  Copyright (c) 2024 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -24,45 +24,42 @@
 
 */
 
-#pragma once
-
+#include "fmt/format.h"
 #include <type_traits>
-#include <vector>
 
-#include "yy_type_traits.h"
+#include <gtest/gtest.h>
 
-namespace yafiyogi::yy_traits {
-namespace traits_detail {
+#include "yy_variant_traits.h"
 
-template<typename T>
-struct container_traits<std::vector<T>>:
-      std::true_type
+namespace yafiyogi::yy_cpp::tests {
+
+class TestVariantTraits:
+      public testing::Test
 {
-    using value_type = typename std::vector<T>::value_type;
+  public:
+    void SetUp() override
+    {
+    }
+
+    void TearDown() override
+    {
+    }
 };
 
-template<typename T>
-struct vector_traits:
-      std::false_type
+TEST_F(TestVariantTraits, TestTypeIsInVariant)
 {
-};
+  using var = std::variant<bool, double, std::string>;
 
-template<typename T>
-struct vector_traits<std::vector<T>>:
-      std::true_type
+  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, bool>));
+  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, double>));
+  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, std::string>));
+}
+
+TEST_F(TestVariantTraits, TestTypeIsNotInVariant)
 {
-};
+  using var = std::variant<bool, double, std::string>;
 
-} // namespace traits_detail
+  ASSERT_FALSE((yy_traits::check_variant_for_type_v<var, int>));
+}
 
-/** @brief is_vector type trait */
-template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
-template<typename T>
-using is_vector_t = typename is_vector<T>::type;
-
-} // namespace yafiyogi::yy_vector_traits
+} // namespace yafiyogi::yy_cpp::tests
