@@ -74,12 +74,12 @@ class tokenizer final
     constexpr span_type scan() noexcept
     {
       ++m_token_idx;
-      m_pos = std::find(m_span.begin(), m_span.end(), m_delim);
+      auto pos = std::find(m_span.begin(), m_span.end(), m_delim);
 
-      m_more = m_pos != m_span.end();
+      m_more = pos != m_span.end();
 
-      m_token = span_type{m_span.begin(), m_pos};
-      m_span = span_type{m_pos, m_span.end()};
+      m_token = span_type{m_span.begin(), pos};
+      m_span = span_type{pos, m_span.end()};
       m_span.inc_begin();
 
       return token();
@@ -122,11 +122,8 @@ class tokenizer final
     span_type m_token;
     size_type m_token_idx = none;
     span_type m_span;
-    iterator m_pos{};
     value_type m_delim{};
     bool m_more = false;
 };
-
-
 
 } // namespace yafiyogi::yy_util
