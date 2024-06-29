@@ -34,6 +34,7 @@ add_executable(test_yy_cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
   string_util_tests.cpp
+  tokenizer_tests.cpp
   variant_tests.cpp
   vector_util_tests.cpp
   vector_tests.cpp
