@@ -443,7 +443,7 @@ class vector
     {
       if(!empty())
       {
-        erase(end() - 1, end, action);
+        erase(end() - 1, end(), action);
       }
     }
 

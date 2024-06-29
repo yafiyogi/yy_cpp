@@ -29,7 +29,7 @@
 #if defined(NDEBUG)
 # define YY_ASSERT(yy_assert_expr) /* */
 #else
-# include "assert.h"
+# include <cassert>
 # undef YY_ASSERT
 # define YY_ASSERT(yy_assert_expr) assert(yy_assert_expr)
 #endif
