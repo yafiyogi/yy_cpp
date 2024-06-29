@@ -292,13 +292,8 @@ class vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
-    template<typename InputValueType>
-    constexpr return_value emplace(iterator pos, InputValueType && value)
+    constexpr return_value add_empty(iterator pos)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
-
       return_value rv{end(), false};
 
       auto [distance, valid] = distance_valid(pos, m_size + 1);
@@ -317,9 +312,27 @@ class vector
         }
 
         rv.first = begin() + distance;
-        *rv.first = std::forward<InputValueType>(value);
         rv.second = true;
         ++m_size;
+      }
+
+      return rv;
+    }
+
+    template<typename InputValueType>
+    constexpr return_value emplace(iterator pos, InputValueType && value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+                    "Value is of an incompatible type.");
+
+
+
+      return_value rv = add_empty(pos);
+
+      if(rv.second)
+      {
+        *rv.first = std::forward<InputValueType>(value);
       }
 
       return rv;
@@ -818,6 +831,33 @@ class simple_vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    constexpr return_value add_empty(iterator pos)
+    {
+      return_value rv{end(), false};
+
+      auto [distance, valid] = distance_valid(pos, m_size + 1);
+
+      if(valid)
+      {
+        if(m_size == m_capacity)
+        {
+          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
+          // Can't use the parameter pos after this point!
+        }
+        else
+        {
+#pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+          std::move_backward(pos, end(), end() + 1);
+        }
+
+        rv.first = begin() + distance;
+        rv.second = true;
+        ++m_size;
+      }
+
+      return rv;
+    }
+
     template<typename InputValueType>
     constexpr return_value emplace(iterator pos, InputValueType && value)
     {
@@ -825,28 +865,11 @@ class simple_vector
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
-      return_value rv{end(), false};
-      auto [distance, valid] = distance_valid(pos, m_size + 1);
+      return_value rv = add_empty(pos);
 
-      if(valid)
+      if(rv.second)
       {
-        if(m_size == m_capacity)
-        {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1),
-                           static_cast<size_type>(distance));
-          // Can't use the parameter pos after this point!
-        }
-        else
-        {
-#pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
-          //#pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
-          std::move_backward(pos, end(), end() + 1);
-        }
-
-        rv.first = begin() + distance;
         *rv.first = std::forward<InputValueType>(value);
-        rv.second = true;
-        ++m_size;
       }
 
       return rv;

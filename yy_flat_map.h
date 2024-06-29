@@ -244,6 +244,23 @@ class flat_map final
       return const_ref_type{*key(pos), *value(pos)};
     }
 
+    ref_type add_empty(size_type p_pos)
+    {
+      auto [key_pos, key_added] = m_keys.add_empty(m_keys.begin() + p_pos);
+      if(!key_added)
+      {
+        throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
+      }
+
+      auto [value_pos, value_added] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
+      if(!value_added)
+      {
+        throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
+      }
+
+      return ref_type{*key_pos, *value_pos};
+    }
+
     template<typename InputValueType>
     [[nodiscard]]
     constexpr size_type emplace(size_type p_pos,
@@ -254,10 +271,14 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto key_iter = do_emplace(m_keys.begin() + static_cast<difference_type>(p_pos),
-                                 std::forward<key_type>(p_key),
-                                 std::forward<InputValueType>(p_value));
-      return static_cast<size_type>(key_iter - m_keys.begin());
+      auto [key, value] = add_empty(p_pos);
+
+      size_type new_pos = static_cast<size_type>(&key - m_keys.begin());
+
+      key = std::forward<key_type>(p_key);
+      value = std::forward<InputValueType>(p_value);
+
+      return new_pos;
     }
 
     struct pos_inserted_type final
