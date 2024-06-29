@@ -59,8 +59,8 @@ TEST_F(TestFMFlatTrie, TrieNodeGetBeforeAdd)
   // No child nodes added.
   trie_node node{trie_node::no_data};
 
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'a'));
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b'));
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'a').found);
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
 TEST_F(TestFMFlatTrie, TrieNodeGetAfterAdd)
@@ -71,8 +71,8 @@ TEST_F(TestFMFlatTrie, TrieNodeGetAfterAdd)
   trie_node node{trie_node::no_data};
   node.add_edge(node.find_edge_pos('a').pos, 'a', 1);
 
-  EXPECT_TRUE(node.find_edge([](auto, auto){}, 'a'));
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b'));
+  EXPECT_TRUE(node.find_edge([](auto, auto){}, 'a').found);
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
 TEST_F(TestFMFlatTrie, TrieNodeAddDuplicate)
@@ -82,7 +82,7 @@ TEST_F(TestFMFlatTrie, TrieNodeAddDuplicate)
   node.add_edge(node.find_edge_pos('b').pos, 'b', 668);
   node.add_edge(node.find_edge_pos('b').pos, 'b', 777);
 
-  ASSERT_TRUE(node.find_edge([](auto, auto){}, 'b'));
+  ASSERT_TRUE(node.find_edge([](auto, auto){}, 'b').found);
   // EXPECT_EQ(777, edge_idx);
 }
 
@@ -197,10 +197,10 @@ TEST_F(TestFMFlatTrie, Trie_R_Value)
 
   // Add duplicate '1234'
   trie.add("1234", 888);
-  // Check '1234' still exists & value changed.
+  // Check '1234' still exists & value unchanged.
   automaton = trie.create_automaton();
   ASSERT_TRUE(automaton.find("1234"));
-  automaton.visit([](const auto & payload) { EXPECT_EQ(888, payload);});
+  automaton.visit([](const auto & payload) { EXPECT_EQ(668, payload);});
 }
 
 TEST_F(TestFMFlatTrie, TrieAddThreeThirdOverlap_L_Value)
@@ -287,10 +287,10 @@ TEST_F(TestFMFlatTrie, Trie_L_Value)
   // Add duplicate '1234'
   auto value_888 = 888;
   trie.add("1234", value_888);
-  // Check '1234' still exists & value changed.
+  // Check '1234' still exists & value unchanged.
   automaton = trie.create_automaton();
   EXPECT_TRUE(automaton.find("1234"));
-  automaton.visit([&value_888](const auto & payload) { EXPECT_EQ(value_888, payload);});
+  automaton.visit([&value_668](const auto & payload) { EXPECT_EQ(value_668, payload);});
 }
 
 } // namespace yafiyogi::yy_data::tests

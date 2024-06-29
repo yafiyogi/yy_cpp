@@ -56,8 +56,8 @@ TEST_F(TestFMTrie, TrieNodeGetBeforeAdd)
   // No child nodes added.
   trie_node node{};
 
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'a'));
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b'));
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'a').found);
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
 TEST_F(TestFMTrie, TrieNodeGetAfterAdd)
@@ -66,8 +66,8 @@ TEST_F(TestFMTrie, TrieNodeGetAfterAdd)
   trie_node node{};
   node.add_edge(node.find_edge_pos('a').pos, 'a', {});
 
-  EXPECT_TRUE(node.find_edge([](auto, auto){}, 'a'));
-  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b'));
+  EXPECT_TRUE(node.find_edge([](auto, auto){}, 'a').found);
+  EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
 TEST_F(TestFMTrie, TestNodeChildOrder)

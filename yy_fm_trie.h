@@ -89,7 +89,7 @@ class trie_node
 
     template<typename Visitor>
     [[nodiscard]]
-    bool find_edge(Visitor && visitor,
+    auto find_edge(Visitor && visitor,
                    const label_l_value_ref label) noexcept
     {
       return m_edges.find_value(std::forward<Visitor>(visitor), label);
@@ -265,7 +265,7 @@ class Automaton final
 
       for(const label_l_value_ref ch : label)
       {
-        if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, ch))
+        if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, ch).found)
         {
           m_state = nullptr;
           return false;
@@ -369,7 +369,10 @@ class fm_trie
       // Skip exising nodes.
       while(!label.empty())
       {
-        auto found = node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, label[0]);
+        auto [ignore, found] = node->find_edge([&node]
+                                               (node_ptr * edge_node, size_type /* pos */) {
+          node = edge_node->get();
+        }, label[0]);
 
         if(!found)
         {
@@ -403,11 +406,9 @@ class fm_trie
 
         auto last = label.back();
         node_ptr * edge_node = nullptr;
-        size_type edge_pos = 0;
-        bool found = parent->find_edge([&edge_node, &edge_pos](node_ptr * node,
-                                                               size_type pos) {
+        auto [edge_pos, found] = parent->find_edge([&edge_node]
+                                                   (node_ptr * node, size_type) {
           edge_node = node;
-          edge_pos = pos;
         }, last);
 
         if(found)

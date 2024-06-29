@@ -121,7 +121,7 @@ class trie_node_idx final
     template<typename Visitor,
              typename InputLabelType>
     [[nodiscard]]
-    constexpr bool find_edge(Visitor && visitor,
+    constexpr auto find_edge(Visitor && visitor,
                              const InputLabelType & label) noexcept
     {
       return m_edges.find_value(std::forward<Visitor>(visitor), label);
@@ -233,7 +233,7 @@ class trie_node_ptr final
     constexpr bool find_edge(Visitor && visitor,
                              const InputLabelType & label) noexcept
     {
-      return m_edges.find_value(std::forward<Visitor>(visitor), label);
+      return m_edges.find_value(std::forward<Visitor>(visitor), label).found;
     }
 
     template<typename Visitor>
@@ -454,16 +454,22 @@ class fm_flat_trie
     constexpr fm_flat_trie & operator=(const fm_flat_trie &) = delete;
     constexpr fm_flat_trie & operator=(fm_flat_trie &&) noexcept = default;
 
+    struct data_added_type final
+    {
+        value_type * data = nullptr;
+        bool added = false;
+    };
+
     template<typename InputType,
              typename InputValueType>
-    constexpr void add(InputType && label,
-                       InputValueType && value)
+    constexpr data_added_type add(InputType && label,
+                                  InputValueType && value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>,
                     yy_traits::remove_rcv_t<value_type>>,
                     "The value provided is not the correct type.");
 
-      add_span(yy_quad::make_const_span(label), std::forward<InputValueType>(value));
+      return add_span(yy_quad::make_const_span(label), std::forward<InputValueType>(value));
     }
 
     [[nodiscard]]
@@ -474,7 +480,7 @@ class fm_flat_trie
       typename automaton::data_vector new_data{m_data};
 
       // Transform node_idx_type to node_type *,
-      // and transform data_idx_type to avlue_type *.
+      // and transform data_idx_type to value_type *.
       typename automaton::node_type * nodes_begin = new_nodes.begin();
       typename automaton::value_type * data_begin = new_data.begin();
 
@@ -543,9 +549,7 @@ class fm_flat_trie
     static constexpr value_type & get_data(data_vector & data,
                                            const data_idx_type idx) noexcept
     {
-      YY_ASSERT(idx < data.size());
-
-      return *(data.data() + idx);
+      return *get_data_ptr(data, idx);
     }
 
     [[nodiscard]]
@@ -555,6 +559,21 @@ class fm_flat_trie
       YY_ASSERT(idx < data.size());
 
       return *(data.data() + idx);
+    }
+
+    [[nodiscard]]
+    constexpr value_type * get_data_ptr(const data_idx_type idx) noexcept
+    {
+      return get_data_ptr(m_data, idx);
+    }
+
+    [[nodiscard]]
+    static constexpr value_type * get_data_ptr(data_vector & data,
+                                               const data_idx_type idx) noexcept
+    {
+      YY_ASSERT(idx < data.size());
+
+      return data.data() + idx;
     }
 
     template<typename InternalValueType>
@@ -601,7 +620,7 @@ class fm_flat_trie
       // Skip exising nodes.
       while(!label.empty())
       {
-        auto found = get_node(nodes.data(), node_idx)->find_edge(next_node_do, label[0]);
+        auto found = get_node(nodes.data(), node_idx)->find_edge(next_node_do, label[0]).found;
 
         if(!found)
         {
@@ -623,8 +642,8 @@ class fm_flat_trie
     }
 
     template<typename InputValueType>
-    constexpr void add_span(label_span_type label,
-                            InputValueType && value)
+    constexpr data_added_type add_span(label_span_type label,
+                                       InputValueType && value)
     {
       if(!label.empty())
       {
@@ -632,14 +651,12 @@ class fm_flat_trie
         auto node = get_node(m_nodes.data(), node_idx);
 
         node_idx_type * edge_node_idx = nullptr;;
-        size_type edge_pos = 0;
-        auto do_find_edge = [&edge_node_idx, &edge_pos]
-                            (node_idx_type * idx, size_type pos) {
+        auto do_find_edge = [&edge_node_idx]
+                            (node_idx_type * idx, size_type) {
           edge_node_idx = idx;
-          edge_pos = pos;
         };
 
-        auto found = node->find_edge(do_find_edge, label.back());
+        auto [edge_pos, found] = node->find_edge(do_find_edge, label.back());
 
         if(found)
         {
@@ -648,19 +665,15 @@ class fm_flat_trie
           if(!edge_node.empty())
           {
             // Data node exists.
-            // Overwrite existing value.
-            auto & data_value = get_data(m_data, edge_node.data());
-
-            data_value = std::forward<InputValueType>(value);
-            return;
+            // Keep existing data.
+            return data_added_type{get_data_ptr(edge_node.data()), false};
           }
 
           // Add new data item, & update node data idx
           auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
           edge_node.data(data_idx);
 
-          m_data.emplace_back(value);
-          return;
+          return data_added_type{get_data_ptr(edge_node.data()), true};
         }
 
         // No data node exists.
@@ -668,7 +681,11 @@ class fm_flat_trie
         auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
         [[maybe_unused]]
         auto ignore = add_node(m_nodes, node, edge_pos, label.back(), data_idx);
+
+        return data_added_type{get_data_ptr(data_idx), true};
       }
+
+      return data_added_type{};
     }
 
     trie_vector m_nodes;
