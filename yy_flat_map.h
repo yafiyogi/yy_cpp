@@ -29,28 +29,29 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "yy_ref_traits.h"
+#include "yy_clear_action.h"
 #include "yy_lower_bound.h"
+#include "yy_ref_traits.h"
 #include "yy_span.h"
 #include "yy_vector.h"
-
-//#include <functional>
 
 namespace yafiyogi::yy_data {
 namespace flat_map_detail {
 
 template<typename Key,
-         typename Value>
+         typename Value,
+         ClearAction KeyClearAction,
+         ClearAction ValueClearAction>
 struct traits_type final
 {
     using key_type = yy_traits::remove_rcv_t<Key>;
     using key_l_value_ref = typename yy_traits::ref_traits<key_type>::l_value_ref;
     using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
-    using key_vector = yy_quad::simple_vector<key_type>;
+    using key_vector = yy_quad::simple_vector<key_type, KeyClearAction>;
     using value_type = yy_traits::remove_rcv_t<Value>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
-    using value_vector = yy_quad::simple_vector<value_type>;
+    using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
     using size_type = std::size_t;
 };
 
@@ -58,11 +59,13 @@ struct traits_type final
 
 
 template<typename Key,
-         typename Value>
+         typename Value,
+         ClearAction KeyClearAction = default_action<Key>,
+         ClearAction ValueClearAction = default_action<Value>>
 class flat_map final
 {
   public:
-    using traits = flat_map_detail::traits_type<Key, Value>;
+    using traits = flat_map_detail::traits_type<Key, Value, KeyClearAction, ValueClearAction>;
     using size_type = typename traits::size_type;
     using key_type = typename traits::key_type;
     using key_l_value_ref = typename traits::key_l_value_ref;

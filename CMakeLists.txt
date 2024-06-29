@@ -62,6 +62,7 @@ set(YY_CPP_HEADERS
   "yy_assert.h"
   "yy_binary_search.h"
   "yy_bit_twiddling.h"
+  "yy_clear_action.h"
   "yy_flat_map.h"
   "yy_flat_radix_trie.h"
   "yy_flat_trie.h"

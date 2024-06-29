@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "yy_bit_twiddling.h"
+#include "yy_clear_action.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -39,7 +40,7 @@
 namespace yafiyogi {
 namespace yy_quad {
 
-enum class ClearAction { Clear, Keep};
+using ClearAction = yy_data::ClearAction;
 
 namespace vector_detail {
 
@@ -57,9 +58,7 @@ struct vector_traits final
     using size_type = std::size_t;
     using distance_type = std::ptrdiff_t;
 
-    static constexpr ClearAction default_action = (std::is_trivially_constructible_v<value_type>
-                                                   && std::is_trivially_move_assignable_v<value_type>
-                                                   && std::is_trivially_copy_assignable_v<value_type>) ? ClearAction::Keep : ClearAction::Clear;
+    static constexpr ClearAction default_action = yy_data::default_action<value_type>;
 
 };
 
