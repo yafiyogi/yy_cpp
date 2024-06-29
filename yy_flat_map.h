@@ -172,11 +172,17 @@ class flat_map final
       return key_value_pos;
     }
 
+    struct pos_found_type final
+    {
+        std::size_t pos{};
+        bool found = false;
+    };
+
     template<typename KeyParamType,
              typename Visitor>
     [[nodiscard]]
-    constexpr bool find_value(Visitor && visitor,
-                              const KeyParamType & p_key) noexcept
+    constexpr pos_found_type find_value(Visitor && visitor,
+                                        const KeyParamType & p_key) noexcept
     {
       auto [pos, found] = do_find(p_key);
 
@@ -185,13 +191,13 @@ class flat_map final
         visitor(value(pos), pos);
       }
 
-      return found;
+      return pos_found_type{pos, found};
     }
 
     template<typename KeyParamType,
              typename Visitor>
     [[nodiscard]]
-    constexpr bool find_value(Visitor && visitor,
+    constexpr pos_found_type find_value(Visitor && visitor,
                               const KeyParamType & p_key) const noexcept
     {
       auto [pos, found] = do_find(p_key);
@@ -201,14 +207,8 @@ class flat_map final
         visitor(value(pos), pos);
       }
 
-      return found;
+      return pos_found_type{pos, found};
     }
-
-    struct pos_found_type final
-    {
-        std::size_t pos{};
-        bool found = false;
-    };
 
     template<typename KeyParamType>
     [[nodiscard]]
@@ -315,6 +315,12 @@ class flat_map final
     {
       m_keys.reserve(size);
       m_values.reserve(size);
+    }
+
+    void clear() noexcept
+    {
+      m_keys.clear();
+      m_values.clear();
     }
 
   private:
