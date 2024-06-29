@@ -65,7 +65,8 @@ struct vector_traits final
 
 } // namespace vector_detail
 
-template<typename T, ClearAction default_action = vector_detail::vector_traits<T>::default_action>
+template<typename T,
+         ClearAction default_action = vector_detail::vector_traits<T>::default_action>
 class vector
 {
   public:
@@ -596,7 +597,8 @@ class vector
     size_type m_capacity{};
 };
 
-template<typename T, ClearAction default_action = vector_detail::vector_traits<T>::default_action>
+template<typename T,
+         ClearAction default_action = vector_detail::vector_traits<T>::default_action>
 class simple_vector
 {
   public:
@@ -1064,31 +1066,35 @@ class simple_vector
 
 namespace yy_traits::traits_detail {
 
-template<typename T>
-struct vector_traits<yy_quad::vector<T>>:
+template<typename T,
+         yy_quad::ClearAction ct>
+struct vector_traits<yy_quad::vector<T, ct>>:
       std::true_type
 {
 };
 
-template<typename T>
-struct container_traits<yy_quad::vector<T>>:
+template<typename T,
+         yy_quad::ClearAction ct>
+struct container_traits<yy_quad::vector<T, ct>>:
       std::true_type
 {
-    using value_type = typename yy_quad::vector<T>::value_type;
+    using value_type = typename yy_quad::vector<T, ct>::value_type;
 };
 
-template<typename T>
-struct vector_traits<yy_quad::simple_vector<T>>:
+template<typename T,
+         yy_quad::ClearAction ct>
+struct vector_traits<yy_quad::simple_vector<T, ct>>:
       std::true_type
 {
-    using value_type = typename yy_quad::simple_vector<T>::value_type;
+    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
 };
 
-template<typename T>
-struct container_traits<yy_quad::simple_vector<T>>:
+template<typename T,
+         yy_quad::ClearAction ct>
+struct container_traits<yy_quad::simple_vector<T, ct>>:
       std::true_type
 {
-    using value_type = typename yy_quad::simple_vector<T>::value_type;
+    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
 };
 
 } // namespace yy_traits::traits_detail
