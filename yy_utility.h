@@ -31,6 +31,8 @@
 #include <utility>
 #include <memory>
 
+#include "yy_assert.h"
+
 namespace yafiyogi::yy_util {
 
 template<typename Iterator>
@@ -109,11 +111,15 @@ struct ArraySize<std::array<T, Size>>
 
 template<typename Return,
          typename T>
-constexpr std::unique_ptr<Return> static_unique_cast(T && ptr)
+constexpr std::unique_ptr<yy_traits::remove_rcv_t<Return>> static_unique_cast(std::unique_ptr<T> && ptr)
 {
-  static_assert(yy_traits::is_unique_ptr_v<T>, "static_unique_cast(): parameter must be a std::unique_ptr<T>.");
+  using return_type = yy_traits::remove_rcv_t<Return>;
+  using param_type = yy_traits::remove_rcv_t<T>;
+  static_assert(std::is_base_of_v<return_type, param_type>, "static_unique_cast(): type 'Return' is not a base of type 'T'.");
 
-  return std::unique_ptr<Return>(static_cast<Return *>(ptr.release()));
+  auto new_ptr = std::unique_ptr<return_type>(static_cast<return_type *>(ptr.release()));
+  YY_ASSERT(new_ptr);
+  return new_ptr;
 }
 
 } // namespace yafiyogi::yy_util
