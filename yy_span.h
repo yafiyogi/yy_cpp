@@ -121,8 +121,8 @@ class span final
     {
     }
 
-    constexpr span(iterator p_begin,
-                   size_type p_size) noexcept:
+    constexpr explicit span(iterator p_begin,
+                            size_type p_size) noexcept:
       m_begin(p_begin),
       m_end(p_begin + p_size)
     {
@@ -368,14 +368,14 @@ class const_span final
     {
     }
 
-    constexpr const_span(const_iterator p_begin,
-                         const size_type p_size) noexcept:
+    constexpr explicit const_span(const_iterator p_begin,
+                                  const size_type p_size) noexcept:
       m_begin(p_begin),
       m_end(p_begin + p_size)
     {
     }
 
-    constexpr const_span(span<value_type> span) noexcept:
+    constexpr explicit const_span(span<value_type> span) noexcept:
       m_begin(span.begin()),
       m_end(span.end())
     {
