@@ -38,24 +38,24 @@ template<typename Value,
          typename Enable = void>
 struct lockable_value_visitor_traits final
 {
-    lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
-    lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
-    ~lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
-    lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
 
     template<typename Visitor>
-    static void visit(Value & value,
-                      Visitor && visitor)
+    constexpr static void visit(Value & value,
+                                Visitor && visitor)
     {
       visitor(value);
     }
 
     template<typename Visitor>
-    static void visit(const Value & value,
-                      Visitor && visitor)
+    constexpr static void visit(const Value & value,
+                                Visitor && visitor)
     {
       visitor(value);
     }
@@ -66,17 +66,17 @@ struct lockable_value_visitor_traits<Value,
                                      std::enable_if_t<std::is_pointer_v<Value>
                                                       || yy_traits::is_smart_ptr_v<Value>>> final
 {
-    lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
-    lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
-    ~lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
-    lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
 
     template<typename Visitor>
-    static void visit(Value & value,
-                      Visitor && visitor)
+    static constexpr void visit(Value & value,
+                                Visitor && visitor)
     {
       if(value)
       {
@@ -85,8 +85,8 @@ struct lockable_value_visitor_traits<Value,
     }
 
     template<typename Visitor>
-    static void visit(const Value & value,
-                      Visitor && visitor)
+    static constexpr void visit(const Value & value,
+                                Visitor && visitor)
     {
       if(value)
       {
@@ -99,17 +99,17 @@ template<typename Value>
 struct lockable_value_visitor_traits<Value,
                                      std::enable_if_t<yy_traits::is_optional_v<Value>>> final
 {
-    lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
-    lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
-    ~lockable_value_visitor_traits() noexcept = default;
+    constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
-    lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
 
     template<typename Visitor>
-    static void visit(Value & value,
-                      Visitor && visitor)
+    static constexpr void visit(Value & value,
+                                Visitor && visitor)
     {
       if(value.has_value())
       {
@@ -118,8 +118,8 @@ struct lockable_value_visitor_traits<Value,
     }
 
     template<typename Visitor>
-    static void visit(const Value & value,
-                      Visitor && visitor)
+    static constexpr void visit(const Value & value,
+                                Visitor && visitor)
     {
       if(value.has_value())
       {
@@ -138,22 +138,22 @@ class lockable_value final
     using mutex_type = MutexType;
 
     template<typename... Args>
-    lockable_value(Args &&... args) noexcept:
+    constexpr lockable_value(Args &&... args) noexcept:
       m_value(std::forward<Args>(args)...),
       m_mtx()
     {
     }
 
-    lockable_value() noexcept = default;
+    constexpr lockable_value() noexcept = default;
     lockable_value(const lockable_value &) = delete;
-    lockable_value(lockable_value &&) noexcept = default;
-    ~lockable_value() noexcept = default;
+    constexpr lockable_value(lockable_value &&) noexcept = default;
+    constexpr ~lockable_value() noexcept = default;
 
     lockable_value & operator=(const lockable_value &) = delete;
-    lockable_value & operator=(lockable_value && rhs) noexcept = default;
+    constexpr lockable_value & operator=(lockable_value && rhs) noexcept = default;
 
     template<typename LockType>
-    value_type get() const
+    constexpr value_type get() const
     {
       LockType lck(m_mtx);
 
@@ -161,7 +161,7 @@ class lockable_value final
     }
 
     template<typename LockType>
-    value_type set(const value_type & value)
+    constexpr value_type set(const value_type & value)
     {
       LockType lck(m_mtx);
 
@@ -169,7 +169,7 @@ class lockable_value final
     }
 
     template<typename LockType>
-    value_type set(value_type && value)
+    constexpr value_type set(value_type && value)
     {
       LockType lck(m_mtx);
 
@@ -177,7 +177,7 @@ class lockable_value final
     }
 
     template<typename LockType>
-    value_type exchange(value_type & value)
+    constexpr value_type exchange(value_type & value)
     {
       LockType lck(m_mtx);
 
@@ -187,7 +187,7 @@ class lockable_value final
     }
 
     template<typename LockType>
-    value_type exchange(value_type && value)
+    constexpr value_type exchange(value_type && value)
     {
       LockType lck(m_mtx);
 
@@ -198,7 +198,7 @@ class lockable_value final
 
     template<typename LockType,
              typename Visitor>
-    void visit(Visitor && visitor) const
+    constexpr void visit(Visitor && visitor) const
     {
       LockType lck(m_mtx);
 
@@ -210,7 +210,7 @@ class lockable_value final
 
     template<typename LockType,
              typename Visitor>
-    void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor)
     {
       LockType lck(m_mtx);
 
@@ -233,46 +233,46 @@ class lock_type final
     using value_type = typename LockableValue::value_type;
     using guard_type = GuardType;
 
-    lock_type() noexcept = default;
+    constexpr lock_type() noexcept = default;
     lock_type(const lock_type &) = delete;
-    lock_type(lock_type &&) noexcept = default;
-    ~lock_type() noexcept = default;
+    constexpr lock_type(lock_type &&) noexcept = default;
+    constexpr ~lock_type() noexcept = default;
 
     lock_type & operator=(const lock_type &) = delete;
-    lock_type & operator=(lock_type && rhs) noexcept = default;
+    constexpr lock_type & operator=(lock_type && rhs) noexcept = default;
 
-    static value_type get(const LockableValue & lockable)
+    static constexpr value_type get(const LockableValue & lockable)
     {
       return lockable.template get<guard_type>();
     }
 
-    static value_type set(LockableValue & lockable,
-                          const value_type & value)
+    static constexpr value_type set(LockableValue & lockable,
+                                    const value_type & value)
     {
       return lockable.template set<guard_type>(value);
     }
 
-    static value_type set(LockableValue & lockable,
-                          value_type && value)
+    static constexpr value_type set(LockableValue & lockable,
+                                    value_type && value)
     {
       return lockable.template set<guard_type>(std::forward<value_type>(value));
     }
 
-    static value_type exchange(LockableValue & lockable,
-                               value_type & value)
+    static constexpr value_type exchange(LockableValue & lockable,
+                                         value_type & value)
     {
       return lockable.template exchange<guard_type>(value);
     }
 
-    static value_type exchange(LockableValue & lockable,
-                               value_type && value)
+    static constexpr value_type exchange(LockableValue & lockable,
+                                         value_type && value)
     {
       return lockable.template exchange<guard_type>(std::forward<value_type>(value));
     }
 
     template<typename Visitor>
-    static void visit(LockableValue & lockable,
-                      Visitor && visitor)
+    static constexpr void visit(LockableValue & lockable,
+                                Visitor && visitor)
     {
       lockable.template visit<guard_type>(std::forward<Visitor>(visitor));
     }

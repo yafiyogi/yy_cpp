@@ -85,7 +85,7 @@ class vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr vector(size_type num)
+    constexpr explicit vector(size_type num)
     {
       reserve(num);
       m_size = num;
@@ -451,7 +451,7 @@ class vector
       return erased;
     }
 
-    void pop_back(ClearAction action = default_action) noexcept
+    constexpr void pop_back(ClearAction action = default_action) noexcept
     {
       if(!empty())
       {
@@ -459,7 +459,7 @@ class vector
       }
     }
 
-    void pop_front(ClearAction action = default_action) noexcept
+    constexpr void pop_front(ClearAction action = default_action) noexcept
     {
       if(!empty())
       {
@@ -636,7 +636,7 @@ class simple_vector
       m_size = num;
     }
 
-    constexpr simple_vector() noexcept = default;
+    constexpr explicit simple_vector() noexcept = default;
 
     constexpr simple_vector(const simple_vector & other)
     {
@@ -947,7 +947,7 @@ class simple_vector
       return erased;
     }
 
-    void pop_back(ClearAction action = default_action) noexcept
+    constexpr void pop_back(ClearAction action = default_action) noexcept
     {
       if(!empty())
       {
@@ -955,7 +955,7 @@ class simple_vector
       }
     }
 
-    void pop_front(ClearAction action = default_action) noexcept
+    constexpr void pop_front(ClearAction action = default_action) noexcept
     {
       if(!empty())
       {

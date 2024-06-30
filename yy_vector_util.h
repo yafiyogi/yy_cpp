@@ -46,21 +46,21 @@ class less_than_comp final
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    explicit less_than_comp(C comp) noexcept:
+    constexpr explicit less_than_comp(C comp) noexcept:
       m_comp(std::move(comp))
     {
     }
 
     less_than_comp() = delete;
-    less_than_comp(const less_than_comp&) noexcept = default;
-    less_than_comp(less_than_comp &&) noexcept = default;
-    ~less_than_comp() noexcept = default;
+    constexpr less_than_comp(const less_than_comp&) noexcept = default;
+    constexpr less_than_comp(less_than_comp &&) noexcept = default;
+    constexpr ~less_than_comp() noexcept = default;
 
     less_than_comp & operator=(const less_than_comp&) = delete;
     less_than_comp & operator=(less_than_comp &&) = delete;
 
-    bool operator()(const container_value_type & cval,
-                    const value_type & val) const noexcept
+    constexpr bool operator()(const container_value_type & cval,
+                              const value_type & val) const noexcept
     {
       return m_comp(cval, val) < 0;
     }
@@ -78,21 +78,21 @@ class equal_to_comp final
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    explicit equal_to_comp(C comp) noexcept:
+    constexpr explicit equal_to_comp(C comp) noexcept:
       m_comp(std::move(comp))
     {
     }
 
     equal_to_comp() = delete;
-    equal_to_comp(const equal_to_comp &) noexcept = default;
-    equal_to_comp(equal_to_comp &&) noexcept = default;
-    ~equal_to_comp() noexcept = default;
+    constexpr equal_to_comp(const equal_to_comp &) noexcept = default;
+    constexpr equal_to_comp(equal_to_comp &&) noexcept = default;
+    constexpr ~equal_to_comp() noexcept = default;
 
     equal_to_comp & operator=(const equal_to_comp&) = delete;
     equal_to_comp & operator=(equal_to_comp &&) noexcept = delete;
 
-    bool operator()(const container_value_type & cval,
-                    const value_type & val) const noexcept
+    constexpr bool operator()(const container_value_type & cval,
+                              const value_type & val) const noexcept
     {
       return 0 == m_comp(cval, val);
     }
@@ -109,8 +109,8 @@ struct default_comp final
     using container_value_type = yy_traits::remove_rcv_t<T>;
     using value_type = yy_traits::remove_rcv_t<V>;
 
-    int operator()(const container_value_type & item,
-                   const value_type & val) const noexcept
+    constexpr int operator()(const container_value_type & item,
+                             const value_type & val) const noexcept
     {
       if(val < item)
       {
@@ -131,11 +131,11 @@ template<typename T,
 struct default_comp<T,
                     V,
                     std::enable_if_t<(yy_traits::is_std_string_v<T>
-                                               || yy_traits::is_std_string_view_v<T>)
-                                              &&(yy_traits::is_std_string_v<V>
-                                                 || yy_traits::is_std_string_view_v<V>)>> final
+                                      || yy_traits::is_std_string_view_v<T>)
+                                     &&(yy_traits::is_std_string_v<V>
+                                        || yy_traits::is_std_string_view_v<V>)>> final
 {
-    int operator()(const T & item, const V & val) const noexcept
+    constexpr int operator()(const T & item, const V & val) const noexcept
     {
       return item.compare(val);
     }
@@ -156,9 +156,9 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
-pos_end_type lower_bound_pos(T && container,
-                             V && value,
-                             C && comp = C{}) noexcept
+constexpr pos_end_type lower_bound_pos(T && container,
+                                       V && value,
+                                       C && comp = C{}) noexcept
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using value_type = yy_traits::remove_rcv_t<V>;
@@ -191,9 +191,9 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
-pos_found_type find_pos(T && container,
-                        V && value,
-                        C && comp = C{}) noexcept
+constexpr pos_found_type find_pos(T && container,
+                                  V && value,
+                                  C && comp = C{}) noexcept
 {
   using container_type = yy_traits::remove_rcv_t<T>;
   using container_value_type = yy_traits::container_type_t<container_type>;
@@ -217,9 +217,9 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
-auto lower_bound(T && container,
-                 V && value,
-                 C && comp = C{}) noexcept
+constexpr auto lower_bound(T && container,
+                           V && value,
+                           C && comp = C{}) noexcept
 {
   auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
 
@@ -233,9 +233,9 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
-auto find(T && container,
-          V && value,
-          C && comp = C{}) noexcept
+constexpr auto find(T && container,
+                    V && value,
+                    C && comp = C{}) noexcept
 {
   auto [pos, found] = find_pos(container, value, std::forward<C>(comp));
 
@@ -247,8 +247,8 @@ template<typename T,
                                                   yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>
                           || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
-void sort(T & container,
-          C && comp = C{})
+constexpr void sort(T & container,
+                    C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using less_than =
@@ -261,8 +261,8 @@ template<typename T,
          typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
                                                   yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
-void unique(T & container,
-            C && comp = C{})
+constexpr void unique(T & container,
+                      C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using equal_to =
@@ -275,13 +275,13 @@ void unique(T & container,
 }
 
 template<typename T>
-void shrink(T & container)
+constexpr void shrink(T & container)
 {
   T{container}.swap(container);
 }
 
 template<typename T>
-void shrink(const T & src, T & dst)
+constexpr void shrink(const T & src, T & dst)
 {
   T{src}.swap(dst);
 }

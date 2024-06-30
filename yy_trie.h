@@ -80,23 +80,23 @@ struct trie_node_edge final
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_ptr = typename traits::node_ptr;
 
-    explicit trie_node_edge(label_l_value_ref p_label,
-                            node_ptr p_node) noexcept:
+    constexpr explicit trie_node_edge(label_l_value_ref p_label,
+                                      node_ptr p_node) noexcept:
       m_label(p_label),
       m_node(std::move(p_node))
     {
     }
 
-    trie_node_edge() noexcept = default;
-    trie_node_edge(const trie_node_edge & edge) noexcept = default;
-    trie_node_edge(trie_node_edge && edge) noexcept = default;
-    ~trie_node_edge() = default;
+    constexpr trie_node_edge() noexcept = default;
+    constexpr trie_node_edge(const trie_node_edge & edge) noexcept = default;
+    constexpr trie_node_edge(trie_node_edge && edge) noexcept = default;
+    constexpr ~trie_node_edge() = default;
 
-    trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
-    trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
+    constexpr trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
+    constexpr trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
 
     [[nodiscard]]
-    explicit operator bool() const noexcept
+    constexpr explicit operator bool() const noexcept
     {
       return static_cast<bool>(m_node);
     }
@@ -137,22 +137,22 @@ class trie_node
     using edges_type = typename traits::edges_type;
     using edges_iterator = typename traits::edges_iterator;
 
-    trie_node() noexcept = default;
-    trie_node(const trie_node & node) noexcept = default;
-    trie_node(trie_node && node) noexcept = default;
-    virtual ~trie_node() noexcept = default;
+    constexpr trie_node() noexcept = default;
+    constexpr trie_node(const trie_node & node) noexcept = default;
+    constexpr trie_node(trie_node && node) noexcept = default;
+    constexpr virtual ~trie_node() noexcept = default;
 
-    trie_node & operator=(const trie_node & node) noexcept = default;
-    trie_node & operator=(trie_node && node) noexcept = default;
+    constexpr trie_node & operator=(const trie_node & node) noexcept = default;
+    constexpr trie_node & operator=(trie_node && node) noexcept = default;
 
-    void add_edge(edges_iterator iter,
-                  node_edge edge)
+    constexpr void add_edge(edges_iterator iter,
+                            node_edge edge)
     {
       m_edges.emplace(iter, std::move(edge));
     }
 
     [[nodiscard]]
-    found_value_type find_edge(const label_l_value_ref label) noexcept
+    constexpr found_value_type find_edge(const label_l_value_ref label) noexcept
     {
       auto [iter, found] = yy_util::find(m_edges, label);
 
@@ -160,13 +160,13 @@ class trie_node
     }
 
     [[nodiscard]]
-    virtual bool empty() const noexcept
+    constexpr virtual bool empty() const noexcept
     {
       return true;
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor)
     {
       for(auto & [label, node]: m_edges)
       {
@@ -175,18 +175,18 @@ class trie_node
     }
 
     [[nodiscard]]
-    virtual value_type & value()
+    constexpr virtual value_type & value()
     {
       throw std::runtime_error("Invalid value");
     }
 
     [[nodiscard]]
-    virtual const value_type & value() const
+    constexpr virtual const value_type & value() const
     {
       throw std::runtime_error("Invalid value");
     }
 
-    void swap(trie_node & other) noexcept
+    constexpr void swap(trie_node & other) noexcept
     {
       m_edges.swap(other.m_edges);
     }
@@ -205,38 +205,38 @@ class Payload final:
     using node_type = typename traits::node_type;
     using value_type = typename traits::value_type;
 
-    explicit Payload(const value_type & payload) noexcept:
+    constexpr explicit Payload(const value_type & payload) noexcept:
       m_payload(payload)
     {
     }
 
-    explicit Payload(value_type && payload) noexcept:
+    constexpr explicit Payload(value_type && payload) noexcept:
       m_payload(std::move(payload))
     {
     }
 
     Payload() = delete;
-    Payload(const Payload &) noexcept = default;
-    Payload(Payload &&) noexcept = default;
-    ~Payload() noexcept = default;
+    constexpr Payload(const Payload &) noexcept = default;
+    constexpr Payload(Payload &&) noexcept = default;
+    constexpr ~Payload() noexcept override = default;
 
-    Payload & operator=(const Payload &) noexcept = default;
-    Payload & operator=(Payload &&) noexcept = default;
+    constexpr Payload & operator=(const Payload &) noexcept = default;
+    constexpr Payload & operator=(Payload &&) noexcept = default;
 
     [[nodiscard]]
-    bool empty() const noexcept override
+    constexpr bool empty() const noexcept override
     {
       return false;
     }
 
     [[nodiscard]]
-    value_type & value() override
+    constexpr value_type & value() override
     {
       return m_payload;
     }
 
     [[nodiscard]]
-    const value_type & value() const override
+    constexpr const value_type & value() const override
     {
       return m_payload;
     }
@@ -259,47 +259,47 @@ class Automaton final
     using root_node_ptr = typename traits::root_node_ptr;
     using node_edge = typename traits::node_edge;
 
-    explicit Automaton(root_node_ptr p_root) noexcept:
+    constexpr explicit Automaton(root_node_ptr p_root) noexcept:
       m_root(std::move(p_root)),
       m_state()
     {
       reset();
     }
 
-    Automaton() noexcept = default;
+    constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
-    Automaton(Automaton &&) noexcept = default;
-    ~Automaton() noexcept = default;
+    constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
-    Automaton & operator=(Automaton && other) noexcept = default;
+    constexpr Automaton & operator=(Automaton && other) noexcept = default;
 
     template<typename InputSpanType>
     [[nodiscard]]
-    bool find(InputSpanType && label)
+    constexpr bool find(InputSpanType && label)
     {
       return find_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)));
     }
 
-    void reset() noexcept
+    constexpr void reset() noexcept
     {
       m_state = m_root.get();
     }
 
     [[nodiscard]]
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
     {
       return nullptr == m_state;
     }
 
     [[nodiscard]]
-    bool has_payload() const noexcept
+    constexpr bool has_payload() const noexcept
     {
       return !empty() && !m_state->empty();
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor) const
+    constexpr void visit(Visitor && visitor) const
     {
       if(has_payload())
       {
@@ -310,7 +310,7 @@ class Automaton final
   protected:
     template<typename InputSpanType>
     [[nodiscard]]
-    bool find_span(const InputSpanType label) noexcept
+    constexpr bool find_span(const InputSpanType label) noexcept
     {
       static_assert(yy_traits::is_span_v<InputSpanType>,
                     "trie::find_span(): InputSpanType is not a yy_quad::span<>");
@@ -363,22 +363,22 @@ class trie
     using value_node = typename trie_detail::Payload<label_type, value_type>;
     using automaton = Automaton;
 
-    trie() noexcept:
+    constexpr trie() noexcept:
       m_root(std::make_shared<node_type>())
     {
     }
 
     trie(const trie &) = delete;
-    trie(trie &&) noexcept = default;
-    ~trie() noexcept = default;
+    constexpr trie(trie &&) noexcept = default;
+    constexpr ~trie() noexcept = default;
 
     trie & operator=(const trie &) = delete;
-    trie & operator=(trie &&) noexcept = default;
+    constexpr trie & operator=(trie &&) noexcept = default;
 
     template<typename Container,
              typename Value>
-    void add(Container && label,
-             Value && value)
+    constexpr void add(Container && label,
+                       Value && value)
     {
       static_assert(std::is_same_v<yy_traits::remove_rcv_t<Value>,
                     yy_traits::remove_rcv_t<value_type>>,
@@ -387,13 +387,13 @@ class trie
     }
 
     [[nodiscard]]
-    automaton create_automaton() noexcept
+    constexpr automaton create_automaton() noexcept
     {
       return automaton{m_root};
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor)
     {
       if(m_root)
       {
@@ -402,9 +402,9 @@ class trie
     }
 
   private:
-    node_type * add_node(node_type * node,
-                         edges_iterator edge_iter,
-                         const label_type & label)
+    constexpr node_type * add_node(node_type * node,
+                                   edges_iterator edge_iter,
+                                   const label_type & label)
     {
       node_ptr new_node{std::make_unique<node_type>()};
 
@@ -416,7 +416,7 @@ class trie
     }
 
     template<typename InputSpanType>
-    node_type * add_empty_nodes(const InputSpanType label)
+    constexpr node_type * add_empty_nodes(const InputSpanType label)
     {
       static_assert(yy_traits::is_span_v<InputSpanType>,
                     "trie::add_empty_nodes(): InputSpanType is not a yy_quad::span<>");
@@ -442,8 +442,8 @@ class trie
 
     template<typename InputSpanType,
              typename InputValueType>
-    void add_span(InputSpanType label,
-                  InputValueType && value)
+    constexpr void add_span(InputSpanType label,
+                            InputValueType && value)
     {
       static_assert(yy_traits::is_span_v<InputSpanType>,
                     "trie::add_span(): InputSpanType is not a yy_quad::span<>");

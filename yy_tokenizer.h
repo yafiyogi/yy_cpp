@@ -57,7 +57,7 @@ class tokenizer final
 
     inline static constexpr size_type none{};
 
-    constexpr tokenizer(span_type p_span, const_l_value_ref p_delim) noexcept:
+    constexpr explicit tokenizer(span_type p_span, const_l_value_ref p_delim) noexcept:
       m_span(p_span),
       m_delim(p_delim)
     {

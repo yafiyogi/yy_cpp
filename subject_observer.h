@@ -43,10 +43,10 @@ class observer_base
     using ptr_type = std::unique_ptr<observer_base<ReturnType,
                                                    OtherArgs...>>;
 
-    observer_base() noexcept = default;
+    constexpr observer_base() noexcept = default;
     observer_base(const observer_base &) = delete;
     observer_base(observer_base &&) = delete;
-    virtual ~observer_base() noexcept = default;
+    constexpr virtual ~observer_base() noexcept = default;
 
     observer_base & operator=(const observer_base &) = delete;
     observer_base & operator=(observer_base &&) = delete;
@@ -66,15 +66,15 @@ class observer_class_method final:
     using method_ptr = ReturnType (T::*)(const ParamType *, OtherArgs &&...);
     using object_ptr = std::shared_ptr<T>;
 
-    explicit observer_class_method(const object_ptr & obj,
-                                   method_ptr method) noexcept:
+    constexpr explicit observer_class_method(const object_ptr & obj,
+                                             method_ptr method) noexcept:
       m_obj(obj),
       m_method(std::move(method))
     {
     }
 
-    explicit observer_class_method(object_ptr && obj,
-                                   method_ptr method) noexcept:
+    constexpr explicit observer_class_method(object_ptr && obj,
+                                             method_ptr method) noexcept:
       m_obj(std::move(obj)),
       m_method(std::move(method))
     {
@@ -83,13 +83,13 @@ class observer_class_method final:
     observer_class_method() = delete;
     observer_class_method(const observer_class_method &) = delete;
     observer_class_method(observer_class_method &&) = delete;
-    ~observer_class_method() noexcept = default;
+    constexpr ~observer_class_method() noexcept = default;
 
     observer_class_method & operator=(const observer_class_method &) = delete;
     observer_class_method & operator=(observer_class_method &&) = delete;
 
-    ReturnType event(const void * data,
-                     OtherArgs && ...args) override
+    constexpr ReturnType event(const void * data,
+                               OtherArgs && ...args) override
     {
       T * obj = m_obj.get();
 
@@ -113,7 +113,7 @@ class observer_func final:
     using func_traits = yy_traits::func_traits<T>;
     using arg_type = typename func_traits::arg_types::template arg_type<0>;
 
-    explicit observer_func(T func) noexcept:
+    constexpr explicit observer_func(T func) noexcept:
       m_func(std::move(func))
     {
     }
@@ -121,13 +121,13 @@ class observer_func final:
     observer_func() = delete;
     observer_func(const observer_func &) = delete;
     observer_func(observer_func &&) = delete;
-    ~observer_func() noexcept= default;
+    constexpr ~observer_func() noexcept= default;
 
     observer_func & operator=(const observer_func &) = delete;
     observer_func & operator=(observer_func &&) = delete;
 
-    ReturnType event(const void * data,
-                     OtherArgs && ...args) override
+    constexpr ReturnType event(const void * data,
+                               OtherArgs && ...args) override
     {
       return m_func(static_cast<arg_type>(data),
                     std::forward<OtherArgs>(args)...);
@@ -140,7 +140,7 @@ class observer_func final:
 template<typename KeyType,
          typename ReturnType,
          typename... OtherArgs>
-class subject
+class subject final
 {
   public:
     using observer_type = observer_base<ReturnType,
@@ -148,17 +148,17 @@ class subject
     using map_type = std::unordered_map<KeyType,
                                         typename observer_type::ptr_type>;
 
-    subject() noexcept = default;
+    constexpr subject() noexcept = default;
     subject(const subject &) = delete;
-    subject(subject &&) noexcept = default;
-    ~subject() noexcept = default;
+    constexpr subject(subject &&) noexcept = default;
+    constexpr ~subject() noexcept = default;
 
     subject & operator=(const subject &) = delete;
     subject & operator=(subject &&) noexcept = default;
 
-    std::tuple<bool, ReturnType> event(const KeyType & key,
-                                       const void * data,
-                                       OtherArgs && ...args)
+    constexpr std::tuple<bool, ReturnType> event(const KeyType & key,
+                                                 const void * data,
+                                                 OtherArgs && ...args)
     {
       auto found = m_observers.find(key);
 
@@ -173,10 +173,10 @@ class subject
     // Add object method.
     template<typename T,
              typename ParamType>
-    bool add(const KeyType & key,
-             typename std::shared_ptr<T> & obj,
-             ReturnType (T::*method)(const ParamType *,
-                                     OtherArgs && ...args))
+    constexpr bool add(const KeyType & key,
+                       typename std::shared_ptr<T> & obj,
+                       ReturnType (T::*method)(const ParamType *,
+                                               OtherArgs && ...args))
     {
       bool added = false;
       if(obj)
@@ -191,8 +191,8 @@ class subject
     }
 
     template<typename T>
-    bool add(const KeyType & key,
-             T && func)
+    constexpr bool add(const KeyType & key,
+                       T && func)
     {
       auto [not_used, added] = m_observers.try_emplace(
         key,
@@ -201,7 +201,7 @@ class subject
       return added;
     }
 
-    void erase(const KeyType & key)
+    constexpr void erase(const KeyType & key)
     {
       m_observers.erase(key);
     }
@@ -214,7 +214,7 @@ template<typename KeyType,
          typename... OtherArgs>
 class subject<KeyType,
               void,
-              OtherArgs...>
+              OtherArgs...> final
 {
   public:
     using observer_ptr = typename observer_base<void,
@@ -222,17 +222,17 @@ class subject<KeyType,
     using map_type = std::unordered_map<KeyType,
                                         observer_ptr>;
 
-    subject() noexcept = default;
+    constexpr subject() noexcept = default;
     subject(const subject &) = delete;
-    subject(subject &&) noexcept = default;
-    ~subject() noexcept = default;
+    constexpr subject(subject &&) noexcept = default;
+    constexpr ~subject() noexcept = default;
 
     subject & operator=(const subject &) = delete;
     subject & operator=(subject &&) noexcept = default;
 
-    bool event(const KeyType & key,
-               const void * data,
-               OtherArgs && ...args)
+    constexpr bool event(const KeyType & key,
+                         const void * data,
+                         OtherArgs && ...args)
     {
       auto found = m_observers.find(key);
 
@@ -249,10 +249,10 @@ class subject<KeyType,
     // Add object method.
     template<typename T,
              typename ParamType>
-    bool add(const KeyType & key,
-             typename std::shared_ptr<T> & obj,
-             void (T::*method)(const ParamType *,
-                               OtherArgs && ...args))
+    constexpr bool add(const KeyType & key,
+                       typename std::shared_ptr<T> & obj,
+                       void (T::*method)(const ParamType *,
+                                         OtherArgs && ...args))
     {
       bool added = false;
       if(obj)
@@ -267,8 +267,8 @@ class subject<KeyType,
     }
 
     template<typename T>
-    bool add(const KeyType & key,
-             T func)
+    constexpr bool add(const KeyType & key,
+                       T func)
     {
       auto [not_used, added] = m_observers.try_emplace(
         key,
@@ -277,7 +277,7 @@ class subject<KeyType,
       return added;
     }
 
-    void erase(const KeyType & key)
+    constexpr void erase(const KeyType & key)
     {
       m_observers.erase(key);
     }

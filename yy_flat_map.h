@@ -201,7 +201,7 @@ class flat_map final
              typename Visitor>
     [[nodiscard]]
     constexpr pos_found_type find_value(Visitor && visitor,
-                              const KeyParamType & p_key) const noexcept
+                                        const KeyParamType & p_key) const noexcept
     {
       auto [pos, found] = do_find(p_key);
 
@@ -244,7 +244,7 @@ class flat_map final
       return const_ref_type{*key(pos), *value(pos)};
     }
 
-    ref_type add_empty(size_type p_pos)
+    constexpr ref_type add_empty(size_type p_pos)
     {
       auto [key_pos, key_added] = m_keys.add_empty(m_keys.begin() + p_pos);
       if(!key_added)

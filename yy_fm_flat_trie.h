@@ -325,11 +325,11 @@ class Automaton final
     }
 
     constexpr Automaton() noexcept = default;
-    constexpr Automaton(const Automaton &) = delete;
+    Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
     constexpr ~Automaton() noexcept = default;
 
-    constexpr Automaton & operator=(const Automaton & other) = delete;
+    Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
 
     template<typename InputSpanType>
@@ -447,11 +447,11 @@ class fm_flat_trie
     {
     }
 
-    constexpr fm_flat_trie(const fm_flat_trie &) = delete;
+    fm_flat_trie(const fm_flat_trie &) = delete;
     constexpr fm_flat_trie(fm_flat_trie &&) noexcept = default;
     constexpr ~fm_flat_trie() noexcept = default;
 
-    constexpr fm_flat_trie & operator=(const fm_flat_trie &) = delete;
+    fm_flat_trie & operator=(const fm_flat_trie &) = delete;
     constexpr fm_flat_trie & operator=(fm_flat_trie &&) noexcept = default;
 
     struct data_added_type final

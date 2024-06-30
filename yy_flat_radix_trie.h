@@ -100,63 +100,63 @@ struct trie_node_edge final
     using label_type = typename traits::label_type;
     using node_idx_type = typename traits::node_idx_type;
 
-    explicit trie_node_edge(const label_type & p_label,
-                            node_idx_type p_idx) noexcept:
+    constexpr explicit trie_node_edge(const label_type & p_label,
+                                      node_idx_type p_idx) noexcept:
       m_label(p_label),
       m_idx(p_idx)
     {
     }
 
-    explicit trie_node_edge(label_type && p_label,
-                            node_idx_type p_idx) noexcept:
+    constexpr explicit trie_node_edge(label_type && p_label,
+                                      node_idx_type p_idx) noexcept:
       m_label(std::move(p_label)),
       m_idx(p_idx)
     {
     }
 
-    bool operator==(const trie_node_edge & other) const noexcept
+    constexpr bool operator==(const trie_node_edge & other) const noexcept
     {
       return m_label == other.m_label;
     }
 
-    friend bool operator==(const typename label_type::value_type & a,
-                           const trie_node_edge & b) noexcept
+    friend constexpr bool operator==(const typename label_type::value_type & a,
+                                     const trie_node_edge & b) noexcept
     {
       return a == b.m_label[0];
     }
 
-    friend bool operator==(const trie_node_edge & a,
-                           const typename label_type::value_type & b) noexcept
+    friend constexpr bool operator==(const trie_node_edge & a,
+                                     const typename label_type::value_type & b) noexcept
     {
       return a.m_label[0] == b;
     }
 
-    bool operator<(const trie_node_edge & other) const noexcept
+    constexpr bool operator<(const trie_node_edge & other) const noexcept
     {
       return m_label < other.m_label;
     }
 
-    friend bool operator<(const typename label_type::value_type & a,
-                          const trie_node_edge & b) noexcept
+    friend constexpr bool operator<(const typename label_type::value_type & a,
+                                    const trie_node_edge & b) noexcept
     {
       return a < b.m_label[0];
     }
 
-    friend bool operator<(const trie_node_edge & a,
-                          const typename label_type::value_type & b) noexcept
+    friend constexpr bool operator<(const trie_node_edge & a,
+                                    const typename label_type::value_type & b) noexcept
     {
       return a.m_label[0] < b;
     }
 
     trie_node_edge() = delete;
-    trie_node_edge(const trie_node_edge & edge) noexcept = default;
-    trie_node_edge(trie_node_edge && edge) noexcept = default;
-    ~trie_node_edge() noexcept = default;
+    constexpr trie_node_edge(const trie_node_edge & edge) noexcept = default;
+    constexpr trie_node_edge(trie_node_edge && edge) noexcept = default;
+    constexpr ~trie_node_edge() noexcept = default;
 
-    trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
-    trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
+    constexpr trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
+    constexpr trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
 
-    explicit operator bool() const noexcept
+    constexpr explicit operator bool() const noexcept
     {
       return traits::empty_idx != m_idx;
     }
@@ -180,21 +180,21 @@ class trie_node final
 
     static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
-    explicit trie_node(const data_idx_type p_data_idx) noexcept:
+    constexpr explicit trie_node(const data_idx_type p_data_idx) noexcept:
       m_data_idx(p_data_idx)
     {
     }
 
-    trie_node() noexcept = default;
-    trie_node(const trie_node & node) noexcept = default;
-    trie_node(trie_node && node) noexcept = default;
-    ~trie_node() noexcept = default;
+    constexpr trie_node() noexcept = default;
+    constexpr trie_node(const trie_node & node) noexcept = default;
+    constexpr trie_node(trie_node && node) noexcept = default;
+    constexpr ~trie_node() noexcept = default;
 
-    trie_node & operator=(const trie_node & node) noexcept = default;
-    trie_node & operator=(trie_node && node) noexcept = default;
+    constexpr trie_node & operator=(const trie_node & node) noexcept = default;
+    constexpr trie_node & operator=(trie_node && node) noexcept = default;
 
-    void add_edge(label_type && label,
-                  node_idx_type node_idx)
+    constexpr void add_edge(label_type && label,
+                            node_idx_type node_idx)
     {
       auto iter = std::lower_bound(m_edges.begin(),
                                    m_edges.end(),
@@ -203,16 +203,16 @@ class trie_node final
       m_edges.emplace(iter, std::move(label), node_idx);
     }
 
-    void add_edge(edges_iterator iter,
-                  label_type && label,
-                  node_idx_type node_idx)
+    constexpr void add_edge(edges_iterator iter,
+                            label_type && label,
+                            node_idx_type node_idx)
     {
       m_edges.emplace(iter, std::move(label), node_idx);
     }
 
     template<typename InputLabelType>
     [[nodiscard]]
-    found_value_type find(InputLabelType label_target) noexcept
+    constexpr found_value_type find(InputLabelType label_target) noexcept
     {
       static_assert(yy_traits::is_span_v<InputLabelType>,
                     "trie_node::find(): InputLabelType is not a yy_quad::span<>");
@@ -242,7 +242,7 @@ class trie_node final
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor)
     {
       for(auto & [label, node_idx]: m_edges)
       {
@@ -251,18 +251,18 @@ class trie_node final
     }
 
     [[nodiscard]]
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
     {
       return no_data == m_data_idx;;
     }
 
-    void data_idx(data_idx_type p_data_idx) noexcept
+    constexpr void data_idx(data_idx_type p_data_idx) noexcept
     {
       m_data_idx = p_data_idx;
     }
 
     [[nodiscard]]
-    data_idx_type data_idx() const noexcept
+    constexpr data_idx_type data_idx() const noexcept
     {
       return m_data_idx;
     }
@@ -289,48 +289,48 @@ class Automaton final
     using data_ptr = typename traits::data_ptr;
     using data_container_type = typename traits::data_container_type;
 
-    explicit Automaton(const trie_ptr p_nodes,
-                       const data_ptr p_data) noexcept:
+    constexpr explicit Automaton(const trie_ptr p_nodes,
+                                 const data_ptr p_data) noexcept:
       m_nodes(std::move(p_nodes)),
       m_data(std::move(p_data))
     {
       reset();
     }
 
-    Automaton() noexcept = default;
+    constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
-    Automaton(Automaton &&) noexcept = default;
-    ~Automaton() noexcept = default;
+    constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
-    Automaton & operator=(Automaton && other) noexcept = default;
+    constexpr Automaton & operator=(Automaton && other) noexcept = default;
 
     template<typename InputSpanType>
     [[nodiscard]]
-    bool find(InputSpanType && label)
+    constexpr bool find(InputSpanType && label)
     {
       return find_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)));
     }
 
-    void reset() noexcept
+    constexpr void reset() noexcept
     {
       m_state = traits::root_idx;
     }
 
     [[nodiscard]]
-    bool empty() const noexcept
+    constexpr bool empty() const noexcept
     {
       return traits::empty_idx == m_state;
     }
 
     [[nodiscard]]
-    bool has_payload() const noexcept
+    constexpr bool has_payload() const noexcept
     {
       return !empty() && !get_node(m_state)->empty();
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor) const
+    constexpr void visit(Visitor && visitor) const
     {
       if(has_payload())
       {
@@ -342,27 +342,27 @@ class Automaton final
 
   private:
     [[nodiscard]]
-    node_type * get_node(const node_idx_type idx) noexcept
+    constexpr node_type * get_node(const node_idx_type idx) noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    const node_type * get_node(const node_idx_type idx) const noexcept
+    constexpr const node_type * get_node(const node_idx_type idx) const noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    static node_type * get_node(node_type * nodes,
-                                const node_idx_type idx) noexcept
+    static constexpr node_type * get_node(node_type * nodes,
+                                          const node_idx_type idx) noexcept
     {
       return nodes + idx;
     }
 
     [[nodiscard]]
-    static const node_type * get_node(const node_type * nodes,
-                                      const node_idx_type idx) noexcept
+    static constexpr const node_type * get_node(const node_type * nodes,
+                                                const node_idx_type idx) noexcept
     {
       return nodes + idx;
     }
@@ -374,26 +374,26 @@ class Automaton final
     }
 
     [[nodiscard]]
-    value_type * get_data(data_idx_type idx) noexcept
+    constexpr value_type * get_data(data_idx_type idx) noexcept
     {
       return get_data(m_data->data(), idx);
     }
 
     [[nodiscard]]
-    static const value_type * get_data(const value_type * data, data_idx_type idx) noexcept
+    static constexpr const value_type * get_data(const value_type * data, data_idx_type idx) noexcept
     {
       return data + idx;
     }
 
     [[nodiscard]]
-    const value_type * get_data(data_idx_type idx) const noexcept
+    constexpr const value_type * get_data(data_idx_type idx) const noexcept
     {
       return get_data(m_data->data(), idx);
     }
 
     template<typename InputSpanType>
     [[nodiscard]]
-    bool find_span(InputSpanType label_target) noexcept
+    constexpr bool find_span(InputSpanType label_target) noexcept
     {
       static_assert(yy_traits::is_span_v<InputSpanType>,
                     "Automaton::find_span(): InputScanType is not a yy_quad::span<>");
@@ -450,23 +450,23 @@ class flat_radix_trie
     using data_ptr = typename traits::data_ptr;
     using data_container_type = typename traits::data_container_type;
 
-    flat_radix_trie() noexcept:
+    constexpr flat_radix_trie() noexcept:
       m_nodes(std::make_shared<trie_container_type>(1, node_type{node_type::no_data})), // add root node
       m_data(std::make_shared<data_container_type>())
     {
     }
 
     flat_radix_trie(const flat_radix_trie &) = delete;
-    flat_radix_trie(flat_radix_trie &&) noexcept = default;
-    ~flat_radix_trie() noexcept = default;
+    constexpr flat_radix_trie(flat_radix_trie &&) noexcept = default;
+    constexpr ~flat_radix_trie() noexcept = default;
 
     flat_radix_trie & operator=(const flat_radix_trie &) = delete;
-    flat_radix_trie & operator=(flat_radix_trie &&) noexcept = default;
+    constexpr flat_radix_trie & operator=(flat_radix_trie &&) noexcept = default;
 
     template<typename InputSpanType,
              typename InputValueType>
-    void add(InputSpanType && label,
-             InputValueType && value)
+    constexpr void add(InputSpanType && label,
+                       InputValueType && value)
     {
       static_assert(std::is_same_v<yy_traits::remove_rcv_t<InputValueType>,
                     yy_traits::remove_rcv_t<value_type>>,
@@ -475,35 +475,35 @@ class flat_radix_trie
     }
 
     [[nodiscard]]
-    automaton create_automaton() noexcept
+    constexpr automaton create_automaton() noexcept
     {
       return automaton{m_nodes, m_data};
     }
 
     template<typename Visitor>
-    void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor)
     {
       get_node(traits::root_idx)->visit(visitor);
     }
 
   private:
     [[nodiscard]]
-    node_type * get_node(const node_idx_type idx) noexcept
+    constexpr node_type * get_node(const node_idx_type idx) noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    static node_type * get_node(node_type * nodes,
-                                const node_idx_type idx) noexcept
+    static constexpr node_type * get_node(node_type * nodes,
+                                          const node_idx_type idx) noexcept
     {
       return nodes + idx;
     }
 
     template<typename InputValueType>
     [[nodiscard]]
-    static data_idx_type add_data(data_container_type & data,
-                                  InputValueType && value)
+    static constexpr data_idx_type add_data(data_container_type & data,
+                                            InputValueType && value)
     {
       auto data_idx = data.size();
 
@@ -513,8 +513,8 @@ class flat_radix_trie
     }
 
     [[nodiscard]]
-    static node_idx_type add_node(trie_container_type & nodes,
-                                  data_idx_type data_idx)
+    static constexpr node_idx_type add_node(trie_container_type & nodes,
+                                            data_idx_type data_idx)
     {
       auto node_idx = nodes.size();
 
@@ -525,8 +525,8 @@ class flat_radix_trie
 
     template<typename InputSpanType,
              typename InputValueType>
-    void add_span(InputSpanType label,
-                  InputValueType && value)
+    constexpr void add_span(InputSpanType label,
+                            InputValueType && value)
     {
       static_assert(yy_traits::is_span_v<InputSpanType>,
                     "flat_radix_trie::add_span(): InputSpanType is not a yy_quad::span<>");
