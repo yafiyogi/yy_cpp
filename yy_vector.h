@@ -630,13 +630,13 @@ class simple_vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr simple_vector(size_type num)
+    constexpr explicit simple_vector(size_type num)
     {
       reserve(num);
       m_size = num;
     }
 
-    constexpr explicit simple_vector() noexcept = default;
+    constexpr simple_vector() noexcept = default;
 
     constexpr simple_vector(const simple_vector & other)
     {
