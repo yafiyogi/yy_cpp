@@ -262,7 +262,6 @@ class flat_map final
     }
 
     template<typename InputValueType>
-    [[nodiscard]]
     constexpr size_type emplace(size_type p_pos,
                                 key_r_value_ref p_key,
                                 InputValueType && p_value)
@@ -290,7 +289,6 @@ class flat_map final
 
     template<typename InputKeyType,
              typename InputValueType>
-    [[nodiscard]]
     constexpr pos_inserted_type emplace(InputKeyType && p_key,
                                         InputValueType && p_value)
     {
@@ -347,10 +345,84 @@ class flat_map final
       m_values.clear();
     }
 
+    constexpr bool empty() const noexcept
+    {
+      return m_keys.empty();
+    }
+
+    constexpr bool operator<(const flat_map & other) const noexcept
+    {
+      if(empty())
+      {
+        return !other.empty();
+      }
+
+      if(!empty() && other.empty())
+      {
+        return false;
+      }
+
+      const auto max = std::min(size(), other.size());
+      for(size_type idx = 0; idx < max; ++idx)
+      {
+        if(m_keys[idx] < other.m_keys[idx])
+        {
+          return true;
+        }
+
+        if(m_keys[idx] == other.m_keys[idx])
+        {
+          if(m_values[idx] < other.m_values[idx])
+          {
+            return true;
+          }
+
+          if(!(m_keys[idx] == other.m_keys[idx]))
+          {
+            return false;
+          }
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+      return size() < other.size();
+    }
+
+    constexpr bool operator==(const flat_map & other) const noexcept
+    {
+      if(empty())
+      {
+        return other.empty();
+      }
+
+      if(!empty() && other.empty())
+      {
+        return false;
+      }
+
+      const auto max = std::min(size(), other.size());
+      for(size_type idx = 0; idx < max; ++idx)
+      {
+        if(!(m_keys[idx] == other.m_keys[idx]))
+        {
+          return false;
+        }
+
+        if(!(m_values[idx] == other.m_values[idx]))
+        {
+          return false;
+        }
+      }
+
+      return size() == other.size();
+    }
+
   private:
     template<typename InputKeyType,
              typename InputValueType>
-    [[nodiscard]]
     constexpr key_type * do_emplace(key_type * p_key_pos,
                                     InputKeyType && p_key,
                                     InputValueType && p_value)
