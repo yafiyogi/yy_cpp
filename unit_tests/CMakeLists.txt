@@ -31,6 +31,7 @@ project(test_yy_cpp LANGUAGES CXX)
 add_executable(test_yy_cpp
   binary_search_tests.cpp
   bit_twiddling_tests.cpp
+  flat_map_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
   string_util_tests.cpp
