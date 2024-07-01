@@ -244,23 +244,6 @@ class flat_map final
       return const_ref_type{*key(pos), *value(pos)};
     }
 
-    constexpr ref_type add_empty(size_type p_pos)
-    {
-      auto [key_pos, key_added] = m_keys.add_empty(m_keys.begin() + p_pos);
-      if(!key_added)
-      {
-        throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
-      }
-
-      auto [value_pos, value_added] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
-      if(!value_added)
-      {
-        throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
-      }
-
-      return ref_type{*key_pos, *value_pos};
-    }
-
     template<typename InputValueType>
     constexpr size_type emplace(size_type p_pos,
                                 key_r_value_ref p_key,
@@ -421,6 +404,23 @@ class flat_map final
     }
 
   private:
+    constexpr ref_type add_empty(size_type p_pos)
+    {
+      auto [key_pos, key_added] = m_keys.add_empty(m_keys.begin() + p_pos);
+      if(!key_added)
+      {
+        throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
+      }
+
+      auto [value_pos, value_added] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
+      if(!value_added)
+      {
+        throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
+      }
+
+      return ref_type{*key_pos, *value_pos};
+    }
+
     template<typename InputKeyType,
              typename InputValueType>
     constexpr key_type * do_emplace(key_type * p_key_pos,
