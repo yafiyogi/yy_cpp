@@ -30,6 +30,7 @@
 #include <array>
 #include <utility>
 #include <memory>
+#include <type_traits>
 
 #include "yy_assert.h"
 
@@ -109,6 +110,9 @@ struct ArraySize<std::array<T, Size>>
     static constexpr size_t size = Size;
 };
 
+template<typename T>
+inline constexpr size_t array_size_v = ArraySize<T>::size;
+
 template<typename Return,
          typename T>
 constexpr std::unique_ptr<yy_traits::remove_rcv_t<Return>> static_unique_cast(std::unique_ptr<T> && ptr)
@@ -120,6 +124,13 @@ constexpr std::unique_ptr<yy_traits::remove_rcv_t<Return>> static_unique_cast(st
   auto new_ptr = std::unique_ptr<return_type>(static_cast<return_type *>(ptr.release()));
   YY_ASSERT(new_ptr);
   return new_ptr;
+}
+
+template<typename ...Types>
+constexpr auto make_array(Types && ... data)
+{
+  using type = std::common_type<Types...>::type;
+  return std::array<type, sizeof...(Types)>{std::forward<Types>(data)...};
 }
 
 } // namespace yafiyogi::yy_util
