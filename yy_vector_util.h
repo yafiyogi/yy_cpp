@@ -247,7 +247,7 @@ template<typename T,
                                                   yy_traits::container_type_t<T>>,
          std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>
                           || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
-constexpr void sort(T & container,
+constexpr T sort(T && container,
                     C && comp = C{})
 {
   using container_value_type = yy_traits::container_type_t<T>;
@@ -255,6 +255,8 @@ constexpr void sort(T & container,
     vector_detail::less_than_comp<container_value_type, container_value_type, C>;
 
   std::sort(container.data(), container.data() + container.size(), less_than{comp});
+
+  return container;
 }
 
 template<typename T,
