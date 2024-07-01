@@ -37,7 +37,7 @@ namespace yafiyogi::yy_locale {
 
 namespace {
 
-std::once_flag locale_set_flag;
+std::once_flag g_locale_set_flag;
 std::string g_locale_name;
 std::locale g_locale;
 
@@ -45,7 +45,7 @@ std::locale g_locale;
 
 void set_locale()
 {
-  std::call_once(locale_set_flag, []()
+  std::call_once(g_locale_set_flag, []()
   {
     auto locale_name = std::getenv("LC_ALL");
     if(nullptr != locale_name)
@@ -75,7 +75,7 @@ void set_locale()
 
 void set_locale(const std::string_view locale)
 {
-  std::call_once(locale_set_flag, [locale]()
+  std::call_once(g_locale_set_flag, [locale]()
   {
     g_locale_name = locale;
     if(auto l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
