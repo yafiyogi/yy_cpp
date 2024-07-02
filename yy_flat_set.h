@@ -271,7 +271,7 @@ class flat_set final
       if(!found)
       {
         iter = m_values.emplace(iter,
-                                std::forward<InputValueType>(p_value)).first;
+                                std::forward<InputValueType>(p_value)).iter;
       }
 
       size_type pos = static_cast<size_type>(iter - m_values.begin());
