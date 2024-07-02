@@ -307,8 +307,6 @@ class span final
 
       return std::lexicographical_compare(begin(), end(),
                                           other.data(), other.data() + other.size());
-
-      //return span_detail::less_than(*this, span{other.data(), other.size()});
     }
 
     template<typename type>
