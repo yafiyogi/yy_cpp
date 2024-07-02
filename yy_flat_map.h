@@ -438,7 +438,7 @@ class flat_map final
     {
       auto value_pos = (p_key_pos - m_keys.begin()); // Must be done here! m_keys.emplace() below may re-allocate.
       auto key_iter = m_keys.emplace(p_key_pos,
-                                     std::forward<key_type>(p_key)).first;
+                                     std::forward<key_type>(p_key)).iter;
 
       m_values.emplace(m_values.begin() + value_pos,
                        std::forward<InputValueType>(p_value));

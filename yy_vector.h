@@ -57,6 +57,11 @@ struct vector_traits final
     using const_iterator = const iterator;
     using size_type = std::size_t;
     using distance_type = std::ptrdiff_t;
+    struct return_value
+    {
+        iterator iter{};
+        bool inserted{};
+    };
 
     static constexpr ClearAction default_action = yy_data::default_action<value_type>;
 
@@ -80,7 +85,7 @@ class vector
     using const_iterator = typename traits::const_iterator;
     using size_type = typename traits::size_type;
     using distance_type = typename traits::distance_type;
-    using return_value = std::pair<iterator, bool>;
+    using return_value = typename traits::return_value;
 
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
@@ -311,8 +316,8 @@ class vector
           std::move_backward(pos, end(), end() + 1);
         }
 
-        rv.first = begin() + distance;
-        rv.second = true;
+        rv.iter = begin() + distance;
+        rv.inserted = true;
         ++m_size;
       }
 
@@ -330,9 +335,9 @@ class vector
 
       return_value rv = add_empty(pos);
 
-      if(rv.second)
+      if(rv.inserted)
       {
-        *rv.first = std::forward<InputValueType>(value);
+        *rv.iter = std::forward<InputValueType>(value);
       }
 
       return rv;
@@ -625,7 +630,7 @@ class simple_vector
     using const_iterator = typename traits::const_iterator;
     using size_type = typename traits::size_type;
     using distance_type = typename traits::distance_type;
-    using return_value = std::pair<iterator, bool>;
+    using return_value = typename traits::return_value;
 
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
@@ -850,8 +855,8 @@ class simple_vector
           std::move_backward(pos, end(), end() + 1);
         }
 
-        rv.first = begin() + distance;
-        rv.second = true;
+        rv.iter = begin() + distance;
+        rv.inserted = true;
         ++m_size;
       }
 
@@ -867,9 +872,9 @@ class simple_vector
 
       return_value rv = add_empty(pos);
 
-      if(rv.second)
+      if(rv.inserted)
       {
-        *rv.first = std::forward<InputValueType>(value);
+        *rv.iter = std::forward<InputValueType>(value);
       }
 
       return rv;

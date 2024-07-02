@@ -103,8 +103,8 @@ TEST_F(TestSimpleVector, TestEmplaceNoCapacity)
 
   auto rv = vec.emplace(vec.begin() + 1, 2);
 
-  ASSERT_TRUE(rv.second);
-  ASSERT_EQ(2, *rv.first);
+  ASSERT_TRUE(rv.inserted);
+  ASSERT_EQ(2, *rv.iter);
   ASSERT_EQ(3, vec.size());
   ASSERT_EQ(4, vec.capacity());
 
@@ -122,8 +122,8 @@ TEST_F(TestSimpleVector, TestEmplacePentyCapacity)
   vec.emplace_back(3);
 
   auto rv = vec.emplace(vec.begin() + 1, 2);
-  ASSERT_TRUE(rv.second);
-  ASSERT_EQ(2, *rv.first);
+  ASSERT_TRUE(rv.inserted);
+  ASSERT_EQ(2, *rv.iter);
   ASSERT_EQ(3, vec.size());
   ASSERT_EQ(100, vec.capacity());
 
@@ -136,11 +136,11 @@ TEST_F(TestSimpleVector, TestEmplaceAtBeginningNoCapacity)
 {
   yy_quad::simple_vector<int> vec{};
 
-  ASSERT_TRUE(vec.emplace(vec.begin(), 3).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 3).inserted);
   ASSERT_EQ(3, vec[0]);
-  ASSERT_TRUE(vec.emplace(vec.begin(), 2).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 2).inserted);
   ASSERT_EQ(2, vec[0]);
-  ASSERT_TRUE(vec.emplace(vec.begin(), 1).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 1).inserted);
   ASSERT_EQ(1, vec[0]);
 
   ASSERT_EQ(3, vec.size());
@@ -152,11 +152,11 @@ TEST_F(TestSimpleVector, TestEmplaceAtBeginningPlentyCapacity)
   yy_quad::simple_vector<int> vec{};
   vec.reserve(100);
 
-  ASSERT_TRUE(vec.emplace(vec.begin(), 3).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 3).inserted);
   ASSERT_EQ(3, vec[0]);
-  ASSERT_TRUE(vec.emplace(vec.begin(), 2).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 2).inserted);
   ASSERT_EQ(2, vec[0]);
-  ASSERT_TRUE(vec.emplace(vec.begin(), 1).second);
+  ASSERT_TRUE(vec.emplace(vec.begin(), 1).inserted);
   ASSERT_EQ(1, vec[0]);
 
   ASSERT_EQ(3, vec.size());
@@ -167,11 +167,11 @@ TEST_F(TestSimpleVector, TestEmplaceAtEndNoCapacity)
 {
   yy_quad::simple_vector<int> vec{};
 
-  ASSERT_TRUE(vec.emplace(vec.end(), 3).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 3).inserted);
   ASSERT_EQ(3, vec.back());
-  ASSERT_TRUE(vec.emplace(vec.end(), 2).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 2).inserted);
   ASSERT_EQ(2, vec.back());
-  ASSERT_TRUE(vec.emplace(vec.end(), 1).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 1).inserted);
   ASSERT_EQ(1, vec.back());
 
   ASSERT_EQ(3, vec.size());
@@ -183,11 +183,11 @@ TEST_F(TestSimpleVector, TestEmplaceAtEndPlentyCapacity)
   yy_quad::simple_vector<int> vec{};
 
   vec.reserve(100);
-  ASSERT_TRUE(vec.emplace(vec.end(), 3).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 3).inserted);
   ASSERT_EQ(3, vec.back());
-  ASSERT_TRUE(vec.emplace(vec.end(), 2).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 2).inserted);
   ASSERT_EQ(2, vec.back());
-  ASSERT_TRUE(vec.emplace(vec.end(), 1).second);
+  ASSERT_TRUE(vec.emplace(vec.end(), 1).inserted);
   ASSERT_EQ(1, vec.back());
 
   ASSERT_EQ(3, vec.size());
