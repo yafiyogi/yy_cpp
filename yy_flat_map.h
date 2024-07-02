@@ -381,19 +381,17 @@ class flat_map final
           return true;
         }
 
-        if(m_keys[idx] == other.m_keys[idx])
+        if(m_keys[idx] != other.m_keys[idx])
         {
-          if(m_values[idx] < other.m_values[idx])
-          {
-            return true;
-          }
-
-          if(!(m_keys[idx] == other.m_keys[idx]))
-          {
-            return false;
-          }
+          return false;
         }
-        else
+
+        if(m_values[idx] < other.m_values[idx])
+        {
+          return true;
+        }
+
+        if(!(m_values[idx] == other.m_values[idx]))
         {
           return false;
         }
