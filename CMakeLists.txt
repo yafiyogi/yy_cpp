@@ -71,13 +71,17 @@ set(YY_CPP_HEADERS
   "yy_fm_radix_trie.h"
   "yy_fm_trie.h"
   "yy_func_traits.h"
+  "yy_hash.h"
   "yy_locale.h"
   "yy_lockable_value.h"
   "yy_lower_bound.h"
+  "yy_make_lookup.h"
   "yy_radix_trie.h"
   "yy_ref_traits.h"
   "yy_ring_buffer.h"
   "yy_span.h"
+  "yy_static_flat_map.h"
+  "yy_static_vector.h"
   "yy_string_case.h"
   "yy_string_traits.h"
   "yy_string_util.h"
@@ -89,6 +93,7 @@ set(YY_CPP_HEADERS
   "yy_vector.h"
   "yy_vector_traits.h"
   "yy_vector_util.h" )
+
 
 add_subdirectory(unit_tests)
 add_subdirectory(examples)
