@@ -115,7 +115,7 @@ class vector
       reserve(p_il.size());
       for(auto & item : p_il)
       {
-        emplace_back(item);
+        emplace_back(std::move(item));
       }
     }
 
@@ -297,7 +297,7 @@ class vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
-    constexpr return_value add_empty(iterator pos)
+    constexpr return_value add_empty(value_ptr pos)
     {
       return_value rv{end(), false};
 
@@ -660,7 +660,7 @@ class simple_vector
       reserve(p_il.size());
       for(auto & item : p_il)
       {
-        emplace_back(item);
+        emplace_back(std::move(item));
       }
     }
 
@@ -836,7 +836,7 @@ class simple_vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
-    constexpr return_value add_empty(iterator pos)
+    constexpr return_value add_empty(value_ptr pos)
     {
       return_value rv{end(), false};
 
