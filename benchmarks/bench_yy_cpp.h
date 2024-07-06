@@ -54,7 +54,7 @@ using FlatRadixTrie = yafiyogi::yy_data::flat_radix_trie<char, int>;
 using FMTrie = yafiyogi::yy_data::fm_trie<char, int>;
 using FMRadixTrie = yafiyogi::yy_data::fm_radix_trie<char, int>;
 
-using FMFlatTrie = yafiyogi::yy_data::fm_flat_trie<char, int>;
+using FMFlatTriePtr = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
 using Map = std::map<std::string, int>;
 using UOMap = std::unordered_map<std::string, int>;
@@ -81,7 +81,7 @@ struct TrieFixtureType:
     static FMTrie fm_trie;
     static FMRadixTrie fm_radix_trie;
 
-    static FMFlatTrie fm_flat_trie;
+    static FMFlatTriePtr fm_flat_trie_ptr;
 
     static Map map;
     static UOMap uo_map;

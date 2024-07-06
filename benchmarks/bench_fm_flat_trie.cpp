@@ -30,9 +30,9 @@
 
 namespace yafiyogi::benchmark {
 
-BENCHMARK_F(TrieFixtureType, fm_flat_lookup)(::benchmark::State & state)
+BENCHMARK_F(TrieFixtureType, fm_flat_ptr_lookup)(::benchmark::State & state)
 {
-  auto automaton = fm_flat_trie.create_automaton();
+  auto automaton = fm_flat_trie_ptr.create_automaton();
   assert(!automaton.empty());
 
   size_t idx = 0;

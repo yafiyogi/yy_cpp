@@ -34,12 +34,12 @@
 
 namespace yafiyogi::yy_data::tests {
 
-class TestFMFlatTrie:
+class TestFMFlatTriePtr:
       public testing::Test
 {
   public:
-    using traits = yafiyogi::yy_data::fm_flat_trie<char, int>::traits;
-    using flat_trie_type = yafiyogi::yy_data::fm_flat_trie<char, int>;
+    using traits = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>::traits;
+    using flat_trie_type = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
     using trie_node = flat_trie_type::node_type;
 
@@ -52,7 +52,7 @@ class TestFMFlatTrie:
     }
 };
 
-TEST_F(TestFMFlatTrie, TrieNodeGetBeforeAdd)
+TEST_F(TestFMFlatTriePtr, TrieNodeGetBeforeAdd)
 {
   //auto edge_getter = [](auto &){};
 
@@ -63,7 +63,7 @@ TEST_F(TestFMFlatTrie, TrieNodeGetBeforeAdd)
   EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
-TEST_F(TestFMFlatTrie, TrieNodeGetAfterAdd)
+TEST_F(TestFMFlatTriePtr, TrieNodeGetAfterAdd)
 {
   //auto edge_getter = [](auto &){};
 
@@ -75,7 +75,7 @@ TEST_F(TestFMFlatTrie, TrieNodeGetAfterAdd)
   EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
 }
 
-TEST_F(TestFMFlatTrie, TrieNodeAddDuplicate)
+TEST_F(TestFMFlatTriePtr, TrieNodeAddDuplicate)
 {
   // Add 2 'b' nodes.
   trie_node node{trie_node::no_data};
@@ -86,7 +86,7 @@ TEST_F(TestFMFlatTrie, TrieNodeAddDuplicate)
   // EXPECT_EQ(777, edge_idx);
 }
 
-TEST_F(TestFMFlatTrie, TestNodeChildOrder)
+TEST_F(TestFMFlatTriePtr, TestNodeChildOrder)
 {
   // Add 'a', 'b', 'c', & 'd' nodes out of order.
   // Check node has children in order.
@@ -108,7 +108,7 @@ TEST_F(TestFMFlatTrie, TestNodeChildOrder)
   });
 }
 
-TEST_F(TestFMFlatTrie, TrieAddThreeThirdOverlap_R_Value)
+TEST_F(TestFMFlatTriePtr, TrieAddThreeThirdOverlap_R_Value)
 {
   // Add 'abcd', 'abfg'
   // Test add 'ab'
@@ -164,7 +164,7 @@ TEST_F(TestFMFlatTrie, TrieAddThreeThirdOverlap_R_Value)
   });
 }
 
-TEST_F(TestFMFlatTrie, Trie_R_Value)
+TEST_F(TestFMFlatTriePtr, Trie_R_Value)
 {
   flat_trie_type trie{};
   auto automaton = trie.create_automaton();
@@ -203,7 +203,7 @@ TEST_F(TestFMFlatTrie, Trie_R_Value)
   automaton.visit([](const auto & payload) { EXPECT_EQ(668, payload);});
 }
 
-TEST_F(TestFMFlatTrie, TrieAddThreeThirdOverlap_L_Value)
+TEST_F(TestFMFlatTriePtr, TrieAddThreeThirdOverlap_L_Value)
 {
   // Add 'abcd', 'abfg'
   // Test add 'ab'
@@ -251,7 +251,7 @@ TEST_F(TestFMFlatTrie, TrieAddThreeThirdOverlap_L_Value)
   automaton.visit([&value_777](const auto & payload) { EXPECT_EQ(value_777, payload);});
 }
 
-TEST_F(TestFMFlatTrie, Trie_L_Value)
+TEST_F(TestFMFlatTriePtr, Trie_L_Value)
 {
   flat_trie_type trie{};
   auto automaton = trie.create_automaton();

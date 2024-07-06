@@ -38,7 +38,7 @@
 #include "yy_utility.h"
 
 namespace yafiyogi::yy_data {
-namespace fm_flat_trie_detail {
+namespace fm_flat_trie_ptr_detail {
 
 template<typename LabelType,
          typename ValueType>
@@ -420,11 +420,11 @@ struct trie_idx_traits final
 
 template<typename LabelType,
          typename ValueType,
-         template<typename L, typename V> class Automaton = fm_flat_trie_detail::Automaton>
-class fm_flat_trie
+         template<typename L, typename V> class Automaton = fm_flat_trie_ptr_detail::Automaton>
+class fm_flat_trie_ptr
 {
   public:
-    using traits = typename fm_flat_trie_detail::trie_idx_traits<LabelType, ValueType>;
+    using traits = typename fm_flat_trie_ptr_detail::trie_idx_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
@@ -441,18 +441,18 @@ class fm_flat_trie
 
     using automaton = yy_traits::remove_rcv_t<Automaton<label_type, value_type>>;
 
-    constexpr fm_flat_trie() noexcept:
+    constexpr fm_flat_trie_ptr() noexcept:
       m_nodes(1), // add root node
       m_data()
     {
     }
 
-    fm_flat_trie(const fm_flat_trie &) = delete;
-    constexpr fm_flat_trie(fm_flat_trie &&) noexcept = default;
-    constexpr ~fm_flat_trie() noexcept = default;
+    fm_flat_trie_ptr(const fm_flat_trie_ptr &) = delete;
+    constexpr fm_flat_trie_ptr(fm_flat_trie_ptr &&) noexcept = default;
+    constexpr ~fm_flat_trie_ptr() noexcept = default;
 
-    fm_flat_trie & operator=(const fm_flat_trie &) = delete;
-    constexpr fm_flat_trie & operator=(fm_flat_trie &&) noexcept = default;
+    fm_flat_trie_ptr & operator=(const fm_flat_trie_ptr &) = delete;
+    constexpr fm_flat_trie_ptr & operator=(fm_flat_trie_ptr &&) noexcept = default;
 
     struct data_added_type final
     {

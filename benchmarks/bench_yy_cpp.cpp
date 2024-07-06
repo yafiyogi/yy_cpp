@@ -487,7 +487,7 @@ FlatRadixTrie TrieFixtureType::flat_radix_trie;
 FMTrie TrieFixtureType::fm_trie;
 FMRadixTrie TrieFixtureType::fm_radix_trie;
 
-FMFlatTrie TrieFixtureType::fm_flat_trie;
+FMFlatTriePtr TrieFixtureType::fm_flat_trie_ptr;
 
 Map TrieFixtureType::map;
 UOMap TrieFixtureType::uo_map;
@@ -517,7 +517,7 @@ void TrieFixtureType::SetUp(const ::benchmark::State & /* st */)
       fm_trie.add(topic, count);
       fm_radix_trie.add(topic, count);
 
-      fm_flat_trie.add(topic, count);
+      fm_flat_trie_ptr.add(topic, count);
 
       map.emplace(topic, count);
       uo_map.emplace(topic, count);
