@@ -531,7 +531,7 @@ class static_flat_map final
       const key_type * begin = m_keys.begin();
       const key_type * end = m_keys.end();
       //key_type * iter = yy_data::lower_bound(begin, end, p_key);
-      key_type * iter = std::lower_bound(begin, end, p_key);
+      const key_type * iter = std::lower_bound(begin, end, p_key);
 
       return const_iter_end_type{iter, iter == end};
     }
