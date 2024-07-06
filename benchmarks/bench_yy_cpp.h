@@ -42,6 +42,7 @@
 #include "yy_fm_trie.h"
 #include "yy_fm_radix_trie.h"
 
+#include "yy_fm_flat_trie_idx.h"
 #include "yy_fm_flat_trie_ptr.h"
 
 
@@ -54,6 +55,7 @@ using FlatRadixTrie = yafiyogi::yy_data::flat_radix_trie<char, int>;
 using FMTrie = yafiyogi::yy_data::fm_trie<char, int>;
 using FMRadixTrie = yafiyogi::yy_data::fm_radix_trie<char, int>;
 
+using FMFlatTrieIdx = yafiyogi::yy_data::fm_flat_trie_idx<char, int>;
 using FMFlatTriePtr = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
 using Map = std::map<std::string, int>;
@@ -81,6 +83,7 @@ struct TrieFixtureType:
     static FMTrie fm_trie;
     static FMRadixTrie fm_radix_trie;
 
+    static FMFlatTrieIdx fm_flat_trie_idx;
     static FMFlatTriePtr fm_flat_trie_ptr;
 
     static Map map;

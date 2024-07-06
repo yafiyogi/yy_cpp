@@ -499,7 +499,8 @@ class flat_map final
     {
       key_ptr begin = m_keys.begin();
       key_ptr end = m_keys.end();
-      key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      //key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      key_ptr iter = std::lower_bound(begin, end, p_key);
 
       return iter_end_type{iter, iter == end};
     }
@@ -510,7 +511,8 @@ class flat_map final
     {
       const key_ptr begin = m_keys.begin();
       const key_ptr end = m_keys.end();
-      const key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      //key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      key_ptr iter = std::lower_bound(begin, end, p_key);
 
       return const_iter_end_type{iter, iter == end};
     }
