@@ -42,7 +42,7 @@
 #include "yy_fm_trie.h"
 #include "yy_fm_radix_trie.h"
 
-#include "yy_fm_flat_trie.h"
+#include "yy_fm_flat_trie_ptr.h"
 
 
 using Trie = yafiyogi::yy_data::trie<char, int>;

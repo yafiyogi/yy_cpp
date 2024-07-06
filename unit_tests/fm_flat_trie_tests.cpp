@@ -30,7 +30,7 @@
 #include <gtest/gtest.h>
 #include <fmt/format.h>
 
-#include "yy_fm_flat_trie.h"
+#include "yy_fm_flat_trie_ptr.h"
 
 namespace yafiyogi::yy_data::tests {
 
