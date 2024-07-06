@@ -55,7 +55,6 @@ target_sources(yy_cpp
     yy_string_util.cpp)
 
 set(YY_CPP_HEADERS
-  "subject_observer.h"
   "yy_aho_corasick.h"
   "yy_arg_traits.h"
   "yy_array_traits.h"
@@ -85,6 +84,7 @@ set(YY_CPP_HEADERS
   "yy_string_case.h"
   "yy_string_traits.h"
   "yy_string_util.h"
+  "yy_subject_observer.h"
   "yy_tokenizer.h"
   "yy_trie.h"
   "yy_type_traits.h"

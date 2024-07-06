@@ -26,7 +26,7 @@
 */
 
 #include <iostream>
-#include "subject_observer.h"
+#include "yy_subject_observer.h"
 
 using namespace std;
 using namespace yafiyogi;
