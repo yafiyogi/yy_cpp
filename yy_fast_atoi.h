@@ -35,23 +35,21 @@
 namespace yafiyogi::yy_util {
 
 template<typename I>
-constexpr inline I fast_atoi(std::string_view p_str)
+constexpr inline I fast_atoi(yy_quad::const_span<char> p_str)
 {
   static_assert(std::is_integral_v<I>, "fast_atoi() only works with integer types!");
   static_assert(Digits<I>::digits <= 20, "fast_atoi(): type contains too many digits!");
 
   I val = 0;
 
-  auto str_span = yy_quad::make_const_span(p_str);
-
-  auto add = [&val, str_span]() mutable {
+  auto add = [&val, p_str]() mutable {
     // multiply by 10
     val = (val << 1) + (val << 3);
-    val += *str_span.begin() - '0';
-    str_span.inc_begin();
+    val += *p_str.begin() - '0';
+    p_str.inc_begin();
   };
 
-  switch(str_span.size())
+  switch(p_str.size())
   {
     case 20:
       add();
@@ -115,6 +113,12 @@ constexpr inline I fast_atoi(std::string_view p_str)
   }
 
   return val;
+}
+
+template<typename I>
+constexpr inline I fast_atoi(std::string_view p_str)
+{
+  return fast_atoi<I>(yy_quad::make_const_span(p_str));
 }
 
 } // namespace yafiyogi::yy_util
