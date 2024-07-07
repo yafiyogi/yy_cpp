@@ -45,6 +45,7 @@ add_executable(benchmark_yy_cpp
   bench_uo_map.cpp
 
   bench_trie_lookup.cpp
+  bench_bit_ceil.cpp
 
   bench_yy_cpp.cpp )
 

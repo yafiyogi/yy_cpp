@@ -26,7 +26,7 @@
 
 #include "fmt/format.h"
 
-#include "bench_yy_cpp.h"
+#include "bench_trie_lookup.h"
 
 namespace yafiyogi::benchmark {
 
@@ -50,7 +50,10 @@ BENCHMARK_F(TrieLookup, flat_lookup)(::benchmark::State & state)
     }
 
     ++idx;
-    idx = (idx % TrieLookup::query_size());
+    if(query_size() == idx)
+    {
+      idx = 0;
+    }
   }
 }
 
