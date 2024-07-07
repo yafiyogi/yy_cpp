@@ -61,7 +61,30 @@ TEST_F(TestBitTwiddling, test_round_up_pow2)
     std::uint64_t val = one_64 << pow2;
 
     EXPECT_EQ(val, yy_bit_twiddling::round_up_pow2(val));
+    EXPECT_EQ(std::bit_ceil(val), yy_bit_twiddling::round_up_pow2(val));
     EXPECT_EQ(val, yy_bit_twiddling::round_up_pow2(val - 1));
+    EXPECT_EQ(std::bit_ceil(val - 1), yy_bit_twiddling::round_up_pow2(val - 1));
+  }
+}
+
+TEST_F(TestBitTwiddling, test_round_down_pow2)
+{
+  uint64_t one_64{1};
+
+  for(std::uint64_t pow2 = 0; pow2 < 2; ++pow2)
+  {
+    std::uint64_t val = one_64 << pow2;
+
+    EXPECT_EQ(val, yy_bit_twiddling::round_down_pow2(val));
+  }
+
+  for(std::uint64_t pow2 = 3; pow2 < 64; ++pow2)
+  {
+    std::uint64_t val = one_64 << pow2;
+
+    EXPECT_EQ(val, yy_bit_twiddling::round_down_pow2(val));
+    EXPECT_EQ(std::bit_floor(val), yy_bit_twiddling::round_down_pow2(val));
+    EXPECT_EQ(std::bit_floor(val - 1), yy_bit_twiddling::round_down_pow2(val - 1));
   }
 }
 
