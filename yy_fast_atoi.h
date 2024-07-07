@@ -29,22 +29,45 @@
 #include <string_view>
 #include <type_traits>
 
-#include "yy_span.h"
 #include "yy_int_util.h"
+#include "yy_span.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_util {
+namespace fast_atoi_detail {
 
 template<typename I>
-constexpr inline I fast_atoi(yy_quad::const_span<char> p_str)
+struct val_valid_type
 {
-  static_assert(std::is_integral_v<I>, "fast_atoi() only works with integer types!");
-  static_assert(Digits<I>::digits <= 20, "fast_atoi(): type contains too many digits!");
+    using value_type = yy_traits::remove_rcv_t<I>;
+    value_type value{};
+    bool valid = false;
+};
 
-  I val = 0;
+} // namespace fast_atoi_detail
+
+template<typename I>
+constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_span<char> p_str)
+{
+  using val_valid_type = fast_atoi_detail::val_valid_type<I>;
+  using value_type = val_valid_type::value_type;
+  using digits_type = Digits<value_type>;
+
+  static_assert(std::is_integral_v<value_type>, "fast_atoi() only works with integer types!");
+  static_assert(digits_type::digits <= 20, "fast_atoi(): type contains too many digits!");
+
+  if(p_str.size() > digits_type::digits)
+  {
+    return val_valid_type{};
+  }
+
+  value_type val = 0;
 
   auto add = [&val, p_str]() mutable {
-    // multiply by 10
+    // Multiply current value by 10.
     val = (val << 1) + (val << 3);
+
+    // Add next digit.
     val += *p_str.begin() - '0';
     p_str.inc_begin();
   };
@@ -112,11 +135,11 @@ constexpr inline I fast_atoi(yy_quad::const_span<char> p_str)
       add();
   }
 
-  return val;
+  return val_valid_type{val, true};
 }
 
 template<typename I>
-constexpr inline I fast_atoi(std::string_view p_str)
+constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(std::string_view p_str)
 {
   return fast_atoi<I>(yy_quad::make_const_span(p_str));
 }
