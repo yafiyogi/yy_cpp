@@ -63,11 +63,11 @@ using UOMap = std::unordered_map<std::string, int>;
 
 namespace yafiyogi::benchmark {
 
-struct TrieFixtureType:
+struct TrieLookup:
       public ::benchmark::Fixture
 {
   public:
-    TrieFixtureType();
+    TrieLookup();
     void SetUp(const ::benchmark::State &) override;
 
     static std::string_view query(size_t idx);

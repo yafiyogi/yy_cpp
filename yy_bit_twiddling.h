@@ -34,15 +34,54 @@ namespace yafiyogi::yy_bit_twiddling {
 constexpr uint64_t round_up_pow2(uint64_t v)
 {
   --v;
-  v |= v >> 1;
-  v |= v >> 2;
-  v |= v >> 4;
-  v |= v >> 8;
-  v |= v >> 16;
-  v |= v >> 32;
+  v |= v >> uint64_t{1};
+  v |= v >> uint64_t{2};
+  v |= v >> uint64_t{4};
+  v |= v >> uint64_t{8};
+  v |= v >> uint64_t{16};
+  v |= v >> uint64_t{32};
   ++v;
 
   return v;
+}
+
+constexpr uint64_t round_down_pow2(uint64_t v)
+{
+  v |= v >> uint64_t{1};
+  v |= v >> uint64_t{2};
+  v |= v >> uint64_t{4};
+  v |= v >> uint64_t{8};
+  v |= v >> uint64_t{16};
+  v |= v >> uint64_t{32};
+
+  return v - (v >> 1);
+}
+
+constexpr uint64_t pop(uint64_t v)
+{
+  v = v - ((v >> uint64_t{1}) & uint64_t{0x5555555555555555});
+  v = (v & uint64_t{0x3333333333333333}) + ((v >> uint64_t{2}) & uint64_t{0x3333333333333333});
+  return (((v + (v >> uint64_t{4})) & uint64_t{0xF0F0F0F0F0F0F0F}) * uint64_t{0x101010101010101}) >> uint64_t{56};
+}
+
+constexpr uint64_t nlz(uint64_t v)
+{
+  v |= v >> uint64_t{1};
+  v |= v >> uint64_t{2};
+  v |= v >> uint64_t{4};
+  v |= v >> uint64_t{8};
+  v |= v >> uint64_t{16};
+  v |= v >> uint64_t{32};
+
+  return pop(~v);
+}
+
+inline constexpr uint64_t all_bits{uint64_t{0} - uint64_t{1}};
+
+constexpr uint64_t ntz(uint64_t v)
+{
+  uint64_t mask = all_bits + static_cast<uint64_t>(0 == v);
+  return mask & (uint64_t{63} - nlz(v));
 }
 
 } // namespace yafiyogi::yy_bit_twiddling

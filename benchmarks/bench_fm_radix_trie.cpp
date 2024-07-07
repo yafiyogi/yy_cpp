@@ -30,7 +30,7 @@
 
 namespace yafiyogi::benchmark {
 
-BENCHMARK_F(TrieFixtureType, fm_radix_lookup)(::benchmark::State & state)
+BENCHMARK_F(TrieLookup, fm_radix_lookup)(::benchmark::State & state)
 {
   auto automaton = fm_radix_trie.create_automaton();
   assert(!automaton.empty());
@@ -40,7 +40,7 @@ BENCHMARK_F(TrieFixtureType, fm_radix_lookup)(::benchmark::State & state)
 
   while(state.KeepRunning())
   {
-    bool found = automaton.find(TrieFixtureType::query(idx));
+    bool found = automaton.find(TrieLookup::query(idx));
     ::benchmark::DoNotOptimize(found);
     if(found)
     {
@@ -50,7 +50,7 @@ BENCHMARK_F(TrieFixtureType, fm_radix_lookup)(::benchmark::State & state)
     }
 
     ++idx;
-    idx = (idx % TrieFixtureType::query_size());
+    idx = (idx % TrieLookup::query_size());
   }
 }
 

@@ -44,6 +44,8 @@ add_executable(benchmark_yy_cpp
   bench_map.cpp
   bench_uo_map.cpp
 
+  bench_trie_lookup.cpp
+
   bench_yy_cpp.cpp )
 
 target_include_directories(benchmark_yy_cpp

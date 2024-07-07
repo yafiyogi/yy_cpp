@@ -30,7 +30,7 @@
 
 namespace yafiyogi::benchmark {
 
-BENCHMARK_F(TrieFixtureType, map_lookup)(::benchmark::State & state)
+BENCHMARK_F(TrieLookup, map_lookup)(::benchmark::State & state)
 {
   size_t idx = 0;
   std::size_t count = 0;
@@ -39,7 +39,7 @@ BENCHMARK_F(TrieFixtureType, map_lookup)(::benchmark::State & state)
 
   while(state.KeepRunning())
   {
-    auto query_view = TrieFixtureType::query(idx);
+    auto query_view = TrieLookup::query(idx);
     query.assign(query_view.begin(), query_view.end());
 
     auto iter = map.find(query);
@@ -50,7 +50,7 @@ BENCHMARK_F(TrieFixtureType, map_lookup)(::benchmark::State & state)
     }
 
     ++idx;
-    idx = (idx % TrieFixtureType::query_size());
+    idx = (idx % TrieLookup::query_size());
   }
 }
 
