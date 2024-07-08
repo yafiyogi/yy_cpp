@@ -106,7 +106,7 @@ class flat_map final
 
     struct pos_end_type final
     {
-        std::size_t pos{};
+        size_type pos{};
         bool is_end = false;
     };
 
@@ -192,7 +192,7 @@ class flat_map final
 
     struct pos_found_type final
     {
-        std::size_t pos{};
+        size_type pos{};
         bool found = false;
     };
 
@@ -273,7 +273,7 @@ class flat_map final
 
     struct pos_inserted_type final
     {
-        std::size_t pos{};
+        size_type pos{};
         bool inserted = false;
     };
 
