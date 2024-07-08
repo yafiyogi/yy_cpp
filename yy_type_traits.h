@@ -23,8 +23,8 @@
   SOFTWARE.
 
 */
-#ifndef yy_type_traits_h
-#define yy_type_traits_h
+
+#pragma once
 
 #include <memory>
 #include <optional>
@@ -33,13 +33,24 @@
 namespace yafiyogi::yy_traits {
 
 /**
- * @brief remove_rcv_t type trait. Removes reference, const & volitile from type.
+ * @brief remove_rcv_t type trait. [[deprecated]] Removes reference, const & volatile from type.
  */
+// [[deprecated]]
 template<typename T>
 using remove_rcv_t = std::remove_cv_t<std::remove_reference_t<T>>;
 
+/**
+ * @brief remove_cvr_t type trait. Removes reference, const & volatile from type.
+ */
+template<typename T>
+using remove_cvr_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+// [[deprecated]]
 template<typename T>
 using remove_rpcv_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
+
+template<typename T>
+using remove_cvpr_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
 
 namespace traits_detail {
 
@@ -147,5 +158,3 @@ template<typename T>
 using is_optional_t = typename is_optional<T>::type;
 
 } // namespace yafiyogi::yy_traits
-
-#endif // yy_type_traits_h
