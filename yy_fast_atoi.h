@@ -35,7 +35,7 @@
 
 namespace yafiyogi::yy_util {
 
-enum class FastFloatRV { Ok, Overflow, NoValue}
+enum class FastFloatRV { Ok, Overflow, NoValue};
 
 namespace fast_atoi_detail {
 
