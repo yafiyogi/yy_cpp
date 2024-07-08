@@ -65,14 +65,14 @@ constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_sp
   }
 
   value_type val = 0;
-  bool state = FastFloatRV::NoValue;
+  FastFloatRV state = FastFloatRV::NoValue;
 
   auto add = [&val, p_str]() mutable {
     // Multiply current value by 10.
     val = (val << 1) + (val << 3);
 
     // Add next digit.
-    val += *p_str.begin() - '0';
+    val += static_cast<value_type>(*p_str.begin() - '0');
     p_str.inc_begin();
   };
 
