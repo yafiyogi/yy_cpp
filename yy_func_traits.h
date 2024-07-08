@@ -24,16 +24,14 @@
 
 */
 
-#ifndef yy_func_traits_h
-#define yy_func_traits_h
+#pragma once
 
 #include <climits>
 #include <cstddef>
 #include <tuple>
 
-#ifndef yy_arg_traits_h
-# include "yy_arg_traits.h"
-#endif
+#include "yy_arg_traits.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_traits {
 
@@ -49,6 +47,15 @@ struct func_traits<R (*)(Args...)>:
       arg_traits<Args...>
 {
     using result_type = remove_rcv_t<R>;
+    using arg_types = arg_traits<Args...>;
+    using class_type = void;
+};
+
+template<typename... Args>
+struct func_traits<void (*)(Args...)>:
+      arg_traits<Args...>
+{
+    using result_type = void;
     using arg_types = arg_traits<Args...>;
     using class_type = void;
 };
@@ -94,5 +101,3 @@ struct func_traits<void (C::*)(Args...) const>:
 };
 
 } // namespace yafiyogi::yy_traits
-
-#endif // yy_func_traits_h
