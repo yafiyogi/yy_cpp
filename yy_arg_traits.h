@@ -24,10 +24,9 @@
 
 */
 
-#include <tuple>
+#pragma once
 
-#ifndef yy_arg_traits_h
-# define yy_arg_traits_h
+#include <tuple>
 
 #include "yy_type_traits.h"
 
@@ -50,5 +49,3 @@ template<std::size_t N, typename... Args>
 using arg_traits_t = typename arg_traits<Args...>::template arg_type<N>;
 
 } // namespace yafiyogi::yy_traits
-
-#endif // yy_arg_traits_h
