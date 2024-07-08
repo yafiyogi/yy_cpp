@@ -34,6 +34,9 @@
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_util {
+
+enum class FastFloatRV { Ok, Overflow, NoValue}
+
 namespace fast_atoi_detail {
 
 template<typename I>
@@ -41,7 +44,7 @@ struct val_valid_type
 {
     using value_type = yy_traits::remove_rcv_t<I>;
     value_type value{};
-    bool valid = false;
+    FastFloatRV state = FastFloatRV::NoValue;
 };
 
 } // namespace fast_atoi_detail
@@ -62,6 +65,7 @@ constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_sp
   }
 
   value_type val = 0;
+  bool state = FastFloatRV::NoValue;
 
   auto add = [&val, p_str]() mutable {
     // Multiply current value by 10.
@@ -133,9 +137,10 @@ constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_sp
       [[fallthrough]];
     case 1:
       add();
+      state = FastFloatRV::Ok;
   }
 
-  return val_valid_type{val, true};
+  return val_valid_type{val, state};
 }
 
 template<typename I>
