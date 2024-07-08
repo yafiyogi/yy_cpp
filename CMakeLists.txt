@@ -70,6 +70,7 @@ set(YY_CPP_HEADERS
   "yy_fm_flat_trie_idx.h"
   "yy_fm_flat_trie_ptr.h"
   "yy_fm_radix_trie.h"
+  "yy_fm_subject_observer.h"
   "yy_fm_trie.h"
   "yy_func_traits.h"
   "yy_hash.h"
