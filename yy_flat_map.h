@@ -433,6 +433,16 @@ class flat_map final
       return size() == other.size();
     }
 
+
+    template<typename Visitor>
+    void visit(Visitor && visitor) const
+    {
+      for(size_type idx = 0; idx < size(); ++idx)
+      {
+        visitor(m_keys[idx], m_values[idx]);
+      }
+    }
+
   private:
     constexpr add_empty_type add_empty(key_ptr p_pos)
     {
