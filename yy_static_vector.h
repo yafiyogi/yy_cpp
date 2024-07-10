@@ -305,7 +305,9 @@ class static_vector
 
       if(valid)
       {
+#if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+#endif
         std::move_backward(pos, end(), end() + 1);
 
         iter = begin() + distance;
@@ -814,8 +816,10 @@ class static_simple_vector
 
       if(valid)
       {
+#if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
+#endif
         std::move_backward(pos, end(), end() + 1);
 
         iter = begin() + distance;

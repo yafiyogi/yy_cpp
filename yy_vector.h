@@ -325,7 +325,9 @@ class vector
         }
         else
         {
+#if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+#endif
           std::move_backward(pos, end(), end() + 1);
         }
 
@@ -880,7 +882,9 @@ class simple_vector
         }
         else
         {
+#if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+#endif
           std::move_backward(pos, end(), end() + 1);
         }
 
