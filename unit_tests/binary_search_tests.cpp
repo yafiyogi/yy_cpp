@@ -24,6 +24,7 @@
 
 */
 
+#include <algorithm>
 #include "fmt/format.h"
 #include "yy_binary_search.h"
 

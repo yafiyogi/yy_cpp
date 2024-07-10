@@ -431,7 +431,8 @@ class vector
             m_offset += static_cast<size_type>(distance);
             if(ClearAction::Clear == action)
             {
-              for(auto & item : yy_util::make_range<iterator>(p_begin, p_end))
+              for(auto range = yy_util::make_range(p_begin, p_end);
+                  auto & item : range)
               {
                 item = value_type{};
               }
@@ -442,7 +443,8 @@ class vector
             std::move(p_end, end(), p_begin);
             if(ClearAction::Clear == action)
             {
-              for(auto & item : yy_util::make_range<iterator>(p_end, end()))
+              for(auto range = yy_util::make_range(p_end, end());
+                  auto & item : range)
               {
                 item = value_type{};
               }
@@ -573,7 +575,8 @@ class vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto & element : yy_util::make_range(begin() + start, end()))
+        for(auto range = yy_util::make_range(begin() + start, end());
+            auto & element : range)
         {
           element = value_type{};
         }
@@ -941,7 +944,8 @@ class simple_vector
           std::move(p_end, end(), p_begin);
           if(ClearAction::Clear == action)
           {
-            for(auto & item : yy_util::make_range<iterator>(p_end, end()))
+            for(auto range = yy_util::make_range(p_end, end());
+                auto & item : range)
             {
               item = value_type{};
             }
@@ -1046,7 +1050,8 @@ class simple_vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto & element : yy_util::make_range(begin() + start, end()))
+        for(auto range = yy_util::make_range(begin() + start, end());
+            auto & element : range)
         {
           element = value_type{};
         }

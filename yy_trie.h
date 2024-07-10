@@ -423,7 +423,8 @@ class trie
 
       node_type * node{m_root.get()};
 
-      for(const label_l_value_ref label_part: yy_util::make_range(label.begin(), std::prev(label.end())))
+      for(auto label_range = yy_util::make_range(label.begin(), std::prev(label.end()));
+          const label_l_value_ref label_part: label_range)
       {
         auto [edge_iter, found] = node->find_edge(label_part);
 
