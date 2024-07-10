@@ -328,6 +328,24 @@ class flat_map final
       return pos_inserted_type{pos, !found};
     }
 
+    template<typename InputKeyType>
+    constexpr void erase(InputKeyType && p_key)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputKeyType>, key_type>
+                    || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_rcv_t<std::remove_pointer<InputKeyType>>>),
+                    "p_key is of an incompatible type.");
+
+      if(auto [key_iter, found] = do_find_raw(p_key);
+         found)
+      {
+        m_keys.erase(key_iter);
+
+        size_type pos = static_cast<size_type>(key_iter - m_keys.begin());
+
+        m_values.erase(m_values.data() + pos);
+      }
+    }
+
     constexpr void swap(flat_map & other)
     {
       std::swap(m_keys, other.m_keys);
