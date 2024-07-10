@@ -331,10 +331,6 @@ class flat_map final
     template<typename InputKeyType>
     constexpr void erase(InputKeyType && p_key)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputKeyType>, key_type>
-                    || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_rcv_t<std::remove_pointer<InputKeyType>>>),
-                    "p_key is of an incompatible type.");
-
       if(auto [key_iter, found] = do_find_raw(p_key);
          found)
       {

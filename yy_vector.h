@@ -142,6 +142,13 @@ class vector
       return *this;
     }
 
+    constexpr bool operator<(const vector & other) const noexcept
+    {
+      return std::lexicographical_compare(begin(), end(),
+                                          other.data(), other.data() + other.size());
+
+    }
+
     template<typename type>
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -160,6 +167,12 @@ class vector
 
       return std::lexicographical_compare(a.data(), a.data() + a.size(),
                                           b.begin(), b.end());
+    }
+
+    constexpr bool operator==(const vector & other) const noexcept
+    {
+      return (size() == other.size())
+        && std::equal(begin(), end(), other.data());
     }
 
     template<typename type>
@@ -431,7 +444,7 @@ class vector
             m_offset += static_cast<size_type>(distance);
             if(ClearAction::Clear == action)
             {
-              for(auto range = yy_util::make_range(p_begin, p_end);
+              for(auto range{yy_util::make_range(p_begin, p_end)};
                   auto & item : range)
               {
                 item = value_type{};
@@ -443,7 +456,7 @@ class vector
             std::move(p_end, end(), p_begin);
             if(ClearAction::Clear == action)
             {
-              for(auto range = yy_util::make_range(p_end, end());
+              for(auto range{yy_util::make_range(p_end, end())};
                   auto & item : range)
               {
                 item = value_type{};
@@ -575,7 +588,7 @@ class vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto range = yy_util::make_range(begin() + start, end());
+        for(auto range{yy_util::make_range(begin() + start, end())};
             auto & element : range)
         {
           element = value_type{};
@@ -690,6 +703,13 @@ class simple_vector
       return *this;
     }
 
+    constexpr bool operator<(const simple_vector & other) const noexcept
+    {
+      return std::lexicographical_compare(begin(), end(),
+                                          other.data(), other.data() + other.size());
+
+    }
+
     template<typename type>
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -708,6 +728,12 @@ class simple_vector
 
       return std::lexicographical_compare(a.data(), a.data() + a.size(),
                                           b.begin(), b.end());
+    }
+
+    constexpr bool operator==(const simple_vector & other) const noexcept
+    {
+      return (size() == other.size())
+        && std::equal(begin(), end(), other.data());
     }
 
     template<typename type>
@@ -944,7 +970,7 @@ class simple_vector
           std::move(p_end, end(), p_begin);
           if(ClearAction::Clear == action)
           {
-            for(auto range = yy_util::make_range(p_end, end());
+            for(auto range{yy_util::make_range(p_end, end())};
                 auto & item : range)
             {
               item = value_type{};
@@ -1050,7 +1076,7 @@ class simple_vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto range = yy_util::make_range(begin() + start, end());
+        for(auto range{yy_util::make_range(begin() + start, end())};
             auto & element : range)
         {
           element = value_type{};

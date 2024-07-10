@@ -598,7 +598,7 @@ class ac_trie
 
       node_type * node = m_root.get();
 
-      for(auto label_range = yy_util::make_range(label.begin(), std::prev(label.end()));
+      for(auto label_range{yy_util::make_range(label.begin(), std::prev(label.end()))};
           const auto & label_part: label_range)
       {
         node = node->add(label_part, m_root.get());
