@@ -28,7 +28,6 @@
 #include <locale>
 #include <locale.h>
 #include <mutex>
-#include <string>
 
 #include "boost/locale/generator.hpp"
 #include "spdlog/spdlog.h"

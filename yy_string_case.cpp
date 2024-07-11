@@ -26,8 +26,8 @@
 
 #include "boost/locale/conversion.hpp"
 
-#include "yy_string_case.h"
 #include "yy_locale.h"
+#include "yy_string_case.h"
 
 namespace yafiyogi::yy_util {
 
