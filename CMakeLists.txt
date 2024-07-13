@@ -31,11 +31,14 @@ cmake_minimum_required(VERSION 3.24)
 
 project(yy_cpp LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS)
 set(YY_ROOT "${PROJECT_SOURCE_DIR}/..")
 set(YY_CMAKE "${YY_ROOT}/yy_cmake")
 
-include(${YY_CMAKE}/cmake_common.txt)
 include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
+include(${YY_CMAKE}/cmake_clang_tidy.txt)
+include(${YY_CMAKE}/cmake_common.txt)
+
 find_package(Boost 1.84.0 REQUIRED COMPONENTS locale)
 
 add_library(yy_cpp STATIC)
@@ -106,3 +109,10 @@ add_subdirectory(benchmarks)
 
 install(TARGETS yy_cpp )
 install(FILES ${YY_CPP_HEADERS} DESTINATION include/yy_cpp )
+
+get_target_property(YY_CPP_SOURCES yy_cpp SOURCES)
+
+set(YY_TIDY_COMPILER_OPTIONS -isystem /Users/tony/code/tp/include -std=c++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -mmacosx-version-min=12.7 -fPIE -pedantic -Wall -Werror -Wextra -Wformat -Wformat=2 -Wconversion -Wimplicit-fallthrough -Wnon-virtual-dtor -Wnull-dereference -Woverloaded-virtual -Wsign-conversion -Wshadow -Wunused -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 -fstack-protector-strong -fcf-protection=full -fPIE -fno-delete-null-pointer-checks -fno-strict-overflow -fno-strict-aliasing -D_GLIBCXX_ASSERTIONS)
+
+add_custom_target(tidy
+ COMMAND rm clang-tidy.log \; for f in "$$(" echo \"${YY_CPP_HEADERS} ${YY_CPP_SOURCES}\" | sed -n -e 's/;/ /pg' ")" \; do ${YY_CLANG_TIDY_CMD} ${YY_CLANG_TIDY_OPTIONS} "$$f" -- ${YY_TIDY_COMPILER_OPTIONS} >> clang-tidy.log \; done)
