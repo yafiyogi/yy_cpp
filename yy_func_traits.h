@@ -46,7 +46,7 @@ template<typename R,
 struct func_traits<R (*)(Args...)>:
       arg_traits<Args...>
 {
-    using result_type = remove_rcv_t<R>;
+    using result_type = remove_cvr_t<R>;
     using arg_types = arg_traits<Args...>;
     using class_type = void;
 };
@@ -66,9 +66,9 @@ template<typename C,
 struct func_traits<R (C::*)(Args...)>:
       arg_traits<Args...>
 {
-    using result_type = remove_rcv_t<R>;
+    using result_type = remove_cvr_t<R>;
     using arg_types = arg_traits<Args...>;
-    using class_type = remove_rcv_t<C>;
+    using class_type = remove_cvr_t<C>;
 };
 
 template<typename C,
@@ -77,9 +77,9 @@ template<typename C,
 struct func_traits<R (C::*)(Args...) const>:
       arg_traits<Args...>
 {
-    using result_type = remove_rcv_t<R>;
+    using result_type = remove_cvr_t<R>;
     using arg_types = arg_traits<Args...>;
-    using class_type = remove_rcv_t<C>;
+    using class_type = remove_cvr_t<C>;
 };
 
 template<typename C, typename... Args>
@@ -88,7 +88,7 @@ struct func_traits<void (C::*)(Args...)>:
 {
     using result_type = void;
     using arg_types = arg_traits<Args...>;
-    using class_type = remove_rcv_t<C>;
+    using class_type = remove_cvr_t<C>;
 };
 
 template<typename C, typename... Args>
@@ -97,7 +97,7 @@ struct func_traits<void (C::*)(Args...) const>:
 {
     using result_type = void;
     using arg_types = arg_traits<Args...>;
-    using class_type = remove_rcv_t<C>;
+    using class_type = remove_cvr_t<C>;
 };
 
 } // namespace yafiyogi::yy_traits

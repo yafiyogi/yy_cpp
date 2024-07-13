@@ -33,21 +33,10 @@
 namespace yafiyogi::yy_traits {
 
 /**
- * @brief remove_rcv_t type trait. [[deprecated]] Removes reference, const & volatile from type.
- */
-// [[deprecated]]
-template<typename T>
-using remove_rcv_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-/**
  * @brief remove_cvr_t type trait. Removes reference, const & volatile from type.
  */
 template<typename T>
 using remove_cvr_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-// [[deprecated]]
-template<typename T>
-using remove_rpcv_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
 
 template<typename T>
 using remove_cvpr_t = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
@@ -109,7 +98,7 @@ struct is_optional_traits<std::optional<T>>:
  * @brief is_container type trait
  */
 template<typename T>
-using is_container = traits_detail::container_traits<yy_traits::remove_rcv_t<T>>;
+using is_container = traits_detail::container_traits<yy_traits::remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_container_v = is_container<T>::value;
@@ -119,13 +108,13 @@ using is_container_t = typename is_container<T>::type;
 
 template<typename T>
 using container_type_t =
-  typename traits_detail::container_traits<remove_rcv_t<T>>::value_type;
+  typename traits_detail::container_traits<remove_cvr_t<T>>::value_type;
 
 /**
  * @brief is_unique_ptr type trait
  */
 template<typename T>
-using is_unique_ptr = traits_detail::is_unique_ptr_traits<remove_rcv_t<T>>;
+using is_unique_ptr = traits_detail::is_unique_ptr_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_unique_ptr_v = is_unique_ptr<T>::value;
@@ -137,7 +126,7 @@ using is_unique_ptr_t = typename is_unique_ptr<T>::type;
  * @brief is_smart_ptr type trait
  */
 template<typename T>
-using is_smart_ptr = traits_detail::is_smart_ptr_traits<remove_rcv_t<T>>;
+using is_smart_ptr = traits_detail::is_smart_ptr_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
@@ -149,7 +138,7 @@ using is_smart_ptr_t = typename is_smart_ptr<T>::type;
  * @brief is_optional type trait
  */
 template<typename T>
-using is_optional = traits_detail::is_optional_traits<yy_traits::remove_rcv_t<T>>;
+using is_optional = traits_detail::is_optional_traits<yy_traits::remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_optional_v = is_optional<T>::value;

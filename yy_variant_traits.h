@@ -25,6 +25,8 @@
 */
 #pragma once
 
+#include <cstddef>
+
 #include <variant>
 #include "yy_type_traits.h"
 
@@ -33,22 +35,22 @@ namespace variant_detail {
 
 template<typename V,
          typename T,
-         size_t N>
+         std::size_t N>
 struct check_variant_for_type
 {
     using variant_type = std::variant_alternative_t<N - 1, V>;
-    using raw_type = std::remove_pointer_t<yy_traits::remove_rcv_t<variant_type>>;
-    inline static constexpr bool has_type = std::is_same_v<T, variant_type>
-                                            || (std::is_pointer_v<T>
-                                                && std::is_base_of_v<raw_type, T>)
-                                            || check_variant_for_type<V, T, N - 1>::has_type;
+    using raw_type = std::remove_pointer_t<yy_traits::remove_cvr_t<variant_type>>;
+    static constexpr bool has_type = std::is_same_v<T, variant_type>
+                                     || (std::is_pointer_v<T>
+                                         && std::is_base_of_v<raw_type, T>)
+                                     || check_variant_for_type<V, T, N - 1>::has_type;
 };
 
 template<typename V,
          typename T>
 struct check_variant_for_type<V, T, 0>
 {
-    inline static constexpr bool has_type = false;
+    static constexpr bool has_type = false;
 };
 
 } // namespace variant_detail
@@ -56,7 +58,7 @@ struct check_variant_for_type<V, T, 0>
 template<typename VariantType,
          typename T>
 inline static constexpr bool check_variant_for_type_v = variant_detail::check_variant_for_type<VariantType,
-                                                                                               yy_traits::remove_rcv_t<T>,
+                                                                                               yy_traits::remove_cvr_t<T>,
                                                                                                std::variant_size_v<VariantType>>::has_type;
 
 } // namespace yafiyogi::yy_traits

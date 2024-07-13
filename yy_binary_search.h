@@ -34,15 +34,20 @@ namespace bs_detail {
 template<typename T, typename V>
 struct equal_val final
 {
-    using type = yy_traits::remove_rcv_t<T>;
-    using value_type = yy_traits::remove_rcv_t<V>;
+    using type = yy_traits::remove_cvr_t<T>;
+    using value_type = yy_traits::remove_cvr_t<V>;
     using val_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     static constexpr size_t mask = std::numeric_limits<size_t>::max();
 
     constexpr equal_val() noexcept = default;
     constexpr equal_val(const equal_val &) noexcept = default;
     constexpr equal_val(equal_val &&) noexcept = default;
+    constexpr ~equal_val() noexcept = default;
 
+    constexpr equal_val & operator=(const equal_val &) noexcept = default;
+    constexpr equal_val & operator=(equal_val &&) noexcept = default;
+
+    [[nodiscard]]
     constexpr bool operator()(const type item,
                               const value_type & val) const noexcept
     {
@@ -53,34 +58,26 @@ struct equal_val final
 template<typename T>
 struct result final
 {
-    T item;
-    bool found;
+    T item{};
+    bool found = false;
 };
 
 } // namespace bs_detail
 
 template<typename T,
          typename V,
-         typename CompareLT,
-         typename CompareEQ>
+         typename CompareLT = lb_detail::less_val<T, V>,
+         typename CompareEQ = bs_detail::equal_val<T, V>>
+    [[nodiscard]]
 constexpr bs_detail::result<T> binary_search(T begin,
                                              T end,
                                              const V & val,
-                                             CompareLT comp_lt,
-                                             CompareEQ comp_eq) noexcept
+                                             CompareLT comp_lt = CompareLT{},
+                                             CompareEQ comp_eq = CompareEQ{}) noexcept
 {
   T found = yy_data::lower_bound(begin, end, val, comp_lt);
 
   return bs_detail::result<T>{found, (found != end) && comp_eq(found, val)};
-}
-
-template<typename T,
-         typename V>
-constexpr bs_detail::result<T> binary_search(T begin,
-                                             T end,
-                                             const V & val) noexcept
-{
-  return yy_data::binary_search(begin, end, val, lb_detail::less_val<T, V>{}, bs_detail::equal_val<T, V>{});
 }
 
 } // namespace yafiyogi::yy_data

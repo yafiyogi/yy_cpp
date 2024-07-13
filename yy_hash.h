@@ -26,14 +26,14 @@
 
 #pragma once
 
-#include <hash>
+#include <functional>
 
 namespace yafiyogi::yy_data {
 
 // Adapted from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3876.pdf
 
 template<typename T>
-inline constexpr st::size_t hash_combine(std::size_t & seed, const T & val) noexcept
+constexpr st::size_t hash_combine(std::size_t & seed, const T & val) noexcept
 {
   seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
@@ -41,7 +41,7 @@ inline constexpr st::size_t hash_combine(std::size_t & seed, const T & val) noex
 }
 
 template <typename T, typename... Types>
-inline constexpr st::size_t hash_combine(std::size_t& seed,
+constexpr st::size_t hash_combine(std::size_t& seed,
                                          const T& val,
                                          const Types&... args) noexcept
 {
@@ -51,13 +51,13 @@ inline constexpr st::size_t hash_combine(std::size_t& seed,
   return seed;
 }
 
-inline constexpr st::size_t hash_combine(std::size_t & seed) noexcept
+constexpr st::size_t hash_combine(std::size_t & seed) noexcept
 {
   return seed;
 }
 
 template <typename... Types>
-inline constexpr std::size_t hash_val(const Types&... args) noexcept
+constexpr std::size_t hash_val(const Types&... args) noexcept
 {
   std::size_t seed = 0;
 

@@ -26,19 +26,24 @@
 
 #pragma once
 
+#include <cstdint>
+
+#include <type_traits>
+
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
 
 template<typename T>
-using ClearActionType = yy_traits::remove_rcv_t<T>;
+using ClearActionType = yy_traits::remove_cvr_t<T>;
 
-enum class ClearAction { Clear, Keep};
+enum class ClearAction:uint8_t {Clear, Keep};
 
 template<typename T>
-inline constexpr ClearAction default_action = (std::is_trivially_constructible_v<ClearActionType<T>>
-                                               && std::is_trivially_move_assignable_v<ClearActionType<T>>
-                                               && std::is_trivially_copy_assignable_v<ClearActionType<T>>) ? ClearAction::Keep : ClearAction::Clear;
+inline constexpr const ClearAction default_clear_action_v =
+  (std::is_trivially_constructible_v<ClearActionType<T>>
+   && std::is_trivially_move_assignable_v<ClearActionType<T>>
+   && std::is_trivially_copy_assignable_v<ClearActionType<T>>) ? ClearAction::Keep : ClearAction::Clear;
 
 
 } // namespace yafiyogi::yy_data

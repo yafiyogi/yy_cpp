@@ -56,10 +56,10 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = yy_traits::remove_rcv_t<LabelType>;
+    using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
-    using value_type = yy_traits::remove_rcv_t<ValueType>;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
     using node_type = trie_node<label_type, value_type>;
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
@@ -102,7 +102,7 @@ struct trie_node_edge final
     }
 
     label_type m_label = label_type{};
-    node_ptr m_node;
+    node_ptr m_node = nullptr;
 };
 
 template<typename LabelType,
@@ -192,7 +192,7 @@ class trie_node
     }
 
   private:
-    edges_type m_edges;
+    edges_type m_edges{};
 };
 
 template<typename LabelType,
@@ -242,7 +242,7 @@ class Payload final:
     }
 
   private:
-    value_type m_payload;
+    value_type m_payload{};
 };
 
 template<typename LabelType,
@@ -319,9 +319,9 @@ class Automaton final
 
       auto node = m_state;
 
-      for(const label_l_value_ref ch : label)
+      for(const label_l_value_ref label_part : label)
       {
-        auto [edge_iter, found] = node->find_edge(ch);
+        auto [edge_iter, found] = node->find_edge(label_part);
 
         if(!found)
         {
@@ -338,7 +338,7 @@ class Automaton final
     }
 
   private:
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
     node_type * m_state = nullptr;
 };
 
@@ -380,8 +380,8 @@ class trie
     constexpr void add(Container && label,
                        Value && value)
     {
-      static_assert(std::is_same_v<yy_traits::remove_rcv_t<Value>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_same_v<yy_traits::remove_cvr_t<Value>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
       add_span(yy_quad::make_const_span(label), std::forward<Value>(value));
     }
@@ -478,7 +478,7 @@ class trie
       }
     }
 
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
 };
 
 } // namespace yafiyogi::yy_data

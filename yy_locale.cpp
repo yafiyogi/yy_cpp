@@ -36,9 +36,9 @@ namespace yafiyogi::yy_locale {
 
 namespace {
 
-std::once_flag g_locale_set_flag;
-std::string g_locale_name;
-std::locale g_locale;
+static std::once_flag g_locale_set_flag;
+static std::string g_locale_name;
+static std::locale g_locale;
 
 } // anonymous namespace
 
@@ -46,7 +46,7 @@ void set_locale()
 {
   std::call_once(g_locale_set_flag, []()
   {
-    auto locale_name = std::getenv("LC_ALL");
+    auto * locale_name = std::getenv("LC_ALL");
     if(nullptr != locale_name)
     {
       g_locale_name = locale_name;
@@ -56,7 +56,7 @@ void set_locale()
       g_locale_name = g_locale.name();
     }
 
-    if(auto l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
+    if(auto * l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
        nullptr == l_locale)
     {
       spdlog::warn("Can't set locale to [{}].", g_locale_name);
@@ -77,7 +77,7 @@ void set_locale(const std::string_view locale)
   std::call_once(g_locale_set_flag, [locale]()
   {
     g_locale_name = locale;
-    if(auto l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
+    if(auto * l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
        nullptr == l_locale)
     {
       spdlog::warn("Can't set locale to [{}].", g_locale_name);

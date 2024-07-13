@@ -57,7 +57,7 @@ struct vector_traits<std::vector<T>>:
 
 /** @brief is_vector type trait */
 template<typename T>
-using is_vector = traits_detail::vector_traits<remove_rcv_t<T>>;
+using is_vector = traits_detail::vector_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_vector_v = is_vector<T>::value;

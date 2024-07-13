@@ -52,11 +52,11 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_common_traits final
 {
-    using label_type = yy_traits::remove_rcv_t<LabelType>;
+    using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using label_span_type = typename yy_quad::const_span<label_type>;
-    using value_type = yy_traits::remove_rcv_t<ValueType>;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
 };
 
 template<typename LabelType,
@@ -93,9 +93,9 @@ class trie_node_idx final
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
-    static inline constexpr node_idx_type root_idx{};
-    static inline constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
-    static inline constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
+    static constexpr node_idx_type root_idx{};
+    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
+    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
     constexpr explicit trie_node_idx(const data_idx_type p_data) noexcept:
       m_data(p_data)
@@ -439,7 +439,7 @@ class fm_flat_trie_ptr
     using trie_vector = typename traits::trie_vector;
     using data_vector = typename traits::data_vector;
 
-    using automaton = yy_traits::remove_rcv_t<Automaton<label_type, value_type>>;
+    using automaton = yy_traits::remove_cvr_t<Automaton<label_type, value_type>>;
 
     constexpr fm_flat_trie_ptr() noexcept:
       m_nodes(1), // add root node
@@ -465,8 +465,8 @@ class fm_flat_trie_ptr
     constexpr data_added_type add(InputType && label,
                                   InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
 
       return add_span(yy_quad::make_const_span(label), std::forward<InputValueType>(value));
@@ -581,7 +581,7 @@ class fm_flat_trie_ptr
     static constexpr data_idx_type add_data(data_vector & data,
                                             InternalValueType && value)
     {
-      static_assert(std::is_same_v<value_type, yy_traits::remove_rcv_t<InternalValueType>>,
+      static_assert(std::is_same_v<value_type, yy_traits::remove_cvr_t<InternalValueType>>,
                     "The data type of value is not 'value_type'");
       data_idx_type data_idx = data.size();
 

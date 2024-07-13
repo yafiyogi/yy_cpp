@@ -31,57 +31,57 @@
 namespace yafiyogi::yy_bit_twiddling {
 
 // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-constexpr uint64_t round_up_pow2(uint64_t v)
+constexpr uint64_t round_up_pow2(uint64_t val)
 {
-  --v;
-  v |= v >> uint64_t{1};
-  v |= v >> uint64_t{2};
-  v |= v >> uint64_t{4};
-  v |= v >> uint64_t{8};
-  v |= v >> uint64_t{16};
-  v |= v >> uint64_t{32};
-  ++v;
+  --val;
+  val |= val >> uint64_t{1};
+  val |= val >> uint64_t{2};
+  val |= val >> uint64_t{4};
+  val |= val >> uint64_t{8};
+  val |= val >> uint64_t{16};
+  val |= val >> uint64_t{32};
+  ++val;
 
-  return v;
+  return val;
 }
 
-constexpr uint64_t round_down_pow2(uint64_t v)
+constexpr uint64_t round_down_pow2(uint64_t val)
 {
-  v |= v >> uint64_t{1};
-  v |= v >> uint64_t{2};
-  v |= v >> uint64_t{4};
-  v |= v >> uint64_t{8};
-  v |= v >> uint64_t{16};
-  v |= v >> uint64_t{32};
+  val |= val >> uint64_t{1};
+  val |= val >> uint64_t{2};
+  val |= val >> uint64_t{4};
+  val |= val >> uint64_t{8};
+  val |= val >> uint64_t{16};
+  val |= val >> uint64_t{32};
 
-  return v - (v >> 1);
+  return val - (val >> uint64_t{1});
 }
 
-constexpr uint64_t pop(uint64_t v)
+constexpr uint64_t pop(uint64_t val)
 {
-  v = v - ((v >> uint64_t{1}) & uint64_t{0x5555555555555555});
-  v = (v & uint64_t{0x3333333333333333}) + ((v >> uint64_t{2}) & uint64_t{0x3333333333333333});
-  return (((v + (v >> uint64_t{4})) & uint64_t{0xF0F0F0F0F0F0F0F}) * uint64_t{0x101010101010101}) >> uint64_t{56};
+  val = val - ((val >> uint64_t{1}) & uint64_t{0x5555555555555555});
+  val = (val & uint64_t{0x3333333333333333}) + ((val >> uint64_t{2}) & uint64_t{0x3333333333333333});
+  return (((val + (val >> uint64_t{4})) & uint64_t{0xF0F0F0F0F0F0F0F}) * uint64_t{0x101010101010101}) >> uint64_t{56};
 }
 
-constexpr uint64_t nlz(uint64_t v)
+constexpr uint64_t nlz(uint64_t val)
 {
-  v |= v >> uint64_t{1};
-  v |= v >> uint64_t{2};
-  v |= v >> uint64_t{4};
-  v |= v >> uint64_t{8};
-  v |= v >> uint64_t{16};
-  v |= v >> uint64_t{32};
+  val |= val >> uint64_t{1};
+  val |= val >> uint64_t{2};
+  val |= val >> uint64_t{4};
+  val |= val >> uint64_t{8};
+  val |= val >> uint64_t{16};
+  val |= val >> uint64_t{32};
 
-  return pop(~v);
+  return pop(~val);
 }
 
 inline constexpr uint64_t all_bits{uint64_t{0} - uint64_t{1}};
 
-constexpr uint64_t ntz(uint64_t v)
+constexpr uint64_t ntz(uint64_t val)
 {
-  uint64_t mask = all_bits + static_cast<uint64_t>(0 == v);
-  return mask & (uint64_t{63} - nlz(v));
+  uint64_t mask = all_bits + static_cast<uint64_t>(0 == val);
+  return mask & (uint64_t{63} - nlz(val));
 }
 
 } // namespace yafiyogi::yy_bit_twiddling

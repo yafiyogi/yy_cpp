@@ -46,10 +46,10 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = yy_traits::remove_rcv_t<LabelType>;
+    using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
-    using value_type = yy_traits::remove_rcv_t<ValueType>;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
     using node_type = trie_node<label_type, value_type>;
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
@@ -263,9 +263,9 @@ class Automaton final
 
       auto node = m_state;
 
-      for(const label_l_value_ref ch : label)
+      for(const label_l_value_ref label_part : label)
       {
-        if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, ch).found)
+        if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, label_part).found)
         {
           m_state = nullptr;
           return false;
@@ -319,8 +319,8 @@ class fm_trie final
     constexpr void add(InputSpanType && label,
                        InputValueType && value)
     {
-      static_assert(std::is_same_v<yy_traits::remove_rcv_t<InputValueType>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_same_v<yy_traits::remove_cvr_t<InputValueType>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
       add_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)), std::forward<InputValueType>(value));
     }

@@ -24,6 +24,8 @@
 
 */
 
+#include <cstddef>
+
 #include <tuple>
 
 #include "yy_cpp/yy_static_flat_map.h"
@@ -37,7 +39,7 @@ template<typename Key,
 class const_lookup final
 {
   public:
-    constexpr const_lookup(std::tuple<Key, Value> (&& arr)[Capacity]) noexcept
+    constexpr explicit const_lookup(std::tuple<Key, Value> (&& arr)[Capacity]) noexcept
     {
       for(std::size_t idx = 0; idx < Capacity; ++idx)
       {
@@ -45,6 +47,7 @@ class const_lookup final
       }
     }
 
+    [[nodiscard]]
     constexpr Value lookup(Key key, Value value = Value{}) const noexcept
     {
       auto do_lookup = [&value](const auto visitor_value, auto /*pos*/) {
@@ -58,8 +61,7 @@ class const_lookup final
     }
 
   private:
-    yy_data::static_flat_map<Key, Value, Capacity> m_lookup;
-
+    yy_data::static_flat_map<Key, Value, Capacity> m_lookup{};
 };
 
 } // namespace make_lookup_detail
@@ -68,6 +70,7 @@ class const_lookup final
 template<typename Key,
          typename Value,
          std::size_t N>
+      [[maybe_unused]]
 constexpr auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
 {
   return make_lookup_detail::const_lookup{std::forward<std::tuple<Key, Value>[N]>(arr)};

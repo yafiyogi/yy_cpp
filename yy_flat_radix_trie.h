@@ -55,7 +55,7 @@ struct found_value final
 template<typename LabelType>
 struct trie_node_traits final
 {
-    using label_type = std::vector<yy_traits::remove_rcv_t<LabelType>>;
+    using label_type = std::vector<yy_traits::remove_cvr_t<LabelType>>;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
     using node_type = trie_node<LabelType>;
     using node_idx_type = std::size_t;
@@ -65,8 +65,8 @@ struct trie_node_traits final
     using edges_iterator = typename edges_type::iterator;
     using found_value_type = found_value<edges_iterator>;
 
-    static inline constexpr node_idx_type root_idx{};
-    static inline constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
+    static constexpr node_idx_type root_idx{};
+    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
 };
 
 template<typename LabelType,
@@ -88,8 +88,8 @@ struct trie_traits final
     using data_container_type = std::vector<value_type>;
     using data_ptr = std::shared_ptr<data_container_type>;
 
-    static inline constexpr node_idx_type root_idx = traits::root_idx;
-    static inline constexpr node_idx_type empty_idx = traits::empty_idx;
+    static constexpr node_idx_type root_idx = traits::root_idx;
+    static constexpr node_idx_type empty_idx = traits::empty_idx;
 };
 
 template<typename LabelElemType>
@@ -268,7 +268,7 @@ class trie_node final
     }
 
   private:
-    edges_type m_edges;
+    edges_type m_edges{};
     data_idx_type m_data_idx = no_data;
 };
 
@@ -422,9 +422,8 @@ class Automaton final
       return has_payload();
     }
 
-  private:
-    trie_ptr m_nodes;
-    data_ptr m_data;
+    trie_ptr m_nodes{};
+    data_ptr m_data{};
     node_idx_type m_state = traits::empty_idx;
 };
 
@@ -468,8 +467,8 @@ class flat_radix_trie
     constexpr void add(InputSpanType && label,
                        InputValueType && value)
     {
-      static_assert(std::is_same_v<yy_traits::remove_rcv_t<InputValueType>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_same_v<yy_traits::remove_cvr_t<InputValueType>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
       add_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)), std::forward<InputValueType>(value));
     }
@@ -649,8 +648,8 @@ class flat_radix_trie
       }
     }
 
-    trie_ptr m_nodes;
-    data_ptr m_data;
+    trie_ptr m_nodes{};
+    data_ptr m_data{};
 };
 
 } // namespace yafiyogi::yy_data

@@ -42,10 +42,12 @@ template<typename Value,
          ClearAction ValueClearAction>
 struct traits_type final
 {
-    using value_type = yy_traits::remove_rcv_t<Value>;
+    using value_type = yy_traits::remove_cvr_t<Value>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
+    using value_ptr = value_vector::value_ptr;
+    using const_value_ptr = value_vector::const_value_ptr;
     using size_type = std::size_t;
 };
 
@@ -53,7 +55,7 @@ struct traits_type final
 
 
 template<typename Value,
-         ClearAction ValueClearAction = default_action<Value>>
+         ClearAction ValueClearAction = default_clear_action_v<Value>>
 class flat_set final
 {
   public:
@@ -63,13 +65,15 @@ class flat_set final
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using value_vector = typename traits::value_vector;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
     using difference_type = std::ptrdiff_t;
 
     template<typename InputValueType>
     constexpr flat_set(std::initializer_list<InputValueType> init)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "The values are of an incompatible type.");
 
       reserve(init.size());
@@ -134,8 +138,8 @@ class flat_set final
 
     struct value_pos_type final
     {
-        value_type * value;
-        size_type pos;
+        value_ptr value = nullptr;
+        size_type pos{};
     };
 
     template<typename ValueParamType>
@@ -144,30 +148,32 @@ class flat_set final
     {
       auto [pos, found] = do_find(p_value);
 
-      value_pos_type value_pos{nullptr, pos};
-
       if(found)
       {
-        value_pos.value = value(pos);
+        return value_pos_type{value(pos), pos};
       }
 
-      return value_pos;
+      return value_pos_type{nullptr, pos};
     }
+
+    struct const_value_pos_type final
+    {
+        value_ptr value = nullptr;
+        size_type pos{};
+    };
 
     template<typename ValueParamType>
     [[nodiscard]]
-    constexpr const value_pos_type find(const ValueParamType & p_value) const noexcept
+    constexpr const_value_pos_type find(const ValueParamType & p_value) const noexcept
     {
       auto [pos, found] = do_find(p_value);
 
-      value_pos_type value_pos{nullptr, pos};
-
       if(found)
       {
-        value_pos.value = value(pos);
+        return const_value_pos_type{value(pos), pos};
       }
 
-      return value_pos;
+      return const_value_pos_type{nullptr, pos};
     }
 
     struct pos_found_type final
@@ -227,6 +233,7 @@ class flat_set final
       return *value(pos);
     }
 
+    [[nodiscard]]
     constexpr value_type & add_empty(size_type p_pos)
     {
       auto [value_pos, value_added] = m_values.add_empty(m_values.begin() + p_pos);
@@ -242,8 +249,8 @@ class flat_set final
     constexpr size_type emplace(size_type p_pos,
                                 InputValueType && p_value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
       auto value = add_empty(p_pos);
@@ -262,8 +269,8 @@ class flat_set final
     template<typename InputValueType>
     constexpr pos_inserted_type emplace(InputValueType && p_value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
       auto [iter, found] = do_find_raw(p_value);
@@ -274,19 +281,25 @@ class flat_set final
                                 std::forward<InputValueType>(p_value)).iter;
       }
 
-      size_type pos = static_cast<size_type>(iter - m_values.begin());
+      auto pos = static_cast<size_type>(iter - m_values.begin());
 
       return pos_inserted_type{pos, !found};
     }
 
     constexpr void swap(flat_set & other)
     {
-      std::swap(m_values, other.m_values);
+      if(this != &other)
+      {
+        std::swap(m_values, other.m_values);
+      }
     }
 
     constexpr void swap(flat_set && other)
     {
-      std::swap(m_values, other.m_values);
+      if(this != &other)
+      {
+        m_values = std::move(other.m_values);
+      }
     }
 
     [[nodiscard]]
@@ -305,11 +318,13 @@ class flat_set final
       m_values.clear();
     }
 
+    [[nodiscard]]
     constexpr bool empty() const noexcept
     {
       return m_values.empty();
     }
 
+    [[nodiscard]]
     constexpr bool operator<(const flat_set & other) const noexcept
     {
       if(empty())
@@ -339,6 +354,7 @@ class flat_set final
       return size() < other.size();
     }
 
+    [[nodiscard]]
     constexpr bool operator==(const flat_set & other) const noexcept
     {
       if(empty())
@@ -364,37 +380,39 @@ class flat_set final
     }
 
   private:
-    constexpr value_type * value(size_type idx) noexcept
+    [[nodiscard]]
+    constexpr value_ptr value(size_type idx) noexcept
     {
       return m_values.data() + idx;
     }
 
-    constexpr const value_type * value(size_type idx) const noexcept
+    [[nodiscard]]
+    constexpr const_value_ptr value(size_type idx) const noexcept
     {
       return m_values.data() + idx;
     }
 
     struct iter_end_type final
     {
-        value_type * iter = nullptr;
+        value_ptr iter = nullptr;
         bool is_end = false;
     };
 
     struct const_iter_end_type final
     {
-        const value_type * iter = nullptr;
+        const_value_ptr iter = nullptr;
         bool is_end = false;
     };
 
     struct iter_found_type final
     {
-        value_type * iter = nullptr;
+        value_ptr iter = nullptr;
         bool found = false;
     };
 
     struct const_iter_found_type final
     {
-        const value_type * iter = nullptr;
+        const_value_ptr iter = nullptr;
         bool found = false;
     };
 
@@ -402,9 +420,9 @@ class flat_set final
     [[nodiscard]]
     constexpr iter_end_type do_lower_bound_raw(const ValueParamType & p_value) noexcept
     {
-      value_type * begin = m_values.begin();
-      value_type * end = m_values.end();
-      value_type * iter = yy_data::lower_bound(begin, end, p_value);
+      value_ptr begin = m_values.begin();
+      value_ptr end = m_values.end();
+      value_ptr iter = yy_data::lower_bound(begin, end, p_value);
 
       return iter_end_type{iter, iter == end};
     }
@@ -413,9 +431,9 @@ class flat_set final
     [[nodiscard]]
     constexpr const_iter_end_type do_lower_bound_raw(const ValueParamType & p_value) const noexcept
     {
-      const value_type * begin = m_values.begin();
-      const value_type * end = m_values.end();
-      const value_type * iter = yy_data::lower_bound(begin, end, p_value);
+      const_value_ptr begin = m_values.begin();
+      const_value_ptr end = m_values.end();
+      const_value_ptr iter = yy_data::lower_bound(begin, end, p_value);
 
       return const_iter_end_type{iter, iter == end};
     }

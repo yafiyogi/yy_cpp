@@ -56,7 +56,7 @@ template<typename LabelElemType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = std::vector<yy_traits::remove_rcv_t<LabelElemType>>;
+    using label_type = std::vector<yy_traits::remove_cvr_t<LabelElemType>>;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
     using value_type = ValueType;
     using node_type = trie_node<LabelElemType, value_type>;
@@ -153,8 +153,8 @@ struct trie_node_edge final
       return a.m_label[0] < b;
     }
 
-    std::vector<LabelElemType> m_label;
-    node_ptr m_node;
+    std::vector<LabelElemType> m_label{};
+    node_ptr m_node = nullptr;
 };
 
 template<typename LabelElemType,
@@ -259,7 +259,7 @@ class trie_node
     }
 
   private:
-    edges_type m_edges;
+    edges_type m_edges{};
 };
 
 template<typename LabelElemType,
@@ -308,7 +308,7 @@ class Payload final:
     }
 
   private:
-    value_type m_payload;
+    value_type m_payload{};
 };
 
 template<typename LabelElemType,
@@ -402,8 +402,7 @@ class Automaton final
       return has_payload();
     }
 
-  private:
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
     node_type * m_state = nullptr;
 };
 
@@ -442,8 +441,8 @@ class radix_trie
     constexpr void add(InputSpanType && label,
                        InputValueType && value)
     {
-      static_assert(std::is_same_v<yy_traits::remove_rcv_t<InputValueType>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_same_v<yy_traits::remove_cvr_t<InputValueType>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
       add_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)), std::forward<InputValueType>(value));
     }
@@ -581,7 +580,7 @@ class radix_trie
       }
     }
 
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
 };
 
 } // namespace yafiyogi::yy_data

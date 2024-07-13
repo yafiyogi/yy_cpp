@@ -34,7 +34,7 @@ template<typename T,
          typename Enable = void>
 struct ref_traits
 {
-    using type = yy_traits::remove_rcv_t<T>;
+    using type = yy_traits::remove_cvr_t<T>;
     using l_value_ref = std::add_lvalue_reference_t<type>;
     using const_l_value_ref = std::add_lvalue_reference_t<std::add_const_t<type>>;
     using r_value_ref = std::add_rvalue_reference_t<type>;
@@ -42,9 +42,9 @@ struct ref_traits
 
 template<typename T>
 struct ref_traits<T,
-                  std::enable_if_t<std::is_trivially_copyable_v<yy_traits::remove_rcv_t<T>>>>
+                  std::enable_if_t<std::is_trivially_copyable_v<yy_traits::remove_cvr_t<T>>>>
 {
-    using type = yy_traits::remove_rcv_t<T>;
+    using type = yy_traits::remove_cvr_t<T>;
     using l_value_ref = type;
     using const_l_value_ref = std::add_const_t<type>;
     using r_value_ref = type;

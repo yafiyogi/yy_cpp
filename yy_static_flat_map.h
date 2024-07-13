@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <algorithm>
 #include <type_traits>
 
@@ -47,15 +49,18 @@ struct traits_type final
 {
     using size_type = std::size_t;
     static constexpr const size_type capacity = Capacity;
-    using key_type = yy_traits::remove_rcv_t<Key>;
-    using key_ptr = key_type *;
+    using key_type = yy_traits::remove_cvr_t<Key>;
+    using key_vector = yy_quad::static_simple_vector<key_type, capacity, KeyClearAction>;
+    using key_ptr = key_vector::value_ptr;
+    using const_key_ptr = key_vector::const_value_ptr;
     using key_l_value_ref = typename yy_traits::ref_traits<key_type>::l_value_ref;
     using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
-    using key_vector = yy_quad::static_simple_vector<key_type, capacity, KeyClearAction>;
-    using value_type = yy_traits::remove_rcv_t<Value>;
+    using value_type = yy_traits::remove_cvr_t<Value>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_vector = yy_quad::static_simple_vector<value_type, capacity, ValueClearAction>;
+    using value_ptr = value_vector::value_ptr;
+    using const_value_ptr = value_vector::const_value_ptr;
     using EmplaceResult = yy_quad::static_vector_detail::EmplaceResult;
 };
 
@@ -65,8 +70,8 @@ struct traits_type final
 template<typename Key,
          typename Value,
          std::size_t Capacity,
-         ClearAction KeyClearAction = default_action<Key>,
-         ClearAction ValueClearAction = default_action<Value>>
+         ClearAction KeyClearAction = default_clear_action_v<Key>,
+         ClearAction ValueClearAction = default_clear_action_v<Value>>
 class static_flat_map final
 {
   public:
@@ -74,9 +79,12 @@ class static_flat_map final
     using size_type = typename traits::size_type;
     using key_type = typename traits::key_type;
     using key_ptr = typename traits::key_ptr;
+    using const_key_ptr = typename traits::const_key_ptr;
     using key_l_value_ref = typename traits::key_l_value_ref;
     using key_r_value_ref = typename traits::key_r_value_ref;
     using value_type = typename traits::value_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using key_vector = typename traits::key_vector;
@@ -157,9 +165,9 @@ class static_flat_map final
 
     struct key_value_pos_type final
     {
-        key_type * key;
-        value_type * value;
-        size_type pos;
+        key_ptr key = nullptr;
+        value_ptr value = nullptr;
+        size_type pos{};
     };
 
     template<typename KeyParamType>
@@ -168,32 +176,33 @@ class static_flat_map final
     {
       auto [pos, found] = do_find(p_key);
 
-      key_value_pos_type key_value_pos{nullptr, nullptr, pos};
-
       if(found)
       {
-        key_value_pos.key = key(pos);
-        key_value_pos.value = value(pos);
+        return key_value_pos_type{key(pos), value(pos), pos};
       }
 
-      return key_value_pos;
+      return key_value_pos_type{nullptr, nullptr, pos};
     }
+
+    struct const_key_value_pos_type final
+    {
+        const_key_ptr key = nullptr;
+        const_value_ptr value = nullptr;
+        size_type pos{};
+    };
 
     template<typename KeyParamType>
     [[nodiscard]]
-    constexpr const key_value_pos_type find(const KeyParamType & p_key) const noexcept
+    constexpr const_key_value_pos_type find(const KeyParamType & p_key) const noexcept
     {
       auto [pos, found] = do_find(p_key);
 
-      key_value_pos_type key_value_pos{nullptr, nullptr, pos};
-
       if(found)
       {
-        key_value_pos.key = key(pos);
-        key_value_pos.value = value(pos);
+        return const_key_value_pos_type{key(pos), value(pos), pos};
       }
 
-      return key_value_pos;
+      return const_key_value_pos_type{nullptr, nullptr, pos};
     }
 
     struct pos_found_type final
@@ -267,11 +276,12 @@ class static_flat_map final
 
     struct add_empty_type final
     {
-        key_type * key{};
-        value_type * value{};
+        key_ptr key = nullptr;
+        value_ptr value = nullptr;
         EmplaceResult result = EmplaceResult::Full;
     };
 
+    [[nodiscard]]
     constexpr add_empty_type add_empty(size_type p_pos) noexcept
     {
       return add_empty(m_keys.begin() + p_pos);
@@ -288,8 +298,8 @@ class static_flat_map final
                                       key_r_value_ref p_key,
                                       InputValueType && p_value) noexcept
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
       auto [key, value, result] = add_empty(p_pos);
@@ -314,17 +324,17 @@ class static_flat_map final
     constexpr pos_result_type emplace(InputKeyType && p_key,
                                         InputValueType && p_value) noexcept
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputKeyType>, key_type>
-                    || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_rcv_t<std::remove_pointer<InputKeyType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputKeyType>, key_type>
+                    || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_cvr_t<std::remove_pointer<InputKeyType>>>),
                     "p_key is of an incompatible type.");
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
 
       auto [key_iter, key_found] = do_find_raw(p_key);
       auto result = EmplaceResult::NotInserted;
-      size_type pos = static_cast<size_type>(key_iter - m_keys.begin());
+      auto pos = static_cast<size_type>(key_iter - m_keys.begin());
 
       if(!key_found)
       {
@@ -342,16 +352,22 @@ class static_flat_map final
       return pos_result_type{pos, result};
     }
 
-    constexpr void swap(static_flat_map & other)
+    constexpr void swap(static_flat_map & other) noexcept
     {
-      std::swap(m_keys, other.m_keys);
-      std::swap(m_values, other.m_values);
+      if(this != &other)
+      {
+        std::swap(m_keys, other.m_keys);
+        std::swap(m_values, other.m_values);
+      }
     }
 
-    constexpr void swap(static_flat_map && other)
+    constexpr void swap(static_flat_map && other) noexcept
     {
-      std::swap(m_keys, other.m_keys);
-      std::swap(m_values, other.m_values);
+      if(this != &other)
+      {
+        m_keys = std::move(other.m_keys);
+        m_values = std::move(other.m_values);
+      }
     }
 
     [[nodiscard]]
@@ -374,11 +390,13 @@ class static_flat_map final
       m_values.clear();
     }
 
+    [[nodiscard]]
     constexpr bool empty() const noexcept
     {
       return m_keys.empty();
     }
 
+    [[nodiscard]]
     constexpr bool operator<(const static_flat_map & other) const noexcept
     {
       if(empty())
@@ -418,6 +436,7 @@ class static_flat_map final
       return size() < other.size();
     }
 
+    [[nodiscard]]
     constexpr bool operator==(const static_flat_map & other) const noexcept
     {
       if(empty())
@@ -448,6 +467,7 @@ class static_flat_map final
     }
 
   private:
+    [[nodiscard]]
     constexpr add_empty_type add_empty(key_ptr p_pos) noexcept
     {
       if(m_capacity == m_size)
@@ -468,21 +488,25 @@ class static_flat_map final
       return add_empty_type{m_keys.end(), m_values.end(), EmplaceResult::NotInserted};
     }
 
-    constexpr key_type * key(size_type idx) noexcept
+    [[nodiscard]]
+    constexpr key_ptr key(size_type idx) noexcept
     {
       return m_keys.data() + idx;
     }
 
-    constexpr const key_type * key(size_type idx) const noexcept
+    [[nodiscard]]
+    constexpr const_key_ptr key(size_type idx) const noexcept
     {
       return m_keys.data() + idx;
     }
 
+    [[nodiscard]]
     constexpr value_type * value(size_type idx) noexcept
     {
       return m_values.data() + idx;
     }
 
+    [[nodiscard]]
     constexpr const value_type * value(size_type idx) const noexcept
     {
       return m_values.data() + idx;
@@ -490,25 +514,25 @@ class static_flat_map final
 
     struct iter_end_type final
     {
-        key_type * iter = nullptr;
+        key_ptr iter = nullptr;
         bool is_end = false;
     };
 
     struct const_iter_end_type final
     {
-        const key_type * iter = nullptr;
+        const_key_ptr iter = nullptr;
         bool is_end = false;
     };
 
     struct iter_found_type final
     {
-        key_type * iter = nullptr;
+        key_ptr iter = nullptr;
         bool found = false;
     };
 
     struct const_iter_found_type final
     {
-        const key_type * iter = nullptr;
+        const_key_ptr iter = nullptr;
         bool found = false;
     };
 
@@ -516,10 +540,10 @@ class static_flat_map final
     [[nodiscard]]
     constexpr iter_end_type do_lower_bound_raw(const KeyParamType & p_key) noexcept
     {
-      key_type * begin = m_keys.begin();
-      key_type * end = m_keys.end();
-      //key_type * iter = yy_data::lower_bound(begin, end, p_key);
-      key_type * iter = std::lower_bound(begin, end, p_key);
+      key_ptr begin = m_keys.begin();
+      key_ptr end = m_keys.end();
+      //key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      key_ptr iter = std::lower_bound(begin, end, p_key);
 
       return iter_end_type{iter, iter == end};
     }
@@ -528,10 +552,10 @@ class static_flat_map final
     [[nodiscard]]
     constexpr const_iter_end_type do_lower_bound_raw(const KeyParamType & p_key) const noexcept
     {
-      const key_type * begin = m_keys.begin();
-      const key_type * end = m_keys.end();
-      //key_type * iter = yy_data::lower_bound(begin, end, p_key);
-      const key_type * iter = std::lower_bound(begin, end, p_key);
+      const_key_ptr begin = m_keys.begin();
+      const_key_ptr end = m_keys.end();
+      //const_key_ptr iter = yy_data::lower_bound(begin, end, p_key);
+      const_key_ptr iter = std::lower_bound(begin, end, p_key);
 
       return const_iter_end_type{iter, iter == end};
     }
@@ -576,8 +600,8 @@ class static_flat_map final
       return pos_found_type{static_cast<size_type>(key_iter - m_keys.data()), found};
     }
 
-    key_vector m_keys;
-    value_vector m_values;
+    key_vector m_keys{};
+    value_vector m_values{};
     size_type m_size{};
     static constexpr const size_type m_capacity = traits::capacity;
 };

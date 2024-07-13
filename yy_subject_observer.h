@@ -40,7 +40,7 @@ template<typename ReturnType,
 class observer_base
 {
   public:
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
     using ptr_type = std::unique_ptr<observer_base<return_type,
                                                    OtherArgs...>>;
 
@@ -64,7 +64,7 @@ class observer_class_method final:
                            OtherArgs...>
 {
   public:
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
     using method_ptr = return_type (T::*)(const ParamType *, OtherArgs &&...);
     using object_ptr = std::shared_ptr<T>;
 
@@ -100,8 +100,8 @@ class observer_class_method final:
     }
 
   private:
-    object_ptr m_obj;
-    method_ptr m_method;
+    object_ptr m_obj{};
+    method_ptr m_method{};
 };
 
 template<typename T,
@@ -112,7 +112,7 @@ class observer_functor final:
                            OtherArgs...>
 {
   public:
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
     using func_traits = yy_traits::func_traits<T>;
     using arg_type = typename func_traits::arg_types::template arg_type<0>;
 
@@ -137,7 +137,7 @@ class observer_functor final:
     }
 
   private:
-    T m_func;
+    T m_func{};
 };
 
 template<typename ReturnType,
@@ -148,7 +148,7 @@ class observer_fn final:
                            OtherArgs...>
 {
   public:
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
     using fn_type = return_type (*)(ParamType *, OtherArgs && ...);
 
     explicit observer_fn(fn_type p_func) noexcept:
@@ -172,16 +172,16 @@ class observer_fn final:
     }
 
   private:
-    fn_type m_func;
+    fn_type m_func{};
 };
 
 template<typename ReturnType>
 struct value_valid_type
 {
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
 
-    return_type value;
-    bool found;
+    return_type value{};
+    bool found = false;
 };
 
 } // subject_observer_detail
@@ -192,8 +192,8 @@ template<typename KeyType,
 class subject final
 {
   public:
-    using key_type = yy_traits::remove_rcv_t<KeyType>;
-    using return_type = yy_traits::remove_rcv_t<ReturnType>;
+    using key_type = yy_traits::remove_cvr_t<KeyType>;
+    using return_type = yy_traits::remove_cvr_t<ReturnType>;
     using observer_base_type = subject_observer_detail::observer_base<return_type,
                                                                       OtherArgs...>;
     using value_valid_type = subject_observer_detail::value_valid_type<return_type>;
@@ -270,7 +270,7 @@ class subject final
     }
 
   private:
-    map_type m_observers;
+    map_type m_observers{};
 };
 
 template<typename KeyType,
@@ -280,7 +280,7 @@ class subject<KeyType,
               OtherArgs...> final
 {
   public:
-    using key_type = yy_traits::remove_rcv_t<KeyType>;
+    using key_type = yy_traits::remove_cvr_t<KeyType>;
     using observer_ptr = typename subject_observer_detail::observer_base<void,
                                                                          OtherArgs...>::ptr_type;
     using map_type = std::unordered_map<key_type,
@@ -362,7 +362,7 @@ class subject<KeyType,
     }
 
   private:
-    map_type m_observers;
+    map_type m_observers{};
 };
 
 } // namespace yafiyogi::yy_data

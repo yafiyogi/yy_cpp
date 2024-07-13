@@ -27,12 +27,15 @@
 #ifndef yy_utility_h
 #define yy_utility_h
 
+#include <cstddef>
+
 #include <array>
 #include <utility>
 #include <memory>
 #include <type_traits>
 
 #include "yy_assert.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_util {
 
@@ -40,7 +43,9 @@ template<typename Iterator>
 class Range final
 {
   public:
-    using iterator = std::remove_reference_t<std::remove_volatile_t<Iterator>>;
+    using iterator = yy_traits::remove_cvr_t<Iterator>;
+    using const_iterator = std::add_const_t<iterator>;
+
     constexpr explicit Range(const iterator & p_begin,
                              const iterator & p_end) noexcept:
       m_begin(p_begin),
@@ -64,13 +69,25 @@ class Range final
     constexpr Range & operator=(Range &&) noexcept = default;
 
     [[nodiscard]]
-    constexpr iterator begin() const noexcept
+    constexpr iterator begin() noexcept
     {
       return m_begin;
     }
 
     [[nodiscard]]
-    constexpr iterator end() const noexcept
+    constexpr const_iterator begin() const noexcept
+    {
+      return m_begin;
+    }
+
+    [[nodiscard]]
+    constexpr iterator end() noexcept
+    {
+      return m_end;
+    }
+
+    [[nodiscard]]
+    constexpr const_iterator end() const noexcept
     {
       return m_end;
     }
@@ -95,30 +112,30 @@ constexpr auto make_range(Iterator && begin, Iterator && end) noexcept
 template<typename T>
 struct ArraySize
 {
-    static constexpr size_t size = 0;
+    static constexpr std::size_t size = 0;
 };
 
-template<typename T, size_t Size>
+template<typename T, std::size_t Size>
 struct ArraySize<T[Size]>
 {
-    static constexpr size_t size = Size;
+    static constexpr std::size_t size = Size;
 };
 
-template<typename T, size_t Size>
+template<typename T, std::size_t Size>
 struct ArraySize<std::array<T, Size>>
 {
-    static constexpr size_t size = Size;
+    static constexpr std::size_t size = Size;
 };
 
 template<typename T>
-inline constexpr size_t array_size_v = ArraySize<T>::size;
+inline constexpr std::size_t array_size_v = ArraySize<T>::size;
 
 template<typename Return,
          typename T>
-constexpr std::unique_ptr<yy_traits::remove_rcv_t<Return>> static_unique_cast(std::unique_ptr<T> && ptr)
+constexpr std::unique_ptr<yy_traits::remove_cvr_t<Return>> static_unique_cast(std::unique_ptr<T> && ptr)
 {
-  using return_type = yy_traits::remove_rcv_t<Return>;
-  using param_type = yy_traits::remove_rcv_t<T>;
+  using return_type = yy_traits::remove_cvr_t<Return>;
+  using param_type = yy_traits::remove_cvr_t<T>;
   static_assert(std::is_base_of_v<return_type, param_type>, "static_unique_cast(): type 'Return' is not a base of type 'T'.");
 
   auto new_ptr = std::unique_ptr<return_type>(static_cast<return_type *>(ptr.release()));

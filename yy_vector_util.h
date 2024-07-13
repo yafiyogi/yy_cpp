@@ -43,8 +43,8 @@ template<typename T,
 class less_than_comp final
 {
   public:
-    using container_value_type = yy_traits::remove_rcv_t<T>;
-    using value_type = yy_traits::remove_rcv_t<V>;
+    using container_value_type = yy_traits::remove_cvr_t<T>;
+    using value_type = yy_traits::remove_cvr_t<V>;
 
     constexpr explicit less_than_comp(C comp) noexcept:
       m_comp(std::move(comp))
@@ -75,8 +75,8 @@ template<typename T,
 class equal_to_comp final
 {
   public:
-    using container_value_type = yy_traits::remove_rcv_t<T>;
-    using value_type = yy_traits::remove_rcv_t<V>;
+    using container_value_type = yy_traits::remove_cvr_t<T>;
+    using value_type = yy_traits::remove_cvr_t<V>;
 
     constexpr explicit equal_to_comp(C comp) noexcept:
       m_comp(std::move(comp))
@@ -106,8 +106,8 @@ template<typename T,
          typename Enable = void>
 struct default_comp final
 {
-    using container_value_type = yy_traits::remove_rcv_t<T>;
-    using value_type = yy_traits::remove_rcv_t<V>;
+    using container_value_type = yy_traits::remove_cvr_t<T>;
+    using value_type = yy_traits::remove_cvr_t<V>;
 
     constexpr int operator()(const container_value_type & item,
                              const value_type & val) const noexcept
@@ -152,7 +152,7 @@ struct pos_end_type final
 template<typename T,
          typename V,
          typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_rcv_t<V>>,
+                                                  yy_traits::remove_cvr_t<V>>,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
@@ -161,7 +161,7 @@ constexpr pos_end_type lower_bound_pos(T && container,
                                        C && comp = C{}) noexcept
 {
   using container_value_type = yy_traits::container_type_t<T>;
-  using value_type = yy_traits::remove_rcv_t<V>;
+  using value_type = yy_traits::remove_cvr_t<V>;
   using less_than = vector_detail::less_than_comp<container_value_type, value_type, C>;
 
   const auto begin = container.data();
@@ -187,7 +187,7 @@ struct pos_found_type final
 template<typename T,
          typename V,
          typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_rcv_t<V>>,
+                                                  yy_traits::remove_cvr_t<V>>,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
@@ -195,9 +195,9 @@ constexpr pos_found_type find_pos(T && container,
                                   V && value,
                                   C && comp = C{}) noexcept
 {
-  using container_type = yy_traits::remove_rcv_t<T>;
+  using container_type = yy_traits::remove_cvr_t<T>;
   using container_value_type = yy_traits::container_type_t<container_type>;
-  using value_type = yy_traits::remove_rcv_t<V>;
+  using value_type = yy_traits::remove_cvr_t<V>;
   using equal_to = vector_detail::equal_to_comp<container_value_type, value_type, C>;
 
   auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
@@ -213,7 +213,7 @@ constexpr pos_found_type find_pos(T && container,
 template<typename T,
          typename V,
          typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_rcv_t<V>>,
+                                                  yy_traits::remove_cvr_t<V>>,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
@@ -229,7 +229,7 @@ constexpr auto lower_bound(T && container,
 template<typename T,
          typename V,
          typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_rcv_t<V>>,
+                                                  yy_traits::remove_cvr_t<V>>,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>

@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <string_view>
 #include <type_traits>
 
@@ -35,14 +37,14 @@
 
 namespace yafiyogi::yy_util {
 
-enum class FastFloatRV { Ok, Overflow, NoValue};
+enum class FastFloatRV:uint8_t { Ok, Overflow, NoValue};
 
 namespace fast_atoi_detail {
 
 template<typename I>
 struct val_valid_type
 {
-    using value_type = yy_traits::remove_rcv_t<I>;
+    using value_type = yy_traits::remove_cvr_t<I>;
     value_type value{};
     FastFloatRV state = FastFloatRV::NoValue;
 };
@@ -50,7 +52,7 @@ struct val_valid_type
 } // namespace fast_atoi_detail
 
 template<typename I>
-constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_span<char> p_str)
+constexpr fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_span<char> p_str)
 {
   using val_valid_type = fast_atoi_detail::val_valid_type<I>;
   using value_type = val_valid_type::value_type;
@@ -64,12 +66,12 @@ constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_sp
     return val_valid_type{};
   }
 
-  value_type val = 0;
+  value_type val = value_type{0};
   FastFloatRV state = FastFloatRV::NoValue;
 
   auto add = [&val, p_str]() mutable {
     // Multiply current value by 10.
-    val = (val << 1) + (val << 3);
+    val = (val << value_type{1}) + (val << value_type{3});
 
     // Add next digit.
     val += static_cast<value_type>(*p_str.begin() - '0');
@@ -144,7 +146,7 @@ constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_sp
 }
 
 template<typename I>
-constexpr inline fast_atoi_detail::val_valid_type<I> fast_atoi(std::string_view p_str)
+constexpr fast_atoi_detail::val_valid_type<I> fast_atoi(std::string_view p_str)
 {
   return fast_atoi<I>(yy_quad::make_const_span(p_str));
 }

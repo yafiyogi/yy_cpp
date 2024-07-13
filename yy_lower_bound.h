@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <limits>
 
 #include "yy_ref_traits.h"
@@ -36,51 +38,60 @@ namespace lb_detail {
 template<typename T, typename V>
 struct less_val final
 {
-    using type = yy_traits::remove_rcv_t<T>;
-    using value_type = yy_traits::remove_rcv_t<V>;
+    using type = yy_traits::remove_cvr_t<T>;
+    using value_type = yy_traits::remove_cvr_t<V>;
     using val_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
-    static constexpr size_t mask = std::numeric_limits<size_t>::max();
+    static constexpr std::size_t mask = std::numeric_limits<std::size_t>::max();
 
     constexpr less_val() noexcept = default;
     constexpr less_val(const less_val &) noexcept = default;
     constexpr less_val(less_val &&) noexcept = default;
+    constexpr ~less_val() noexcept = default;
 
+    constexpr less_val & operator=(const less_val &) noexcept = default;
+    constexpr less_val & operator=(less_val &&) noexcept = default;
+
+    [[nodiscard]]
     constexpr bool operator()(const type item,
                               const value_type & val) const noexcept
     {
       return *item < val;
     }
 
-    constexpr size_t comp_bool(const type item,
+    [[nodiscard]]
+    constexpr std::size_t comp_bool(const type item,
                                const value_type & val) const noexcept
     {
-      return static_cast<size_t>(*item < val);
+      return static_cast<std::size_t>(*item < val);
     }
 
-    constexpr size_t comp_mask(const type item,
+    [[nodiscard]]
+    constexpr std::size_t comp_mask(const type item,
                                const value_type & val) const noexcept
     {
-      static_assert(mask == (size_t{0} - size_t{1}), "Your platform/complier doesn't wrap unsigned integers. You are going to have to use std::lower_bound. Sorry!");
+      static_assert(mask == (std::size_t{0} - std::size_t{1}), "Your platform/complier doesn't wrap unsigned integers. You are going to have to use std::lower_bound. Sorry!");
 
-      return size_t{0} - comp_bool(item, val);
+      return std::size_t{0} - comp_bool(item, val);
     }
 
-    constexpr size_t comp_mask(const type item,
+    [[nodiscard]]
+    constexpr std::size_t comp_mask(const type item,
                                const value_type & val,
-                               const size_t val_to_mask) const noexcept
+                               const std::size_t val_to_mask) const noexcept
     {
       return val_to_mask & comp_mask(item, val);
     }
 };
 
-inline constexpr size_t loop_mask = std::numeric_limits<size_t>::max() - size_t{1};
+inline constexpr std::size_t loop_mask = std::numeric_limits<std::size_t>::max() - std::size_t{1};
 
 }
 
 template<typename T,
          typename V,
-         typename Compare>
-constexpr T lower_bound(T begin, T end, const V & val, Compare comp) noexcept
+         typename Compare = lb_detail::less_val<T, V>>
+[[nodiscard]]
+constexpr T lower_bound(T begin, T end, const V & val, Compare comp = Compare{}) noexcept
 {
   static_assert(std::is_pointer_v<T>, "Type 'T' must be a pointer!");
 
@@ -89,11 +100,11 @@ constexpr T lower_bound(T begin, T end, const V & val, Compare comp) noexcept
     return begin;
   }
 
-  size_t n = static_cast<size_t>(end - begin);
+  auto n = static_cast<std::size_t>(end - begin);
 
   while(0 != (n & lb_detail::loop_mask))
   {
-    size_t half = n >> 1;
+    std::size_t half = n >> 1;
 
     begin = begin + comp.comp_mask(begin + half, val, half);
 
@@ -101,15 +112,6 @@ constexpr T lower_bound(T begin, T end, const V & val, Compare comp) noexcept
   }
 
   return begin + comp.comp_bool(begin, val);
-}
-
-template<typename T,
-         typename V>
-constexpr T lower_bound(T begin, T end, const V & val) noexcept
-{
-  static_assert(std::is_pointer_v<T>, "Type 'T' must be a pointer!");
-
-  return yy_data::lower_bound(begin, end, val, lb_detail::less_val<T, V>{});
 }
 
 } // namespace yafiyogi::yy_data

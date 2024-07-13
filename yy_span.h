@@ -82,7 +82,7 @@ namespace span_detail {
 template<typename ValueType>
 struct span_traits
 {
-    using value_type = yy_traits::remove_rcv_t<ValueType>;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
@@ -136,11 +136,13 @@ class span final
     constexpr span & operator=(const span &) noexcept = default;
     constexpr span & operator=(span &&) noexcept = default;
 
+    [[nodiscard]]
     constexpr value_type & operator[](size_type idx) noexcept
     {
       return *(m_begin + idx);
     }
 
+    [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
       return *(m_begin + idx);
@@ -206,11 +208,13 @@ class span final
       return *this;
     }
 
+    [[nodiscard]]
     constexpr const_ptr data() noexcept
     {
       return m_begin;
     }
 
+    [[nodiscard]]
     constexpr const_ptr data() const noexcept
     {
       return m_begin;
@@ -301,6 +305,7 @@ class span final
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -310,6 +315,7 @@ class span final
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const span b) noexcept
     {
@@ -320,6 +326,7 @@ class span final
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -329,6 +336,7 @@ class span final
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const span b) noexcept
     {
@@ -387,6 +395,7 @@ class const_span final
     constexpr const_span & operator=(const const_span &) noexcept = default;
     constexpr const_span & operator=(const_span &&) noexcept = default;
 
+    [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
       return *(m_begin + idx);
@@ -440,6 +449,7 @@ class const_span final
       return *this;
     }
 
+    [[nodiscard]]
     constexpr const_ptr data() const noexcept
     {
       return m_begin;
@@ -508,6 +518,7 @@ class const_span final
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -517,6 +528,7 @@ class const_span final
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const const_span b) noexcept
     {
@@ -527,6 +539,7 @@ class const_span final
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -536,6 +549,7 @@ class const_span final
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const const_span b) noexcept
     {
@@ -545,12 +559,14 @@ class const_span final
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
 
+    [[nodiscard]]
     constexpr bool operator<(const span<value_type> other) const noexcept
     {
       return std::lexicographical_compare(begin(), end(),
                                           other.begin(), other.end());
     }
 
+    [[nodiscard]]
     friend constexpr bool operator<(const span<value_type> a,
                                     const const_span b) noexcept
     {
@@ -558,12 +574,14 @@ class const_span final
                                           b.begin(), b.end());
     }
 
+    [[nodiscard]]
     constexpr bool operator==(const span<value_type> other) const noexcept
     {
       return (size() == other.size())
         && std::equal(begin(), end(), other.begin());
     }
 
+    [[nodiscard]]
     friend constexpr bool operator==(const span<value_type> a,
                                      const const_span b) noexcept
     {
@@ -620,7 +638,7 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_std_string_v<T>
                           || yy_traits::is_array_v<T>, bool> = true>
-inline constexpr auto make_span(T & container)
+constexpr auto make_span(T & container)
 {
   return typename span_traits_helper<T>::span_type{container.data(), container.size()};
 }
@@ -629,21 +647,21 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_std_string_v<T>
                           || yy_traits::is_array_v<T>, bool> = true>
-inline constexpr auto make_span(const T & container)
+constexpr auto make_span(const T & container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
-inline constexpr auto make_span(T container)
+constexpr auto make_span(T container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
-inline constexpr auto make_span(T p_str)
+constexpr auto make_span(T p_str)
 {
   std::string_view str{p_str};
   return make_span(str);
@@ -651,7 +669,7 @@ inline constexpr auto make_span(T p_str)
 
 template<typename T,
          std::enable_if_t<yy_traits::is_span_v<T>, bool> = true>
-inline constexpr auto make_span(T p_span)
+constexpr auto make_span(T p_span)
 {
   return T{p_span};
 }
@@ -660,39 +678,31 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_std_string_v<T>
                           || yy_traits::is_array_v<T>, bool> = true>
-inline constexpr auto make_const_span(T & container)
+constexpr auto make_const_span(T & container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
 template<typename T,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_std_string_v<T>
-                          || yy_traits::is_array_v<T>, bool> = true>
-inline constexpr auto make_const_span(const T & container)
-{
-  return make_span(container);
-}
-
-template<typename T,
          std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
-inline constexpr auto make_const_span(T container)
+constexpr auto make_const_span(T container)
 {
-  return make_span(container);
+  return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
-inline constexpr auto make_const_span(T p_str)
+constexpr auto make_const_span(T p_str)
 {
-  return make_span(p_str);
+  std::string_view str{p_str};
+  return typename span_traits_helper<std::string_view>::const_span_type{str.data(), str.size()};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_span_v<T>, bool> = true>
-inline constexpr auto make_const_span(T p_span)
+constexpr auto make_const_span(T p_span)
 {
-  return const_span<typename T::value_type>{p_span};
+  return T{p_span};
 }
 
 } // namespace yy_quad

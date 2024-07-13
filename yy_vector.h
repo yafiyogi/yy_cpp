@@ -47,7 +47,7 @@ namespace vector_detail {
 template<typename T>
 struct vector_traits final
 {
-    using value_type = yy_traits::remove_rcv_t<T>;
+    using value_type = yy_traits::remove_cvr_t<T>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
@@ -63,7 +63,7 @@ struct vector_traits final
         bool inserted{};
     };
 
-    static constexpr ClearAction default_action = yy_data::default_action<value_type>;
+    static constexpr ClearAction default_action = yy_data::default_clear_action_v<value_type>;
 
 };
 
@@ -90,10 +90,10 @@ class vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr explicit vector(size_type num)
+    constexpr explicit vector(size_type num):
+      m_size(num)
     {
-      reserve(num);
-      m_size = num;
+      reserve(m_size);
     }
 
     constexpr vector() noexcept = default;
@@ -107,7 +107,8 @@ class vector
     constexpr vector(vector && other) noexcept
     {
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
-      swap(other);
+
+      move(std::move(other));
     }
 
     constexpr vector(std::initializer_list<value_type> p_il) noexcept
@@ -127,21 +128,26 @@ class vector
     constexpr vector & operator=(const vector & other)
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
-      copy(other);
+
+      if(this != &other)
+      {
+        copy(other);
+      }
 
       return *this;
     }
 
     constexpr vector & operator=(vector && other) noexcept
     {
-      vector tmp{};
-
-      tmp.swap(other);
-      swap(tmp);
+      if(this != &other)
+      {
+        move(std::move(other));
+      }
 
       return *this;
     }
 
+    [[nodiscard]]
     constexpr bool operator<(const vector & other) const noexcept
     {
       return std::lexicographical_compare(begin(), end(),
@@ -150,6 +156,7 @@ class vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -160,6 +167,7 @@ class vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const vector & b) noexcept
     {
@@ -169,6 +177,7 @@ class vector
                                           b.begin(), b.end());
     }
 
+    [[nodiscard]]
     constexpr bool operator==(const vector & other) const noexcept
     {
       return (size() == other.size())
@@ -176,6 +185,7 @@ class vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -185,6 +195,7 @@ class vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const vector & b) noexcept
     {
@@ -194,36 +205,43 @@ class vector
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
 
+    [[nodiscard]]
     constexpr iterator begin() noexcept
     {
       return raw_data() + m_offset;
     }
 
+    [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
       return raw_data() + m_offset;
     }
 
+    [[nodiscard]]
     constexpr iterator end() noexcept
     {
       return raw_data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
       return raw_data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr value_type & operator[](size_type pos) noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr const value_type & operator[](size_type pos) const noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr value_type & back()
     {
       if(begin() == end())
@@ -234,6 +252,7 @@ class vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
       if(begin() == end())
@@ -244,6 +263,7 @@ class vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_type & front()
     {
       if(begin() == end())
@@ -254,6 +274,7 @@ class vector
       return *begin();
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
       if(begin() == end())
@@ -271,7 +292,7 @@ class vector
     }
 
     [[nodiscard]]
-    constexpr const value_ptr data() const noexcept
+    constexpr const_value_ptr data() const noexcept
     {
       return raw_data() + m_offset;
     }
@@ -303,13 +324,14 @@ class vector
     template<typename InputValueType>
     constexpr void emplace_back(InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    [[nodiscard]]
     constexpr return_value add_empty(value_ptr pos)
     {
       return_value rv{end(), false};
@@ -342,8 +364,8 @@ class vector
     template<typename InputValueType>
     constexpr return_value emplace(iterator pos, InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
 
@@ -543,20 +565,27 @@ class vector
     {
       if(this != &other)
       {
-        std::swap(m_data, other.m_data);
-        std::swap(m_capacity, other.m_capacity);
-        std::swap(m_size, other.m_size);
-        std::swap(m_offset, other.m_offset);
+        move(std::move(other));
       }
     }
 
   private:
+    constexpr void move(vector && other) noexcept
+    {
+      m_data = std::move(other.m_data);
+      m_capacity = std::move(other.m_capacity);
+      m_size = std::move(other.m_size);
+      m_offset = std::move(other.m_offset);
+    }
+
+    [[nodiscard]]
     constexpr value_ptr raw_data() noexcept
     {
       return m_data.get();
     }
 
-    constexpr const value_ptr raw_data() const noexcept
+    [[nodiscard]]
+    constexpr const_value_ptr raw_data() const noexcept
     {
       return m_data.get();
     }
@@ -573,8 +602,8 @@ class vector
 
     struct distance_valid_type final
     {
-        size_type distance;
-        bool valid;
+        size_type distance{};
+        bool valid = false;
     };
 
     constexpr distance_valid_type distance_valid(iterator pos, size_type max) const noexcept
@@ -608,7 +637,7 @@ class vector
       {
         auto new_data = std::make_unique<vector_type>(new_capacity);
 
-        if(m_size > 0)
+        if(m_data && m_size > 0)
         {
           std::move(begin(), begin() + pos, new_data.get());
           if(pos != m_size)
@@ -626,7 +655,7 @@ class vector
     using vector_type = value_type[];
     using vector_ptr = std::unique_ptr<vector_type>;
 
-    vector_ptr m_data;
+    vector_ptr m_data{};
     size_type m_size{};
     size_type m_offset{};
     size_type m_capacity{};
@@ -653,10 +682,10 @@ class simple_vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr explicit simple_vector(size_type num)
+    constexpr explicit simple_vector(size_type num):
+      m_size(num)
     {
-      reserve(num);
-      m_size = num;
+      reserve(m_size);
     }
 
     constexpr simple_vector() noexcept = default;
@@ -670,7 +699,8 @@ class simple_vector
     constexpr simple_vector(simple_vector && other) noexcept
     {
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
-      swap(other);
+
+      move(std::move(other));
     }
 
     constexpr simple_vector(std::initializer_list<value_type> p_il) noexcept
@@ -690,21 +720,26 @@ class simple_vector
     constexpr simple_vector & operator=(const simple_vector & other)
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
-      copy(other);
+
+      if(this != &other)
+      {
+        copy(other);
+      }
 
       return *this;
     }
 
     constexpr simple_vector & operator=(simple_vector && other) noexcept
     {
-      simple_vector tmp{};
-
-      tmp.swap(other);
-      swap(tmp);
+      if(this != &other)
+      {
+        move(std::move(other));
+      }
 
       return *this;
     }
 
+    [[nodiscard]]
     constexpr bool operator<(const simple_vector & other) const noexcept
     {
       return std::lexicographical_compare(begin(), end(),
@@ -713,6 +748,7 @@ class simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -723,6 +759,7 @@ class simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const simple_vector & b) noexcept
     {
@@ -732,6 +769,7 @@ class simple_vector
                                           b.begin(), b.end());
     }
 
+    [[nodiscard]]
     constexpr bool operator==(const simple_vector & other) const noexcept
     {
       return (size() == other.size())
@@ -739,6 +777,7 @@ class simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -748,6 +787,7 @@ class simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const simple_vector & b) noexcept
     {
@@ -757,36 +797,43 @@ class simple_vector
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
 
+    [[nodiscard]]
     constexpr iterator begin() noexcept
     {
       return data();
     }
 
+    [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
       return data();
     }
 
+    [[nodiscard]]
     constexpr iterator end() noexcept
     {
       return data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
       return data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr value_type & operator[](size_type pos) noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr const value_type & operator[](size_type pos) const noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr value_type & back()
     {
       if(begin() == end())
@@ -797,6 +844,7 @@ class simple_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
       if(begin() == end())
@@ -807,6 +855,7 @@ class simple_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_type & front()
     {
       if(begin() == end())
@@ -817,6 +866,7 @@ class simple_vector
       return *begin();
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
       if(begin() == end())
@@ -834,7 +884,7 @@ class simple_vector
     }
 
     [[nodiscard]]
-    constexpr const value_ptr data() const noexcept
+    constexpr const_value_ptr data() const noexcept
     {
       return m_data.get();
     }
@@ -860,13 +910,14 @@ class simple_vector
     template<typename InputValueType>
     constexpr void emplace_back(InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    [[nodiscard]]
     constexpr return_value add_empty(value_ptr pos)
     {
       return_value rv{end(), false};
@@ -899,8 +950,8 @@ class simple_vector
     template<typename InputValueType>
     constexpr return_value emplace(iterator pos, InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       return_value rv = add_empty(pos);
@@ -1054,19 +1105,25 @@ class simple_vector
     {
       if(this != &other)
       {
-        std::swap(m_data, other.m_data);
-        std::swap(m_capacity, other.m_capacity);
-        std::swap(m_size, other.m_size);
+        move(std::move(other));
       }
     }
 
   private:
+    constexpr void move(simple_vector && other) noexcept
+    {
+      m_data = std::move(other.m_data);
+      m_capacity = std::move(other.m_capacity);
+      m_size = std::move(other.m_size);
+    }
+
     struct distance_valid_type final
     {
-        size_type distance;
-        bool valid;
+        size_type distance{};
+        bool valid = false;
     };
 
+    [[nodiscard]]
     constexpr distance_valid_type distance_valid(iterator pos, size_type max) const noexcept
     {
       const auto distance = std::distance(begin(), pos);
@@ -1097,7 +1154,7 @@ class simple_vector
       {
         auto new_data = std::make_unique<vector_type>(new_capacity);
 
-        if(m_size > 0)
+        if(m_data && m_size > 0)
         {
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
@@ -1119,7 +1176,7 @@ class simple_vector
     using vector_type = value_type[];
     using vector_ptr = std::unique_ptr<vector_type>;
 
-    vector_ptr m_data;
+    vector_ptr m_data{};
     size_type m_size{};
     size_type m_capacity{};
 };

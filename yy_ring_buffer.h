@@ -32,18 +32,19 @@
 namespace yafiyogi::yy_data {
 
 template<typename ValueType,
-         std::size_t Size>
+         std::size_t Capacity>
 class ring_buffer final
 {
   public:
-    using value_type = yy_traits::remove_rcv_t<ValueType>;
-    using size_type = std::size_t;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
+    using array_type = std::array<value_type, Capacity>;
+    using size_type = array_type::size_type;
 
     template<typename InputValueType>
-    bool push(InputValueType && value) const noexcept
+    bool push(InputValueType && value) noexcept
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       const auto old_pos = m_write_pos.load();
@@ -61,7 +62,7 @@ class ring_buffer final
       return true;
     }
 
-    bool pop(value_type & value) const noexcept
+    bool pop(value_type & value) noexcept
     {
       const auto write_pos = m_write_pos.load();
       const auto old_pos = m_read_pos.load();
@@ -81,11 +82,11 @@ class ring_buffer final
     static constexpr size_type calc_new_pos(size_type pos) noexcept
     {
       ++pos;
-      return (pos == size) ? 0 : pos;
+      return (pos == m_size) ? 0 : pos;
     }
 
-    static constexpr size_type size = Size;
-    std::array<value_type, size> m_buffer;
+    static constexpr size_type m_size = Capacity;
+    array_type m_buffer;
     std::atomic<size_type> m_read_pos = 0;
     std::atomic<size_type> m_write_pos = 0;
 };

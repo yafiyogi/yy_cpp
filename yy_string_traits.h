@@ -41,7 +41,7 @@ struct container_traits<std::basic_string<T>>:
       std::true_type
 {
     using value_type =
-      yy_traits::remove_rcv_t<typename std::basic_string<T>::value_type>;
+      yy_traits::remove_cvr_t<typename std::basic_string<T>::value_type>;
 };
 
 template<typename T>
@@ -49,7 +49,7 @@ struct container_traits<std::basic_string_view<T>>:
       std::true_type
 {
     using value_type =
-      yy_traits::remove_rcv_t<typename std::basic_string_view<T>::value_type>;
+      yy_traits::remove_cvr_t<typename std::basic_string_view<T>::value_type>;
 };
 
 template<>
@@ -83,7 +83,7 @@ struct is_std_string_traits:
 template<typename T>
 struct is_std_string_traits<T,
                             typename std::enable_if_t<std::is_base_of_v<std::string,
-                                                                        yy_traits::remove_rcv_t<T>>>>:
+                                                                        yy_traits::remove_cvr_t<T>>>>:
       std::true_type
 {
 };
@@ -98,7 +98,7 @@ struct is_std_string_view_traits:
 template<typename T>
 struct is_std_string_view_traits<T,
                                  typename std::enable_if_t<std::is_base_of_v<std::string_view,
-                                                                             yy_traits::remove_rcv_t<T>>>>:
+                                                                             yy_traits::remove_cvr_t<T>>>>:
       std::true_type
 {
 };
@@ -114,7 +114,7 @@ template<typename T>
 struct is_c_string_traits<T,
                           typename std::enable_if_t<std::is_pointer_v<T>
                                                     && std::is_same_v<char,
-                                                                      yy_traits::remove_rcv_t<std::remove_pointer_t<T>>>>>:
+                                                                      yy_traits::remove_cvr_t<std::remove_pointer_t<T>>>>>:
       std::true_type
 {
 };
@@ -123,7 +123,7 @@ template<typename T>
 struct is_c_string_traits<T,
                           typename std::enable_if_t<std::is_array_v<T>
                                                     && std::is_same_v<char,
-                                                                      yy_traits::remove_rcv_t<std::remove_all_extents_t<T>>>>>:
+                                                                      yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>>>:
       std::true_type
 {
 };
@@ -135,7 +135,7 @@ struct is_c_string_traits<T,
  * @brief is_std_string type trait
  */
 template<typename T>
-using is_std_string = traits_detail::is_std_string_traits<remove_rcv_t<T>>;
+using is_std_string = traits_detail::is_std_string_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_std_string_v = is_std_string<T>::value;
@@ -147,7 +147,7 @@ using is_std_string_t = typename is_std_string<T>::type;
  * @brief is_std_string_view type trait
  */
 template<typename T>
-using is_std_string_view = traits_detail::is_std_string_view_traits<remove_rcv_t<T>>;
+using is_std_string_view = traits_detail::is_std_string_view_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_std_string_view_v = is_std_string_view<T>::value;
@@ -159,7 +159,7 @@ using is_std_string_view_t = typename is_std_string_view<T>::type;
  * @brief is_c_string type trait
  */
 template<typename T>
-using is_c_string = traits_detail::is_c_string_traits<remove_rcv_t<T>>;
+using is_c_string = traits_detail::is_c_string_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_c_string_v = is_c_string<T>::value;

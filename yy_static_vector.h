@@ -25,6 +25,8 @@
 */
 #pragma once
 
+#include <cstdint>
+
 #include <algorithm>
 #include <memory>
 #include <typeinfo>
@@ -44,13 +46,13 @@ using ClearAction = yy_data::ClearAction;
 
 namespace static_vector_detail {
 
-enum class EmplaceResult {Ok, NotInserted, Full};
+enum class EmplaceResult:uint8_t {Ok, NotInserted, Full};
 
 template<typename T,
          std::size_t Capacity>
 struct vector_traits final
 {
-    using value_type = yy_traits::remove_rcv_t<T>;
+    using value_type = yy_traits::remove_cvr_t<T>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
@@ -68,7 +70,7 @@ struct vector_traits final
         EmplaceResult result = EmplaceResult::NotInserted;
     };
 
-    static constexpr ClearAction default_action = yy_data::default_action<value_type>;
+    static constexpr ClearAction default_action = yy_data::default_clear_action_v<value_type>;
 
 };
 
@@ -109,7 +111,8 @@ class static_vector
     constexpr static_vector(static_vector && other) noexcept
     {
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
-      swap(other);
+
+      move(std::move(other));
     }
 
     constexpr static_vector(std::initializer_list<value_type> p_il) noexcept
@@ -131,32 +134,37 @@ class static_vector
     constexpr static_vector & operator=(const static_vector & other)
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
-      copy(other);
+
+      if(this != &other)
+      {
+        copy(other);
+      }
 
       return *this;
     }
 
     constexpr static_vector & operator=(static_vector && other) noexcept
     {
-      static_vector tmp{};
-
-      tmp.swap(other);
-      swap(tmp);
+      if(this != &other)
+      {
+        move(std::move(other));
+      }
 
       return *this;
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
       return std::lexicographical_compare(begin(), end(),
                                           other.data(), other.data() + other.size());
-
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const static_vector & b) noexcept
     {
@@ -167,6 +175,7 @@ class static_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -176,6 +185,7 @@ class static_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const static_vector & b) noexcept
     {
@@ -185,21 +195,25 @@ class static_vector
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
 
+    [[nodiscard]]
     constexpr iterator begin() noexcept
     {
       return raw_data() + m_offset;
     }
 
+    [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
       return raw_data() + m_offset;
     }
 
+    [[nodiscard]]
     constexpr iterator end() noexcept
     {
       return raw_data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
       return raw_data() + m_size;
@@ -215,6 +229,7 @@ class static_vector
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr value_type & back()
     {
       if(begin() == end())
@@ -225,6 +240,7 @@ class static_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
       if(begin() == end())
@@ -235,6 +251,7 @@ class static_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_type & front()
     {
       if(begin() == end())
@@ -245,6 +262,7 @@ class static_vector
       return *begin();
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
       if(begin() == end())
@@ -291,6 +309,7 @@ class static_vector
       return 0 == size();
     }
 
+    [[nodiscard]]
     constexpr return_value add_empty(value_ptr pos)
     {
       if(m_capacity == m_size)
@@ -321,8 +340,8 @@ class static_vector
     template<typename InputValueType>
     constexpr return_value emplace(iterator pos, InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       return_value rv = add_empty(pos);
@@ -338,8 +357,8 @@ class static_vector
     template<typename InputValueType>
     constexpr EmplaceResult emplace_back(InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
@@ -524,19 +543,26 @@ class static_vector
     {
       if(this != &other)
       {
-        std::swap(m_data, other.m_data);
-        std::swap(m_size, other.m_size);
-        std::swap(m_offset, other.m_offset);
+        move(std::move(other));
       }
     }
 
   private:
+    constexpr void move(static_vector && other) noexcept
+    {
+      m_data = std::move(other.m_data);
+      m_size = std::move(other.m_size);
+      m_offset = std::move(other.m_offset);
+    }
+
+    [[nodiscard]]
     constexpr value_ptr raw_data() noexcept
     {
       return m_data.data();
     }
 
-    constexpr const value_ptr raw_data() const noexcept
+    [[nodiscard]]
+    constexpr const_value_ptr raw_data() const noexcept
     {
       return m_data.data();
     }
@@ -553,8 +579,8 @@ class static_vector
 
     struct distance_valid_type final
     {
-        size_type distance;
-        bool valid;
+        size_type distance{};
+        bool valid = false;
     };
 
     constexpr distance_valid_type distance_valid(const_iterator pos, size_type max) const noexcept
@@ -625,7 +651,8 @@ class static_simple_vector
     constexpr static_simple_vector(static_simple_vector && other) noexcept
     {
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
-      swap(other);
+
+      move(std::move(other));
     }
 
     constexpr static_simple_vector(std::initializer_list<value_type> p_il) noexcept
@@ -648,22 +675,27 @@ class static_simple_vector
     constexpr static_simple_vector & operator=(const static_simple_vector & other)
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
-      copy(other);
+
+      if(this != &other)
+      {
+        copy(other);
+      }
 
       return *this;
     }
 
     constexpr static_simple_vector & operator=(static_simple_vector && other) noexcept
     {
-      static_simple_vector tmp{};
-
-      tmp.swap(other);
-      swap(tmp);
+      if(this != &other)
+      {
+        move(std::move(other));
+      }
 
       return *this;
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -674,6 +706,7 @@ class static_simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const static_simple_vector & b) noexcept
     {
@@ -684,6 +717,7 @@ class static_simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
@@ -693,6 +727,7 @@ class static_simple_vector
     }
 
     template<typename type>
+    [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const static_simple_vector & b) noexcept
     {
@@ -702,36 +737,43 @@ class static_simple_vector
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
 
+    [[nodiscard]]
     constexpr iterator begin() noexcept
     {
       return data();
     }
 
+    [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
       return data();
     }
 
+    [[nodiscard]]
     constexpr iterator end() noexcept
     {
       return data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
       return data() + m_size;
     }
 
+    [[nodiscard]]
     constexpr value_type & operator[](size_type pos) noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr const value_type & operator[](size_type pos) const noexcept
     {
       return *(begin() + pos);
     }
 
+    [[nodiscard]]
     constexpr value_type & back()
     {
       if(begin() == end())
@@ -742,6 +784,7 @@ class static_simple_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
       if(begin() == end())
@@ -752,6 +795,7 @@ class static_simple_vector
       return *(end() - 1);
     }
 
+    [[nodiscard]]
     constexpr value_type & front()
     {
       if(begin() == end())
@@ -762,6 +806,7 @@ class static_simple_vector
       return *begin();
     }
 
+    [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
       if(begin() == end())
@@ -802,6 +847,7 @@ class static_simple_vector
       return 0 == size();
     }
 
+    [[nodiscard]]
     constexpr return_value add_empty(value_ptr pos)
     {
       if(m_capacity == m_size)
@@ -833,8 +879,8 @@ class static_simple_vector
     template<typename InputValueType>
     constexpr return_value emplace(iterator pos, InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       return_value rv = add_empty(pos);
@@ -850,8 +896,8 @@ class static_simple_vector
     template<typename InputValueType>
     constexpr EmplaceResult emplace_back(InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_rcv_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_rcv_t<std::remove_pointer<InputValueType>>>),
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
       auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
@@ -992,18 +1038,24 @@ class static_simple_vector
     {
       if(this != &other)
       {
-        std::swap(m_data, other.m_data);
-        std::swap(m_size, other.m_size);
+        move(std::move(other));
       }
     }
 
   private:
+    constexpr void move(static_simple_vector && other) noexcept
+    {
+      m_data = std::move(other.m_data);
+      m_size = std::move(other.m_size);
+    }
+
     struct distance_valid_type final
     {
-        size_type distance;
-        bool valid;
+        size_type distance{};
+        bool valid = false;
     };
 
+    [[nodiscard]]
     constexpr distance_valid_type distance_valid(const_iterator pos, size_type max) const noexcept
     {
       const auto distance = std::distance(begin(), pos);

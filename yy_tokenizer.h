@@ -37,7 +37,7 @@ template<typename T>
 class traits final
 {
   public:
-    using value_type = yy_traits::remove_rcv_t<T>;
+    using value_type = yy_traits::remove_cvr_t<T>;
     using const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using span_type = yy_quad::const_span<value_type>;
 };
@@ -55,7 +55,7 @@ class tokenizer final
     using iterator = typename span_type::const_iterator;
     using size_type = typename span_type::size_type;
 
-    inline static constexpr size_type none{};
+    static constexpr size_type none{};
 
     constexpr explicit tokenizer(span_type p_span, const_l_value_ref p_delim) noexcept:
       m_span(p_span),
@@ -66,6 +66,7 @@ class tokenizer final
     constexpr tokenizer() noexcept = default;
     constexpr tokenizer(const tokenizer &) noexcept = default;
     constexpr tokenizer(tokenizer &&) noexcept = default;
+    constexpr ~tokenizer() noexcept = default;
 
     constexpr tokenizer & operator=(const tokenizer &) noexcept = default;
     constexpr tokenizer & operator=(tokenizer &&) noexcept = default;

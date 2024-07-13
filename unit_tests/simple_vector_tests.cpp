@@ -62,7 +62,6 @@ TEST_F(TestSimpleVector, DefaltConstructor)
 TEST_F(TestSimpleVector, TestEmplaceBackNoCapacity)
 {
   yy_quad::simple_vector<int> vec{};
-
   for(int ii = 0; ii < 65; ++ii)
   {
     vec.emplace_back(ii + 7);

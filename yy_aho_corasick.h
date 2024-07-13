@@ -93,7 +93,7 @@ struct trie_node_edge final
     }
 
     label_type m_label = label_type{};
-    node_ptr m_node;
+    node_ptr m_node{};
 };
 
 template<typename LabelType,
@@ -226,7 +226,7 @@ class trie_node
 
   private:
     node_type * m_fail = nullptr;
-    std::vector<node_edge> m_edges;
+    std::vector<node_edge> m_edges{};
 };
 
 template<typename LabelType,
@@ -374,8 +374,8 @@ class compile_visitor final
 
   private:
     node_queue & m_queue;
-    node_type * m_fail;
-    root_node_ptr m_root;
+    node_type * m_fail = nullptr;
+    root_node_ptr m_root{};
 };
 
 template<typename LabelType,
@@ -412,13 +412,13 @@ class Automaton final
       return find_span(yy_quad::make_const_span(label));
     }
 
-    constexpr void next(const label_type p_ch) noexcept
+    constexpr void next(const label_type p_label_part) noexcept
     {
       auto node{m_state};
 
       while(true)
       {
-        const auto edge = node->find(p_ch);
+        const auto edge = node->find(p_label_part);
 
         if(edge)
         {
@@ -487,9 +487,9 @@ class Automaton final
       {
         reset();
 
-        for(const auto & ch: label)
+        for(const auto & label_part: label)
         {
-          next(ch);
+          next(label_part);
 
           if(!m_state)
           {
@@ -511,7 +511,7 @@ class Automaton final
       return false;
     }
 
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
     node_type * m_state = nullptr;
 };
 
@@ -627,7 +627,7 @@ class ac_trie
       }
     }
 
-    root_node_ptr m_root;
+    root_node_ptr m_root{};
 };
 
 } // namespace yafiyogi::yy_data

@@ -39,7 +39,7 @@ template<typename T, std::size_t N>
 struct container_traits<std::array<T, N>>:
       std::true_type
 {
-    using value_type = remove_rcv_t<typename std::array<T, N>::value_type>;
+    using value_type = remove_cvr_t<typename std::array<T, N>::value_type>;
 };
 
 template<typename T>
@@ -58,7 +58,7 @@ struct array_traits<std::array<T, N>>:
 
 /** @brief is_array type trait */
 template<typename T>
-using is_array = traits_detail::array_traits<remove_rcv_t<T>>;
+using is_array = traits_detail::array_traits<remove_cvr_t<T>>;
 
 template<typename T>
 inline constexpr bool is_array_v = is_array<T>::value;

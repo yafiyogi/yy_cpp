@@ -55,7 +55,7 @@ struct found_value final
 template<typename LabelType>
 struct trie_node_traits final
 {
-    using label_type = yy_traits::remove_rcv_t<LabelType>;
+    using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using node_type = trie_node<label_type>;
@@ -66,8 +66,8 @@ struct trie_node_traits final
     using edges_iterator = typename edges_type::iterator;
     using found_value_type = found_value<edges_iterator>;
 
-    static inline constexpr node_idx_type root_idx{};
-    static inline constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
+    static constexpr node_idx_type root_idx{};
+    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
 };
 
 template<typename LabelType,
@@ -90,8 +90,8 @@ struct trie_traits final
     using data_container_type = std::vector<value_type>;
     using data_ptr = std::shared_ptr<data_container_type>;
 
-    static inline constexpr node_idx_type root_idx = traits::root_idx;
-    static inline constexpr node_idx_type empty_idx = traits::empty_idx;
+    static constexpr node_idx_type root_idx = traits::root_idx;
+    static constexpr node_idx_type empty_idx = traits::empty_idx;
 };
 
 template<typename LabelType>
@@ -157,7 +157,7 @@ class trie_node final
     using edges_type = typename traits::edges_type;
     using edges_iterator = typename traits::edges_iterator;
 
-    static inline constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
+    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
     constexpr explicit trie_node(const data_idx_type p_data_idx) noexcept:
       m_data_idx(p_data_idx)
@@ -351,9 +351,9 @@ class Automaton final
       auto node_idx = m_state;
       auto raw_nodes = m_nodes->data();
 
-      for(const label_l_value_ref ch : label)
+      for(const label_l_value_ref label_part : label)
       {
-        auto [edge_iter, found] = get_node(raw_nodes, node_idx)->find(ch);
+        auto [edge_iter, found] = get_node(raw_nodes, node_idx)->find(label_part);
 
         if(!found)
         {
@@ -416,8 +416,8 @@ class flat_trie
     constexpr void add(InputSpanType && label,
                        InputValueType && value)
     {
-      static_assert(std::is_same_v<yy_traits::remove_rcv_t<InputValueType>,
-                    yy_traits::remove_rcv_t<value_type>>,
+      static_assert(std::is_same_v<yy_traits::remove_cvr_t<InputValueType>,
+                    yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
       add_span(yy_quad::make_const_span(std::forward<InputSpanType>(label)), std::forward<InputValueType>(value));
     }
