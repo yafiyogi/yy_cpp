@@ -23,11 +23,15 @@
   SOFTWARE.
 
 */
+
 #pragma once
 
 #include <cstddef>
 
 #include <variant>
+#include <stdexcept>
+#include <type_traits>
+
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_traits {

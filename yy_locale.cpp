@@ -24,10 +24,14 @@
 
 */
 
+#include <clocale>
+#include <cassert>
+
 #include <cstdlib>
 #include <locale>
-#include <locale.h>
 #include <mutex>
+#include <string>
+#include <string_view>
 
 #include "boost/locale/generator.hpp"
 #include "spdlog/spdlog.h"

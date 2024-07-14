@@ -23,11 +23,14 @@
   SOFTWARE.
 
 */
+
 #pragma once
 
+#include <cstddef>
+
 #include <algorithm>
+#include <initializer_list>
 #include <memory>
-#include <typeinfo>
 #include <utility>
 
 #include "yy_bit_twiddling.h"

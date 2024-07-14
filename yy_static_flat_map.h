@@ -29,12 +29,15 @@
 #include <cstddef>
 
 #include <algorithm>
+#include <initializer_list>
+#include <tuple>
 #include <type_traits>
 
+#include "yy_assert.h"
 #include "yy_clear_action.h"
-#include "yy_lower_bound.h"
+//#include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
-#include "yy_span.h"
+#include "yy_type_traits.h"
 #include "yy_static_vector.h"
 
 namespace yafiyogi::yy_data {

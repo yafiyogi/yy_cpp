@@ -31,6 +31,7 @@
 #include <unordered_map>
 
 #include "yy_func_traits.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
 namespace subject_observer_detail {

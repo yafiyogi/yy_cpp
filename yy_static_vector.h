@@ -23,16 +23,19 @@
   SOFTWARE.
 
 */
+
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 #include <algorithm>
-#include <memory>
-#include <typeinfo>
+#include <array>
+#include <initializer_list>
+#include <stdexcept>
+#include <type_traits>
 #include <utility>
 
-#include "yy_bit_twiddling.h"
 #include "yy_clear_action.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"

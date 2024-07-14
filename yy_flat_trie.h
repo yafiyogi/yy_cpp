@@ -26,15 +26,17 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <limits>
 #include <memory>
 #include <vector>
 
 #include "yy_span.h"
-#include "yy_utility.h"
+#include "yy_ref_traits.h"
+#include "yy_type_traits.h"
 #include "yy_vector_util.h"
 
-#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
 namespace flat_trie_detail {

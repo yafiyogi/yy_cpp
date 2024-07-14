@@ -28,10 +28,10 @@
 
 #include <algorithm>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include "yy_assert.h"
-#include "yy_lower_bound.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"

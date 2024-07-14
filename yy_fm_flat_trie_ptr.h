@@ -26,8 +26,9 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <limits>
-#include <memory>
 
 #include "yy_assert.h"
 #include "yy_span.h"
@@ -35,7 +36,6 @@
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_vector.h"
-#include "yy_utility.h"
 
 namespace yafiyogi::yy_data {
 namespace fm_flat_trie_ptr_detail {

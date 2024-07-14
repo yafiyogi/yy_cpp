@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_traits {

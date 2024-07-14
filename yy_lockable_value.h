@@ -24,9 +24,9 @@
 
 */
 
-#ifndef yy_lockable_value_h
-#define yy_lockable_value_h
+#pragma once
 
+#include <type_traits>
 #include <utility>
 
 #include "yy_type_traits.h"
@@ -279,5 +279,3 @@ class lock_type final
 };
 
 } // namespace yafiyogi::yy_util
-
-#endif // yy_lockable_value_h

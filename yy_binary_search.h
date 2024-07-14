@@ -26,7 +26,13 @@
 
 #pragma once
 
+#include <cstddef>
+
+#include <limits>
+
 #include "yy_lower_bound.h"
+#include "yy_ref_traits.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
 namespace bs_detail {

@@ -24,6 +24,9 @@
 
 */
 
+#include <string>
+#include <string_view>
+
 #include "boost/locale/conversion.hpp"
 
 #include "yy_locale.h"

@@ -24,8 +24,13 @@
 
 */
 
+#pragma once
+
+#include <cstddef>
+
 #include <array>
 #include <atomic>
+#include <type_traits>
 
 #include "yy_type_traits.h"
 

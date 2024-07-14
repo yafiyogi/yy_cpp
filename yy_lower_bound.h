@@ -31,6 +31,7 @@
 #include <limits>
 
 #include "yy_ref_traits.h"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
 namespace lb_detail {

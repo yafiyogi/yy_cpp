@@ -26,7 +26,11 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 #include <limits>
+
 namespace yafiyogi::yy_util {
 namespace digits_detail {
 

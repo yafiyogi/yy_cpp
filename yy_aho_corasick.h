@@ -24,18 +24,15 @@
 
 */
 
-#ifndef yy_aho_corasick_h
-#define yy_aho_corasick_h
+#pragma once
 
 #include <deque>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "yy_span.h"
-#include "yy_type_traits.h"
 #include "yy_utility.h"
 #include "yy_vector_util.h"
 
@@ -631,5 +628,3 @@ class ac_trie
 };
 
 } // namespace yafiyogi::yy_data
-
-#endif // yy_aho_corasick_h

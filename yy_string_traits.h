@@ -24,8 +24,9 @@
 
 */
 
-#ifndef yy_string_traits_h
-#define yy_string_traits_h
+#pragma once
+
+#include <cstddef>
 
 #include <string>
 #include <string_view>
@@ -191,5 +192,3 @@ template<typename T>
 using is_string_t = typename is_string<T>::type;
 
 } // namespace yafiyogi::yy_traits
-
-#endif // yy_string_traits_h

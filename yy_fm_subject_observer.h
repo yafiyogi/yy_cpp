@@ -30,6 +30,7 @@
 
 #include "yy_flat_map.h"
 #include "yy_func_traits.h"
+#include "yy_type_traits.h"
 #include "yy_utility.h"
 
 namespace yafiyogi::yy_data {

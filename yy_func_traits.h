@@ -26,9 +26,7 @@
 
 #pragma once
 
-#include <climits>
 #include <cstddef>
-#include <tuple>
 
 #include "yy_arg_traits.h"
 #include "yy_type_traits.h"

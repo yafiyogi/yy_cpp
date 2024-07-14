@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include <tuple>
+#include <cstddef>
 
-#include "yy_type_traits.h"
+#include <tuple>
 
 namespace yafiyogi::yy_traits {
 

@@ -26,14 +26,16 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <vector>
 
 #include "yy_assert.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
-#include "yy_utility.h"
 
 namespace yafiyogi::yy_data {
 namespace flat_radix_trie_detail {

@@ -24,14 +24,17 @@
 
 */
 
-#ifndef yy_vector_util_h
-#define yy_vector_util_h
+#pragma once
+
+#include <cstddef>
 
 #include <algorithm>
 #include <tuple>
+#include <type_traits>
 
 #include "yy_array_traits.h"
 #include "yy_string_traits.h"
+#include "yy_type_traits.h"
 #include "yy_vector_traits.h"
 
 namespace yafiyogi::yy_util {
@@ -289,5 +292,3 @@ constexpr void shrink(const T & src, T & dst)
 }
 
 } // namespace yafiyogi::yy_util
-
-#endif // yy_vector_util_h

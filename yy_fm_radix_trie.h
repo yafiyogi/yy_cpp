@@ -26,12 +26,16 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include "yy_assert.h"
 #include "yy_span.h"
 #include "yy_flat_map.h"
+#include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
 

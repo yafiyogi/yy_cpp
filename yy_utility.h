@@ -24,8 +24,7 @@
 
 */
 
-#ifndef yy_utility_h
-#define yy_utility_h
+#pragma once
 
 #include <cstddef>
 
@@ -151,5 +150,3 @@ constexpr auto make_array(Types && ... data)
 }
 
 } // namespace yafiyogi::yy_util
-
-#endif // yy_utility_h

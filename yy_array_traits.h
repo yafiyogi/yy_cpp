@@ -24,8 +24,9 @@
 
 */
 
-#ifndef yy_vector_traits_h
-#define yy_vector_traits_h
+#pragma once
+
+#include <cstddef>
 
 #include <array>
 #include <type_traits>
@@ -67,5 +68,3 @@ template<typename T>
 using is_array_t = typename is_array<T>::type;
 
 } // namespace yafiyogi::yy_array_traits
-
-#endif // yy_vector_traits_h

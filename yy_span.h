@@ -23,15 +23,21 @@
   SOFTWARE.
 
 */
+
 #pragma once
+
+#include <cstddef>
 
 #include <algorithm>
 #include <limits>
+#include <stdexcept>
+#include <string_view>
 #include <type_traits>
 
 #include "yy_array_traits.h"
 #include "yy_ref_traits.h"
 #include "yy_string_traits.h"
+#include "yy_type_traits.h"
 #include "yy_vector_traits.h"
 
 namespace yafiyogi {

@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include <functional>
 
 namespace yafiyogi::yy_data {
@@ -33,7 +35,7 @@ namespace yafiyogi::yy_data {
 // Adapted from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3876.pdf
 
 template<typename T>
-constexpr st::size_t hash_combine(std::size_t & seed, const T & val) noexcept
+constexpr std::size_t hash_combine(std::size_t & seed, const T & val) noexcept
 {
   seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
