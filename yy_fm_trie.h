@@ -85,8 +85,7 @@ class trie_node
                             label_r_value_ref label,
                             node_ptr && node)
     {
-      [[maybe_unused]]
-      auto ignore = m_edges.emplace(pos, std::move(label), std::move(node));
+      std::ignore = m_edges.emplace(pos, std::move(label), std::move(node));
     }
 
     template<typename Visitor>

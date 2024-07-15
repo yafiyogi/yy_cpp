@@ -137,8 +137,7 @@ class trie_node
                             label_r_value_ref label,
                             node_ptr && node)
     {
-      [[maybe_unused]]
-      auto ignore = m_edges.emplace(pos, std::move(label), std::move(node));
+      std::ignore = m_edges.emplace(pos, std::move(label), std::move(node));
     }
 
     constexpr void add_edge(const label_r_value_ref label,
@@ -147,8 +146,7 @@ class trie_node
       auto label_span = yy_quad::make_const_span(label).subspan(0, 1);
       size_type pos = m_edges.lower_bound_pos(label_span).pos;
 
-      [[maybe_unused]]
-      auto ignore = m_edges.emplace(pos,
+      std::ignore = m_edges.emplace(pos,
                                     std::move(label),
                                     std::move(node));
     }
@@ -172,8 +170,7 @@ class trie_node
         edge.remaining = edge.edge_label->size() - edge.common;
       };
 
-      [[maybe_unused]]
-      auto is_end = m_edges.lower_bound(egde_getter, label.subspan(0, 1));
+      std::ignore = m_edges.lower_bound(egde_getter, label.subspan(0, 1));
 
       return edge;
     }
@@ -198,9 +195,7 @@ class trie_node
         edge_part.remaining = edge_label.size() - edge_part.common;
       };
 
-
-      [[maybe_unused]]
-      auto is_end = m_edges.lower_bound(edge_part_getter,
+      std::ignore = m_edges.lower_bound(edge_part_getter,
                                         label.subspan(0, 1));
 
       return edge_part;

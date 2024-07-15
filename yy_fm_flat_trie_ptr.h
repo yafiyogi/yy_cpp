@@ -114,8 +114,7 @@ class trie_node_idx final
                             label_r_value_ref label,
                             node_idx_type node_idx)
     {
-      [[maybe_unused]]
-      auto ignore = m_edges.emplace(pos, std::move(label), node_idx);
+      std::ignore = m_edges.emplace(pos, std::move(label), node_idx);
     }
 
     template<typename Visitor,
@@ -217,8 +216,7 @@ class trie_node_ptr final
     constexpr void add_edge(label_r_value_ref label,
                             node_type * node)
     {
-      [[maybe_unused]]
-      auto ignore = m_edges.emplace(m_edges.size(), std::move(label), node);
+      std::ignore = m_edges.emplace(m_edges.size(), std::move(label), node);
     }
 
     struct found_edge_type
@@ -679,8 +677,7 @@ class fm_flat_trie_ptr
         // No data node exists.
         // Add data node.
         auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
-        [[maybe_unused]]
-        auto ignore = add_node(m_nodes, node, edge_pos, label.back(), data_idx);
+        std::ignore = add_node(m_nodes, node, edge_pos, label.back(), data_idx);
 
         return data_added_type{get_data_ptr(data_idx), true};
       }

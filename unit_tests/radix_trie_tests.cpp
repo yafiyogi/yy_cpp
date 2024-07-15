@@ -105,8 +105,8 @@ TEST_F(TestRadixTrie, TestNodeValue)
   radix_trie_node node{};
   const radix_trie_node const_node{};
 
-  EXPECT_THROW([[maybe_unused]] auto val = node.value(), std::runtime_error);
-  EXPECT_THROW([[maybe_unused]] auto val = const_node.value(), std::runtime_error);
+  EXPECT_THROW(std::ignore = node.value(), std::runtime_error);
+  EXPECT_THROW(std::ignore = const_node.value(), std::runtime_error);
 }
 
 TEST_F(TestRadixTrie, TrieAddToEmptyTrie_R_Value)
