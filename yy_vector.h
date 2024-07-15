@@ -90,7 +90,7 @@ class vector
     using distance_type = typename traits::distance_type;
     using return_value = typename traits::return_value;
 
-    static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
+    static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
     constexpr explicit vector(size_type num):
@@ -682,7 +682,7 @@ class simple_vector
     using distance_type = typename traits::distance_type;
     using return_value = typename traits::return_value;
 
-    static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
+    static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
     constexpr explicit simple_vector(size_type num):

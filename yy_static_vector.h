@@ -100,7 +100,7 @@ class static_vector
     using return_value = typename traits::return_value;
     using vector_type = typename traits::vector_type;
 
-    static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
+    static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
     constexpr static_vector() noexcept = default;
@@ -640,7 +640,7 @@ class static_simple_vector
     using return_value = typename traits::return_value;
     using vector_type = typename traits::vector_type;
 
-    static_assert(std::is_default_constructible_v<value_type>, "T must be defualt contructable.");
+    static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
     constexpr static_simple_vector() noexcept = default;
