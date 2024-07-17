@@ -111,6 +111,7 @@ struct is_c_string_traits:
 {
 };
 
+// is_c_string_traits for char *
 template<typename T>
 struct is_c_string_traits<T,
                           typename std::enable_if_t<std::is_pointer_v<T>
@@ -120,6 +121,7 @@ struct is_c_string_traits<T,
 {
 };
 
+// is_c_string_traits for char[]
 template<typename T>
 struct is_c_string_traits<T,
                           typename std::enable_if_t<std::is_array_v<T>
