@@ -54,10 +54,10 @@ struct vector_traits final
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
-    using value_ptr = value_type *;
-    using const_value_ptr = const value_ptr;
-    using iterator = value_type *;
-    using const_iterator = const iterator;
+    using value_ptr = std::add_pointer_t<value_type>;
+    using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
+    using iterator = value_ptr;
+    using const_iterator = const_value_ptr;
     using size_type = std::size_t;
     using distance_type = std::ptrdiff_t;
     struct return_value
@@ -609,7 +609,7 @@ class vector
         bool valid = false;
     };
 
-    constexpr distance_valid_type distance_valid(iterator pos, size_type max) const noexcept
+    constexpr distance_valid_type distance_valid(const_value_ptr pos, size_type max) const noexcept
     {
       const auto distance = std::distance(begin(), pos);
 
@@ -1127,7 +1127,7 @@ class simple_vector
     };
 
     [[nodiscard]]
-    constexpr distance_valid_type distance_valid(iterator pos, size_type max) const noexcept
+    constexpr distance_valid_type distance_valid(const_value_ptr pos, size_type max) const noexcept
     {
       const auto distance = std::distance(begin(), pos);
 
