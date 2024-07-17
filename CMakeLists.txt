@@ -60,48 +60,49 @@ target_sources(yy_cpp
     yy_string_util.cpp)
 
 set(YY_CPP_HEADERS
-  "yy_aho_corasick.h"
-  "yy_arg_traits.h"
-  "yy_array_traits.h"
-  "yy_assert.h"
-  "yy_binary_search.h"
-  "yy_bit_twiddling.h"
-  "yy_clear_action.h"
-  "yy_fast_atoi.h"
-  "yy_flat_map.h"
-  "yy_flat_radix_trie.h"
-  "yy_flat_set.h"
-  "yy_flat_trie.h"
-  "yy_fm_flat_trie_idx.h"
-  "yy_fm_flat_trie_ptr.h"
-  "yy_fm_radix_trie.h"
-  "yy_fm_subject_observer.h"
-  "yy_fm_trie.h"
-  "yy_func_traits.h"
-  "yy_hash.h"
-  "yy_int_util.h"
-  "yy_locale.h"
-  "yy_lockable_value.h"
-  "yy_lower_bound.h"
-  "yy_make_lookup.h"
-  "yy_radix_trie.h"
-  "yy_ref_traits.h"
-  "yy_ring_buffer.h"
-  "yy_span.h"
-  "yy_static_flat_map.h"
-  "yy_static_vector.h"
-  "yy_string_case.h"
-  "yy_string_traits.h"
-  "yy_string_util.h"
-  "yy_subject_observer.h"
-  "yy_tokenizer.h"
-  "yy_trie.h"
-  "yy_type_traits.h"
-  "yy_utility.h"
-  "yy_variant_traits.h"
-  "yy_vector.h"
-  "yy_vector_traits.h"
-  "yy_vector_util.h" )
+  yy_aho_corasick.h
+  yy_arg_traits.h
+  yy_array_traits.h
+  yy_assert.h
+  yy_binary_search.h
+  yy_bit_twiddling.h
+  yy_clear_action.h
+  yy_fast_atoi.h
+  yy_flat_map.h
+  yy_flat_radix_trie.h
+  yy_flat_set.h
+  yy_flat_trie.h
+  yy_fm_flat_trie_idx.h
+  yy_fm_flat_trie_ptr.h
+  yy_fm_radix_trie.h
+  yy_fm_subject_observer.h
+  yy_fm_trie.h
+  yy_func_traits.h
+  yy_hash.h
+  yy_init.h
+  yy_int_util.h
+  yy_locale.h
+  yy_lockable_value.h
+  yy_lower_bound.h
+  yy_make_lookup.h
+  yy_radix_trie.h
+  yy_ref_traits.h
+  yy_ring_buffer.h
+  yy_span.h
+  yy_static_flat_map.h
+  yy_static_vector.h
+  yy_string_case.h
+  yy_string_traits.h
+  yy_string_util.h
+  yy_subject_observer.h
+  yy_tokenizer.h
+  yy_trie.h
+  yy_type_traits.h
+  yy_utility.h
+  yy_variant_traits.h
+  yy_vector.h
+  yy_vector_traits.h
+  yy_vector_util.h )
 
 
 add_subdirectory(unit_tests)
