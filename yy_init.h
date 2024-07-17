@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-namespace yafiyogi::yy_data {
+namespace yafiyogi::yy_util {
 
 template<typename T>
 class Init final
@@ -81,7 +81,7 @@ class Init final
 
     constexpr ~Init()
     {
-      if(m_count > 0) && (0 == --count))
+      if((m_count > 0) && (0 == --m_count))
       {
         m_obj.tear_down();
       }
@@ -89,7 +89,10 @@ class Init final
 
   private:
     T m_obj;
-    static uint64_t m_count{0};
+    static uint64_t m_count;
 };
 
-} // namespace yafiyogi::yy_data
+template<typename T>
+uint64_t Init<T>::m_count = 0;
+
+} // namespace yafiyogi::yy_util
