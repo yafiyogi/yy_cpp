@@ -30,6 +30,8 @@
 
 #include <array>
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <type_traits>
 
 #include "yy_type_traits.h"
@@ -64,6 +66,8 @@ class ring_buffer final
       m_buffer[old_pos] = std::forward<value_type>(value);
       m_write_pos.store(new_pos);
 
+      wake();
+
       return true;
     }
 
@@ -83,7 +87,32 @@ class ring_buffer final
       return true;
     }
 
+    bool empty() const noexcept
+    {
+      return m_write_pos.load() == m_read_pos.load();
+    }
+
+    size_type size() const noexcept
+    {
+      return m_size;
+    }
+
+    template<typename Pred,
+             typename Duration>
+    void wait(const Duration & duration,
+              Pred && pred)
+    {
+      std::unique_lock lck{m_mxt};
+
+      m_cv.wait(lck, duration, std::forward<Pred>(pred));
+    }
+
   private:
+    void wake()
+    {
+      cv.notify_one();
+    }
+
     static constexpr size_type calc_new_pos(size_type pos) noexcept
     {
       ++pos;
@@ -94,6 +123,9 @@ class ring_buffer final
     array_type m_buffer;
     std::atomic<size_type> m_read_pos = 0;
     std::atomic<size_type> m_write_pos = 0;
+
+    std::mutex m_mtx;
+    std::condition_variable m_cv;
 };
 
 } // namespace yafiyogi::yy_data
