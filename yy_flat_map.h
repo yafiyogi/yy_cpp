@@ -467,20 +467,22 @@ class flat_map final
       return size() == other.size();
     }
 
-
     template<typename Visitor>
-    void visit(Visitor && visitor) const
+    void visit(Visitor && visitor)
     {
-      for(size_type idx = 0; idx < size(); ++idx)
+      value_ptr value_iter = m_values.begin();
+
+      for(const auto & key : m_keys)
       {
-        visitor(m_keys[idx], m_values[idx]);
+        visitor(key, *value_iter);
+        ++value_iter;
       }
     }
 
     template<typename Visitor>
-    void visit(Visitor && visit)
+    void visit(Visitor && visitor) const
     {
-      auto value_iter = m_values.begin();
+      const_value_ptr value_iter = m_values.begin();
 
       for(const auto & key : m_keys)
       {
