@@ -51,6 +51,8 @@ struct traits_type final
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
     using value_ptr = value_vector::value_ptr;
+    using iterator = value_vector::iterator;
+    using const_iterator = value_vector::const_iterator;
     using const_value_ptr = value_vector::const_value_ptr;
     using size_type = std::size_t;
 };
@@ -71,6 +73,8 @@ class flat_set final
     using value_vector = typename traits::value_vector;
     using value_ptr = typename traits::value_ptr;
     using const_value_ptr = typename traits::const_value_ptr;
+    using iterator = typename traits::iterator;
+    using const_iterator = typename traits::const_iterator;
     using difference_type = std::ptrdiff_t;
 
     template<typename InputValueType>
@@ -250,7 +254,7 @@ class flat_set final
     }
 
     template<typename InputValueType>
-    constexpr size_type emplace(size_type p_pos,
+    constexpr iterator emplace(iterator p_pos,
                                 InputValueType && p_value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
@@ -261,17 +265,17 @@ class flat_set final
 
       value = std::forward<InputValueType>(p_value);
 
-      return static_cast<size_type>(&value - m_values.begin());
+      return value;
     }
 
-    struct pos_inserted_type final
+    struct iter_inserted_type final
     {
-        std::size_t pos{};
+        iterator iter = nullptr;
         bool inserted = false;
     };
 
     template<typename InputValueType>
-    constexpr pos_inserted_type emplace(InputValueType && p_value)
+    constexpr iter_inserted_type emplace(InputValueType && p_value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
@@ -285,9 +289,7 @@ class flat_set final
                                 std::forward<InputValueType>(p_value)).iter;
       }
 
-      auto pos = static_cast<size_type>(iter - m_values.begin());
-
-      return pos_inserted_type{pos, !found};
+      return iter_inserted_type{iter, !found};
     }
 
     constexpr void swap(flat_set & other)
@@ -383,7 +385,28 @@ class flat_set final
       return size() == other.size();
     }
 
+    template<typename Visitor>
+    void visit(Visitor && visit)
+    {
+      for(const auto & value : m_values)
+      {
+        visitor(value);
+      }
+    }
+
   private:
+    [[nodiscard]]
+    constexpr iterator add_empty(iterator p_pos)
+    {
+      auto [value_pos, value_added] = m_values.add_empty(p_pos);
+      if(!value_added)
+      {
+        throw std::runtime_error("flat_set::add_empty() value add_empty() failed!");
+      }
+
+      return value_pos;
+    }
+
     [[nodiscard]]
     constexpr value_ptr value(size_type idx) noexcept
     {
@@ -398,25 +421,25 @@ class flat_set final
 
     struct iter_end_type final
     {
-        value_ptr iter = nullptr;
+        iterator iter = nullptr;
         bool is_end = false;
     };
 
     struct const_iter_end_type final
     {
-        const_value_ptr iter = nullptr;
+        const_iterator iter = nullptr;
         bool is_end = false;
     };
 
     struct iter_found_type final
     {
-        value_ptr iter = nullptr;
+        iterator iter = nullptr;
         bool found = false;
     };
 
     struct const_iter_found_type final
     {
-        const_value_ptr iter = nullptr;
+        const_iterator iter = nullptr;
         bool found = false;
     };
 
@@ -424,9 +447,9 @@ class flat_set final
     [[nodiscard]]
     constexpr iter_end_type do_lower_bound_raw(const ValueParamType & p_value) noexcept
     {
-      value_ptr begin = m_values.begin();
-      value_ptr end = m_values.end();
-      value_ptr iter = yy_data::lower_bound(begin, end, p_value);
+      iterator begin = m_values.begin();
+      iterator end = m_values.end();
+      iterator iter = yy_data::lower_bound(begin, end, p_value);
 
       return iter_end_type{iter, iter == end};
     }
@@ -435,9 +458,9 @@ class flat_set final
     [[nodiscard]]
     constexpr const_iter_end_type do_lower_bound_raw(const ValueParamType & p_value) const noexcept
     {
-      const_value_ptr begin = m_values.begin();
-      const_value_ptr end = m_values.end();
-      const_value_ptr iter = yy_data::lower_bound(begin, end, p_value);
+      const_iterator begin = m_values.begin();
+      const_iterator end = m_values.end();
+      const_iterator iter = yy_data::lower_bound(begin, end, p_value);
 
       return const_iter_end_type{iter, iter == end};
     }
