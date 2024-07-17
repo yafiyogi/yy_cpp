@@ -477,6 +477,18 @@ class flat_map final
       }
     }
 
+    template<typename Visitor>
+    void visit(Visitor && visit)
+    {
+      auto value_iter = m_values.begin();
+
+      for(const auto & key : m_keys)
+      {
+        visitor(key, *value_iter);
+        ++value_iter;
+      }
+    }
+
   private:
     [[nodiscard]]
     constexpr add_empty_type add_empty(key_ptr p_pos)
