@@ -137,7 +137,7 @@ constexpr std::unique_ptr<yy_traits::remove_cvr_t<Return>> static_unique_cast(st
   using param_type = yy_traits::remove_cvr_t<T>;
   static_assert(std::is_base_of_v<return_type, param_type>, "static_unique_cast(): type 'Return' is not a base of type 'T'.");
 
-  auto new_ptr = std::unique_ptr<return_type>(static_cast<return_type *>(ptr.release()));
+  auto new_ptr = std::unique_ptr<return_type>{static_cast<return_type *>(ptr.release())};
   YY_ASSERT(new_ptr);
   return new_ptr;
 }
