@@ -38,6 +38,8 @@
 
 namespace yafiyogi::yy_locale {
 
+using namespace std::string_view_literals;
+
 namespace {
 
 static std::once_flag g_locale_set_flag;
@@ -63,14 +65,14 @@ void set_locale()
     if(auto * l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
        nullptr == l_locale)
     {
-      spdlog::warn("Can't set locale to [{}].", g_locale_name);
+      spdlog::warn("Can't set locale to [{}]."sv, g_locale_name);
 
       g_locale_name = "C";
 
       assert(std::setlocale(LC_ALL, g_locale_name.c_str()));
     }
 
-    spdlog::info("Setting locale to [{}].", g_locale_name);
+    spdlog::info("Setting locale to [{}]."sv, g_locale_name);
     boost::locale::generator gen{};
     g_locale = gen(g_locale_name);
   });
@@ -84,14 +86,14 @@ void set_locale(const std::string_view locale)
     if(auto * l_locale =  std::setlocale(LC_ALL, g_locale_name.c_str());
        nullptr == l_locale)
     {
-      spdlog::warn("Can't set locale to [{}].", g_locale_name);
+      spdlog::warn("Can't set locale to [{}]."sv, g_locale_name);
 
       g_locale_name = "C";
 
       assert(std::setlocale(LC_ALL, g_locale_name.c_str()));
     }
 
-    spdlog::info("Setting locale to [{}].", g_locale_name);
+    spdlog::info("Setting locale to [{}]."sv, g_locale_name);
     boost::locale::generator gen{};
     g_locale = gen(g_locale_name);
   });
