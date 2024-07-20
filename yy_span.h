@@ -120,6 +120,15 @@ class span final
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
+    template<typename T,
+             std::enable_if_t<yy_traits::is_container_v<T>
+                              && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
+    constexpr explicit span(const T & container):
+      m_begin(container.begin()),
+      m_end(container.end())
+    {
+    }
+
     constexpr explicit span(ptr p_begin,
                             ptr p_end):
       m_begin(p_begin),
@@ -372,6 +381,15 @@ class const_span final
     using difference_type =  typename traits::difference_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
+
+    template<typename T,
+             std::enable_if_t<yy_traits::is_container_v<T>
+                              && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
+    constexpr explicit const_span(const T & container):
+      m_begin(container.begin()),
+      m_end(container.end())
+    {
+    }
 
     constexpr explicit const_span(const_ptr p_begin,
                                   const_ptr p_end):
