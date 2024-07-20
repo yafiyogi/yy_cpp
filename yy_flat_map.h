@@ -327,13 +327,13 @@ class flat_map final
       {
         auto [key, value, inserted] = add_empty(key_iter);
         pos = static_cast<size_type>(key - m_keys.begin());
-        found = inserted;
 
         if(inserted)
         {
           *key = std::forward<InputKeyType>(p_key);
           *value = std::forward<InputValueType>(p_value);
         }
+        found = !inserted;
       }
 
       return pos_inserted_type{pos, !found};
