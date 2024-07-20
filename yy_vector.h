@@ -36,6 +36,7 @@
 #include "yy_bit_twiddling.h"
 #include "yy_clear_action.h"
 #include "yy_ref_traits.h"
+#include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
 #include "yy_vector_traits.h"
@@ -546,6 +547,40 @@ class vector
           std::copy(other.begin(), other.end(), begin());
         }
       }
+    }
+
+    void assign(yy_quad::const_span<value_type> other)
+    {
+      clear();
+      reserve(other.size());
+
+      std::copy(other.begin(), other.end(), begin());
+      m_size = other.size();
+    }
+
+    void assign(vector && other)
+    {
+      clear();
+      reserve(other.size());
+
+      std::move(other.begin(), other.end(), begin());
+      m_size = other.size();
+    }
+
+    void append(yy_quad::const_span<value_type> other)
+    {
+      reserve(size() + other.size());
+
+      std::copy(other.begin(), other.end(), end());
+      m_size += other.size();
+    }
+
+    void append(vector && other)
+    {
+      reserve(size() + other.size());
+
+      std::move(other.begin(), other.end(), end());
+      m_size += other.size();
     }
 
     constexpr void clear(ClearAction action = default_action) noexcept
@@ -1087,6 +1122,40 @@ class simple_vector
           std::copy(other.begin(), other.end(), begin());
         }
       }
+    }
+
+    void assign(yy_quad::const_span<value_type> other)
+    {
+      clear();
+      reserve(other.size());
+
+      std::copy(other.begin(), other.end(), begin());
+      m_size = other.size();
+    }
+
+    void assign(simple_vector && other)
+    {
+      clear();
+      reserve(other.size());
+
+      std::move(other.begin(), other.end(), begin());
+      m_size = other.size();
+    }
+
+    void append(yy_quad::const_span<value_type> other)
+    {
+      reserve(size() + other.size());
+
+      std::copy(other.begin(), other.end(), end());
+      m_size += other.size();
+    }
+
+    void append(simple_vector && other)
+    {
+      reserve(size() + other.size());
+
+      std::move(other.begin(), other.end(), end());
+      m_size += other.size();
     }
 
     constexpr void clear(ClearAction action = default_action) noexcept
