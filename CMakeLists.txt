@@ -41,17 +41,18 @@ include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
 include(${YY_CMAKE}/cmake_clang_tidy.txt)
 
 find_package(Boost 1.84.0 REQUIRED COMPONENTS locale)
+find_package(fmt REQUIRED)
 
 add_library(yy_cpp STATIC)
+
+target_include_directories(yy_cpp
+  PRIVATE
+    "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_compile_options(yy_cpp
   PRIVATE
   "-DSPDLOG_COMPILED_LIB"
   "-DSPDLOG_FMT_EXTERNAL")
-
-target_include_directories(yy_cpp
-  PRIVATE
-   "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_sources(yy_cpp
   PRIVATE
@@ -105,14 +106,14 @@ set(YY_CPP_HEADERS
   yy_vector_util.h )
 
 
-add_subdirectory(unit_tests)
-add_subdirectory(examples)
-add_subdirectory(benchmarks)
-
-install(TARGETS yy_cpp )
+install(TARGETS yy_cpp)
 install(FILES ${YY_CPP_HEADERS} DESTINATION include/yy_cpp )
 
 get_target_property(YY_CPP_SOURCES yy_cpp SOURCES)
 
 add_custom_target(tidy-all
  COMMAND rm -f clang-tidy.log \; for f in "$$(" echo \"${YY_CPP_HEADERS} ${YY_CPP_SOURCES}\" | sed -n -e 's/;/ /pg' ")" \; do ${YY_CLANG_TIDY_CMD} ${YY_CLANG_TIDY_OPTIONS} "$$f" -- ${YY_TIDY_COMPILER_OPTIONS} >> clang-tidy.log \; done)
+
+add_subdirectory(unit_tests)
+add_subdirectory(examples)
+add_subdirectory(benchmarks)
