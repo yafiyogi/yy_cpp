@@ -45,14 +45,14 @@ class traits final
 } // namespace tokenizer_detail
 
 template<typename T>
-class tokenizer final
+class tokenizer
 {
   public:
     using traits = tokenizer_detail::traits<T>;
     using value_type = typename traits::value_type;
     using const_l_value_ref = typename traits::const_l_value_ref;
     using span_type = typename traits::span_type;
-    using iterator = typename span_type::const_iterator;
+    using const_iterator = typename span_type::const_iterator;
     using size_type = typename span_type::size_type;
 
     static constexpr size_type none{};
@@ -114,9 +114,14 @@ class tokenizer final
       return m_more;
     }
 
-    constexpr span_type source()
+    constexpr span_type source() const noexcept
     {
       return m_span;
+    }
+
+    constexpr value_type delim() const noexcept
+    {
+      return m_delim;
     }
 
   private:
@@ -125,6 +130,29 @@ class tokenizer final
     span_type m_span;
     value_type m_delim{};
     bool m_more = false;
+};
+
+template<typename T>
+class tokenizer_first:
+      public tokenizer<T>
+{
+  public:
+    using traits = typename tokenizer<T>::traits;
+    using value_type = tokenizer<T>::value_type;
+    using const_l_value_ref = tokenizer<T>::const_l_value_ref;
+    using span_type = tokenizer<T>::span_type;
+    using const_iterator = tokenizer<T>::const_iterator;
+    using size_type = tokenizer<T>::size_type;
+
+    constexpr explicit tokenizer_first(span_type p_span, const_l_value_ref p_delim) noexcept:
+      tokenizer<T>(p_span, p_delim)
+    {
+      if(auto src = tokenizer<T>::source();
+         !src.empty() && (tokenizer<T>::delim() == src[0]))
+      {
+        std::ignore = tokenizer<T>::scan();
+      }
+    }
 };
 
 } // namespace yafiyogi::yy_util
