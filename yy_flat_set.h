@@ -37,6 +37,7 @@
 #include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
+#include "yy_utility.h"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
@@ -472,6 +473,85 @@ class flat_set final
       auto [iter, is_end] = do_lower_bound_raw(p_value);
 
       return pos_end_type{static_cast<size_type>(iter - m_values.data()), is_end};
+    }
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr iter_end_type do_upper_bound_raw(const ValueParamType & p_value) noexcept
+    {
+      value_ptr begin = m_values.begin();
+      value_ptr end = m_values.end();
+      value_ptr iter = std::upper_bound(begin, end, p_value);
+
+      return iter_end_type{iter, iter == end};
+    }
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr const_iter_end_type do_upper_bound_raw(const ValueParamType & p_value) const noexcept
+    {
+      const_value_ptr begin = m_values.begin();
+      const_value_ptr end = m_values.end();
+      const_value_ptr iter = std::upper_bound(begin, end, p_value);
+
+      return const_iter_end_type{iter, iter == end};
+    }
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr pos_end_type do_upper_bound(const ValueParamType & p_value) const noexcept
+    {
+      auto [iter, is_end] = do_upper_bound_raw(p_value);
+
+      return pos_end_type{static_cast<size_type>(iter - m_values.data()), is_end};
+    }
+
+    using range = yy_util::Range<value_ptr>;
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr range do_range_raw(const ValueParamType & p_value) noexcept
+    {
+      auto [begin, begin_is_end] = lower_bound_raw(m_values.begin(), m_values.end(), p_value);
+
+      if(begin_is_end)
+      {
+        return range{begin, begin};
+      }
+
+      auto [end, end_is_end] = lower_bound_raw(begin, m_values.end(), p_value);
+
+      return range{begin, end};
+    }
+
+    using const_range = yy_util::Range<const_value_ptr>;
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr range do_range_raw(const ValueParamType & p_value) const noexcept
+    {
+      auto [begin, begin_is_end] = lower_bound_raw(m_values.begin(), m_values.end(), p_value);
+
+      if(begin_is_end)
+      {
+        return const_range{begin, begin};
+      }
+
+      auto [end, end_is_end] = lower_bound_raw(begin, m_values.end(), p_value);
+
+      return const_range{begin, end};
+    }
+
+    using pos_range = yy_util::Range<size_type>;
+
+    template<typename ValueParamType>
+    [[nodiscard]]
+    constexpr pos_range do_range(const ValueParamType & p_value) const noexcept
+    {
+      auto range_found = do_range_raw(p_value);
+      const_value_ptr begin = m_values.begin();
+
+      return pos_range{range_found.begin() - begin, range_found.end() - begin()};
     }
 
     template<typename ValueParamType>

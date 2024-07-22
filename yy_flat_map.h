@@ -38,6 +38,7 @@
 //#include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
+#include "yy_utility.h"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
@@ -587,6 +588,85 @@ class flat_map final
       auto [iter, is_end] = do_lower_bound_raw(p_key);
 
       return pos_end_type{static_cast<size_type>(iter - m_keys.data()), is_end};
+    }
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr iter_end_type do_upper_bound_raw(const KeyParamType & p_key) noexcept
+    {
+      key_ptr begin = m_keys.begin();
+      key_ptr end = m_keys.end();
+      key_ptr iter = std::upper_bound(begin, end, p_key);
+
+      return iter_end_type{iter, iter == end};
+    }
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr const_iter_end_type do_upper_bound_raw(const KeyParamType & p_key) const noexcept
+    {
+      const_key_ptr begin = m_keys.begin();
+      const_key_ptr end = m_keys.end();
+      const_key_ptr iter = std::upper_bound(begin, end, p_key);
+
+      return const_iter_end_type{iter, iter == end};
+    }
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr pos_end_type do_upper_bound(const KeyParamType & p_key) const noexcept
+    {
+      auto [iter, is_end] = do_upper_bound_raw(p_key);
+
+      return pos_end_type{static_cast<size_type>(iter - m_keys.data()), is_end};
+    }
+
+    using range = yy_util::Range<key_ptr>;
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr range do_range_raw(const KeyParamType & p_key) noexcept
+    {
+      auto [begin, begin_is_end] = lower_bound_raw(m_keys.begin(), m_keys.end(), p_key);
+
+      if(begin_is_end)
+      {
+        return range{begin, begin};
+      }
+
+      auto [end, end_is_end] = lower_bound_raw(begin, m_keys.end(), p_key);
+
+      return range{begin, end};
+    }
+
+    using const_range = yy_util::Range<const_key_ptr>;
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr range do_range_raw(const KeyParamType & p_key) const noexcept
+    {
+      auto [begin, begin_is_end] = lower_bound_raw(m_keys.begin(), m_keys.end(), p_key);
+
+      if(begin_is_end)
+      {
+        return const_range{begin, begin};
+      }
+
+      auto [end, end_is_end] = lower_bound_raw(begin, m_keys.end(), p_key);
+
+      return const_range{begin, end};
+    }
+
+    using pos_range = yy_util::Range<size_type>;
+
+    template<typename KeyParamType>
+    [[nodiscard]]
+    constexpr pos_range do_range(const KeyParamType & p_key) const noexcept
+    {
+      auto range_found = do_range_raw(p_key);
+      const_key_ptr begin = m_keys.begin();
+
+      return pos_range{range_found.begin() - begin, range_found.end() - begin()};
     }
 
     template<typename KeyParamType>
