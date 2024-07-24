@@ -242,18 +242,6 @@ class flat_set final
       return *value(pos);
     }
 
-    [[nodiscard]]
-    constexpr value_type & add_empty(size_type p_pos)
-    {
-      auto [value_pos, value_added] = m_values.add_empty(m_values.begin() + p_pos);
-      if(!value_added)
-      {
-        throw std::runtime_error("flat_set::add_empty() value add_empty() failed!");
-      }
-
-      return *value_pos;
-    }
-
     template<typename InputValueType>
     constexpr iterator emplace(iterator p_pos,
                                 InputValueType && p_value)
@@ -289,6 +277,24 @@ class flat_set final
         iter = m_values.emplace(iter,
                                 std::forward<InputValueType>(p_value)).iter;
       }
+
+      return iter_inserted_type{iter, !found};
+    }
+
+    template<typename InputValueType>
+    constexpr iter_inserted_type emplace_or_assign(InputValueType && p_value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "p_value is of an incompatible type.");
+
+      auto [iter, found] = do_find_raw(p_value);
+      if(!found)
+      {
+        iter = add_empty(iter);
+      }
+
+      *iter = std::forward<InputValueType>(p_value);
 
       return iter_inserted_type{iter, !found};
     }
@@ -387,7 +393,7 @@ class flat_set final
     }
 
     template<typename Visitor>
-    void visit(Visitor && visit)
+    void visit(Visitor && visitor)
     {
       for(const auto & value : m_values)
       {
@@ -397,7 +403,7 @@ class flat_set final
 
   private:
     [[nodiscard]]
-    constexpr iterator add_empty(iterator p_pos)
+    constexpr value_ptr add_empty(value_ptr p_pos)
     {
       auto [value_pos, value_added] = m_values.add_empty(p_pos);
       if(!value_added)
