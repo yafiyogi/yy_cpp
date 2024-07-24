@@ -133,20 +133,14 @@ class vector
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
 
-      if(this != &other)
-      {
-        copy(other);
-      }
+      copy(other);
 
       return *this;
     }
 
     constexpr vector & operator=(vector && other) noexcept
     {
-      if(this != &other)
-      {
-        move(std::move(other));
-      }
+      move(std::move(other));
 
       return *this;
     }
@@ -327,6 +321,16 @@ class vector
 
     template<typename InputValueType>
     constexpr void emplace_back(InputValueType && value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "Value is of an incompatible type.");
+
+      emplace(end(), std::forward<InputValueType>(value));
+    }
+
+    template<typename InputValueType>
+    constexpr void push_back(InputValueType && value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
@@ -549,25 +553,33 @@ class vector
       }
     }
 
-    void assign(yy_quad::const_span<value_type> other)
+    void assign(const vector & other, ClearAction action = default_action)
     {
-      clear();
-      reserve(other.size());
+      copy(other, action);
+    }
 
-      std::copy(other.begin(), other.end(), begin());
-      m_size = other.size();
+    void assign(yy_quad::const_span<value_type> other, ClearAction action = default_action)
+    {
+      if(((other.data() < data())
+          || (other.data() > (data() + size())))
+         && (((other.data() + other.size()) < data())
+             || ((other.data() + other.size()) > (data() + size()))))
+
+      {
+        clear(action);
+        reserve(other.size());
+
+        std::copy(other.begin(), other.end(), begin());
+        m_size = other.size();
+      }
     }
 
     void assign(vector && other)
     {
-      clear();
-      reserve(other.size());
-
-      std::move(other.begin(), other.end(), begin());
-      m_size = other.size();
+      move(std::move(other));
     }
 
-    void append(yy_quad::const_span<value_type> other)
+    void append(const yy_quad::const_span<value_type> & other)
     {
       reserve(size() + other.size());
 
@@ -601,19 +613,23 @@ class vector
 
     constexpr void swap(vector && other) noexcept
     {
-      if(this != &other)
-      {
-        move(std::move(other));
-      }
+      move(std::move(other));
     }
 
   private:
     constexpr void move(vector && other) noexcept
     {
-      m_data = std::move(other.m_data);
-      m_capacity = std::move(other.m_capacity);
-      m_size = std::move(other.m_size);
-      m_offset = std::move(other.m_offset);
+      if(this != &other)
+      {
+        m_data = std::move(other.m_data);
+        other.m_data.release();
+        m_capacity = std::move(other.m_capacity);
+        other.m_capacity = 0;
+        m_size = std::move(other.m_size);
+        other.m_size = 0;
+        m_offset = std::move(other.m_offset);
+        other.m_offset = 0;
+      }
     }
 
     [[nodiscard]]
@@ -675,7 +691,7 @@ class vector
       {
         auto new_data = std::make_unique<vector_type>(new_capacity);
 
-        if(m_data && m_size > 0)
+        if((m_size > 0) && m_data)
         {
           std::move(begin(), begin() + pos, new_data.get());
           if(pos != m_size)
@@ -759,20 +775,14 @@ class simple_vector
     {
       static_assert(std::is_copy_assignable_v<value_type>, "T must be copy assignable.");
 
-      if(this != &other)
-      {
-        copy(other);
-      }
+      copy(other);
 
       return *this;
     }
 
     constexpr simple_vector & operator=(simple_vector && other) noexcept
     {
-      if(this != &other)
-      {
-        move(std::move(other));
-      }
+      move(std::move(other));
 
       return *this;
     }
@@ -955,6 +965,16 @@ class simple_vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    template<typename InputValueType>
+    constexpr void push_back(InputValueType && value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "Value is of an incompatible type.");
+
+      emplace(end(), std::forward<InputValueType>(value));
+    }
+
     [[nodiscard]]
     constexpr return_value add_empty(value_ptr pos)
     {
@@ -1124,22 +1144,29 @@ class simple_vector
       }
     }
 
-    void assign(yy_quad::const_span<value_type> other)
+    void assign(const simple_vector & other, ClearAction action = default_action)
     {
-      clear();
-      reserve(other.size());
+      copy(other, action);
+    }
 
-      std::copy(other.begin(), other.end(), begin());
-      m_size = other.size();
+    void assign(yy_quad::const_span<value_type> other, ClearAction action = default_action)
+    {
+      if(((other.data() < data())
+          || (other.data() > (data() + size())))
+         && (((other.data() + other.size()) < data())
+             || ((other.data() + other.size()) > (data() + size()))))
+      {
+        clear(action);
+        reserve(other.size());
+
+        std::copy(other.begin(), other.end(), begin());
+        m_size = other.size();
+      }
     }
 
     void assign(simple_vector && other)
     {
-      clear();
-      reserve(other.size());
-
-      std::move(other.begin(), other.end(), begin());
-      m_size = other.size();
+      move(std::move(other));
     }
 
     void append(yy_quad::const_span<value_type> other)
@@ -1175,18 +1202,21 @@ class simple_vector
 
     constexpr void swap(simple_vector && other) noexcept
     {
-      if(this != &other)
-      {
-        move(std::move(other));
-      }
+      move(std::move(other));
     }
 
   private:
     constexpr void move(simple_vector && other) noexcept
     {
-      m_data = std::move(other.m_data);
-      m_capacity = std::move(other.m_capacity);
-      m_size = std::move(other.m_size);
+      if(this != &other)
+      {
+        m_data = std::move(other.m_data);
+        other.m_data.release();
+        m_capacity = std::move(other.m_capacity);
+        other.m_capacity = 0;
+        m_size = std::move(other.m_size);
+        other.m_size = 0;
+      }
     }
 
     struct distance_valid_type final
@@ -1226,7 +1256,7 @@ class simple_vector
       {
         auto new_data = std::make_unique<vector_type>(new_capacity);
 
-        if(m_data && m_size > 0)
+        if((m_size > 0) && m_data)
         {
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
