@@ -289,26 +289,6 @@ class flat_map final
         bool inserted = false;
     };
 
-    template<typename InputValueType>
-    constexpr pos_inserted_type emplace(size_type p_pos,
-                                key_r_value_ref p_key,
-                                InputValueType && p_value)
-    {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "p_value is of an incompatible type.");
-
-      auto [key, value, inserted] = add_empty(p_pos);
-
-      if(inserted)
-      {
-        *key = std::forward<key_type>(p_key);
-        *value = std::forward<InputValueType>(p_value);
-      }
-
-      return pos_inserted_type{static_cast<size_type>(key - m_keys.begin()), inserted};
-    }
-
     template<typename InputKeyType,
              typename InputValueType>
     constexpr pos_inserted_type emplace(InputKeyType && p_key,
@@ -326,18 +306,60 @@ class flat_map final
 
       if(!found)
       {
-        auto [key, value, inserted] = add_empty(key_iter);
-        pos = static_cast<size_type>(key - m_keys.begin());
+        auto [key, value] = add_empty(key_iter);
 
-        if(inserted)
-        {
-          *key = std::forward<InputKeyType>(p_key);
-          *value = std::forward<InputValueType>(p_value);
-        }
-        found = !inserted;
+        pos = static_cast<size_type>(key - m_keys.begin());
+        *key = std::forward<InputKeyType>(p_key);
+        *value = std::forward<InputValueType>(p_value);
       }
 
       return pos_inserted_type{pos, !found};
+    }
+
+    template<typename InputKeyType,
+             typename InputValueType>
+    constexpr size_type emplace(size_type p_pos,
+                                InputKeyType && p_key,
+                                InputValueType && p_value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputKeyType>, key_type>
+                    || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_cvr_t<std::remove_pointer<InputKeyType>>>),
+                    "p_key is of an incompatible type.");
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "p_value is of an incompatible type.");
+
+      auto [key, value] = add_empty(m_keys.begin() + p_pos);
+
+      *key = std::forward<InputKeyType>(p_key);
+      *value = std::forward<InputValueType>(p_value);
+
+      return static_cast<size_type>(key - m_keys.begin());
+    }
+
+    template<typename InputKeyType,
+             typename InputValueType>
+    constexpr pos_inserted_type emplace_or_assign(InputKeyType && p_key,
+                                                  InputValueType && p_value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "p_value is of an incompatible type.");
+
+      auto [key_iter, found] = do_find_raw(p_key);
+      auto pos = (key_iter - m_keys.begin());
+      auto value_iter = m_values.begin() + pos;
+
+      if(!found)
+      {
+        std::tie(key_iter, value_iter) = add_empty(key_iter);
+
+        *key_iter = std::forward<InputKeyType>(p_key);
+      }
+
+      *value_iter = std::forward<InputValueType>(p_value);
+
+      return pos_inserted_type{static_cast<size_type>(pos), !found};
     }
 
     template<typename InputKeyType>
@@ -419,7 +441,7 @@ class flat_map final
           return true;
         }
 
-        if(m_keys[idx] != other.m_keys[idx])
+        if(!(m_keys[idx] == other.m_keys[idx]))
         {
           return false;
         }
@@ -494,19 +516,21 @@ class flat_map final
 
   private:
     [[nodiscard]]
-    constexpr add_empty_type add_empty(key_ptr p_pos)
+    constexpr std::tuple<key_ptr, value_ptr> add_empty(key_ptr p_pos)
     {
-      if(auto [key_pos, key_inserted] = m_keys.add_empty(p_pos);
-         key_inserted)
+      auto [key_pos, key_inserted] = m_keys.add_empty(p_pos);
+      if(!key_inserted)
       {
-        if(auto [value_pos, value_inserted] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
-           value_inserted)
-        {
-          return add_empty_type{key_pos, value_pos, true};
-        }
+        throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
       }
 
-      return add_empty_type{m_keys.end(), m_values.end(), false};
+      auto [value_pos, value_inserted] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
+      if(!value_inserted)
+      {
+        throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
+      }
+
+      return std::make_tuple(key_pos, value_pos);
     }
 
     [[nodiscard]]
