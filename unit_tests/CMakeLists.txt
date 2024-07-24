@@ -28,6 +28,10 @@ cmake_minimum_required(VERSION 3.24)
 
 project(test_yy_cpp LANGUAGES CXX)
 
+find_package(fmt REQUIRED)
+find_package(GTest REQUIRED)
+find_package(spdlog REQUIRED)
+
 add_executable(test_yy_cpp
   binary_search_tests.cpp
   bit_twiddling_tests.cpp
@@ -64,11 +68,7 @@ target_link_directories(test_yy_cpp
   ${CMAKE_INSTALL_PREFIX}/lib
   /opt/local/lib)
 
-find_package(fmt REQUIRED)
-find_package(GTest REQUIRED)
-find_package(spdlog REQUIRED)
-
-target_compile_options(yy_cpp
+target_compile_options(test_yy_cpp
   PRIVATE
   "-DSPDLOG_COMPILED_LIB"
   "-DSPDLOG_FMT_EXTERNAL")
