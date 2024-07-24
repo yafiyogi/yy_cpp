@@ -93,7 +93,7 @@ void set_locale(const std::string_view locale)
       assert(std::setlocale(LC_ALL, g_locale_name.c_str()));
     }
 
-    spdlog::info("Setting locale to [{}]."sv, g_locale_name);
+    spdlog::info(" Setting locale to [{}]."sv, g_locale_name);
     boost::locale::generator gen{};
     g_locale = gen(g_locale_name);
   });
