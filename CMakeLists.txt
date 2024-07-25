@@ -125,9 +125,8 @@ install(FILES "yy_cppConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/yy_cppConfigVers
 get_target_property(YY_CPP_HEADERS yy_cpp HEADER_SET)
 get_target_property(YY_CPP_SOURCES yy_cpp SOURCES)
 
-add_custom_target(tidy-all
- COMMAND rm -f clang-tidy.log \; for f in "$$(" echo \"${YY_CPP_HEADERS} ${YY_CPP_SOURCES}\" | sed -n -e 's/;/ /pg' ")" \; do ${YY_CLANG_TIDY_CMD} ${YY_CLANG_TIDY_OPTIONS} "$$f" -- ${YY_TIDY_COMPILER_OPTIONS} >> clang-tidy.log \; done)
-
 add_subdirectory(unit_tests)
 add_subdirectory(examples)
 add_subdirectory(benchmarks)
+
+add_yy_tidy_all(yy_cpp)
