@@ -1266,6 +1266,7 @@ class simple_vector
           {
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
+#pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
 #endif
             std::move(begin() + pos, end(), new_data.get() + pos + 1);
           }
