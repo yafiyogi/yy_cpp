@@ -31,6 +31,7 @@ project(test_yy_cpp LANGUAGES CXX)
 find_package(fmt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(yy_test REQUIRED)
 
 add_executable(test_yy_cpp
   binary_search_tests.cpp
@@ -65,7 +66,6 @@ target_include_directories(test_yy_cpp
 
 target_link_directories(test_yy_cpp
   PUBLIC
-  ${CMAKE_INSTALL_PREFIX}/lib
   /opt/local/lib)
 
 target_compile_options(test_yy_cpp
@@ -75,7 +75,7 @@ target_compile_options(test_yy_cpp
 
 target_link_libraries(test_yy_cpp
   yy_cpp
-  yy_test
+  yy_test::yy_test
   Boost::locale
   fmt::fmt
   spdlog::spdlog

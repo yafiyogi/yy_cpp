@@ -29,7 +29,7 @@
 
 cmake_minimum_required(VERSION 3.24)
 
-project(yy_cpp LANGUAGES CXX)
+project(yy_cpp LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS)
 set(YY_ROOT "${PROJECT_SOURCE_DIR}/..")
@@ -58,57 +58,71 @@ target_sources(yy_cpp
   PRIVATE
     yy_locale.cpp
     yy_string_case.cpp
-    yy_string_util.cpp)
+    yy_string_util.cpp
+  PUBLIC FILE_SET HEADERS
+    FILES
+      yy_aho_corasick.h
+      yy_arg_traits.h
+      yy_array_traits.h
+      yy_assert.h
+      yy_binary_search.h
+      yy_bit_twiddling.h
+      yy_clear_action.h
+      yy_fast_atoi.h
+      yy_flat_map.h
+      yy_flat_radix_trie.h
+      yy_flat_set.h
+      yy_flat_trie.h
+      yy_fm_flat_trie_idx.h
+      yy_fm_flat_trie_ptr.h
+      yy_fm_radix_trie.h
+      yy_fm_subject_observer.h
+      yy_fm_trie.h
+      yy_func_traits.h
+      yy_hash.h
+      yy_init.h
+      yy_int_util.h
+      yy_locale.h
+      yy_lockable_value.h
+      yy_lower_bound.h
+      yy_make_lookup.h
+      yy_radix_trie.h
+      yy_ref_traits.h
+      yy_ring_buffer.h
+      yy_span.h
+      yy_static_flat_map.h
+      yy_static_vector.h
+      yy_string_case.h
+      yy_string_traits.h
+      yy_string_util.h
+      yy_subject_observer.h
+      yy_tokenizer.h
+      yy_trie.h
+      yy_type_traits.h
+      yy_utility.h
+      yy_variant_traits.h
+      yy_vector.h
+      yy_vector_traits.h
+      yy_vector_util.h )
 
-set(YY_CPP_HEADERS
-  yy_aho_corasick.h
-  yy_arg_traits.h
-  yy_array_traits.h
-  yy_assert.h
-  yy_binary_search.h
-  yy_bit_twiddling.h
-  yy_clear_action.h
-  yy_fast_atoi.h
-  yy_flat_map.h
-  yy_flat_radix_trie.h
-  yy_flat_set.h
-  yy_flat_trie.h
-  yy_fm_flat_trie_idx.h
-  yy_fm_flat_trie_ptr.h
-  yy_fm_radix_trie.h
-  yy_fm_subject_observer.h
-  yy_fm_trie.h
-  yy_func_traits.h
-  yy_hash.h
-  yy_init.h
-  yy_int_util.h
-  yy_locale.h
-  yy_lockable_value.h
-  yy_lower_bound.h
-  yy_make_lookup.h
-  yy_radix_trie.h
-  yy_ref_traits.h
-  yy_ring_buffer.h
-  yy_span.h
-  yy_static_flat_map.h
-  yy_static_vector.h
-  yy_string_case.h
-  yy_string_traits.h
-  yy_string_util.h
-  yy_subject_observer.h
-  yy_tokenizer.h
-  yy_trie.h
-  yy_type_traits.h
-  yy_utility.h
-  yy_variant_traits.h
-  yy_vector.h
-  yy_vector_traits.h
-  yy_vector_util.h )
+install(TARGETS yy_cpp
+  EXPORT yy_cppTargets
+  FILE_SET HEADERS DESTINATION include/yy_cpp)
 
+install(EXPORT yy_cppTargets
+  FILE yy_cppTargets.cmake
+  NAMESPACE yy_cpp::
+  DESTINATION lib/cmake/yy_cpp)
 
-install(TARGETS yy_cpp)
-install(FILES ${YY_CPP_HEADERS} DESTINATION include/yy_cpp )
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("yy_cppConfigVersion.cmake"
+  VERSION ${yy_cpp_VERSION}
+  COMPATIBILITY AnyNewerVersion)
 
+install(FILES "yy_cppConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/yy_cppConfigVersion.cmake"
+    DESTINATION lib/cmake/yy_cpp)
+
+get_target_property(YY_CPP_HEADERS yy_cpp HEADER_SET)
 get_target_property(YY_CPP_SOURCES yy_cpp SOURCES)
 
 add_custom_target(tidy-all
