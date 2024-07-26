@@ -10,6 +10,7 @@
 * spdlog (see https://github.com/gabime/spdlog)
 * Google Test (see https://github.com/google/googletest)
 * Google Benchmark (see https://github.com/google/benchmark)
+* These build instructions [Third-Party-Library-Build-Instructions.txt](https://gist.github.com/yafiyogi/8cc25cca91b6b38f50906ca8d5667bf2) worked for me on MacOs 12.7.5 with Xcode 14.2, but mostly compiling with MacPorts gcc14.
 
 ### CMake command
 In `yy_cpp` source directiory:
