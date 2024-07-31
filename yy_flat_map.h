@@ -482,7 +482,7 @@ class flat_map final
     {
       value_ptr value_iter = m_values.begin();
 
-      for(const auto & key : m_keys)
+      for(auto & key : m_keys)
       {
         visitor(key, *value_iter);
         ++value_iter;

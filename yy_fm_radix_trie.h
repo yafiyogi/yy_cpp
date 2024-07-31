@@ -204,12 +204,7 @@ class trie_node
     template<typename Visitor>
     constexpr void visit(Visitor && visitor)
     {
-      for(size_t idx = 0; idx < m_edges.size(); ++idx)
-      {
-        auto [label, node] = m_edges[idx];
-
-        visitor(label, node);
-      }
+      m_edges.visit(std::forward<Visitor>(visitor));
     }
 
     [[nodiscard]]
