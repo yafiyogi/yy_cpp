@@ -49,8 +49,9 @@ class less_than_comp final
     using container_value_type = yy_traits::remove_cvr_t<T>;
     using value_type = yy_traits::remove_cvr_t<V>;
 
-    constexpr explicit less_than_comp(C comp) noexcept:
-      m_comp(std::move(comp))
+    template<typename Comp>
+    constexpr explicit less_than_comp(Comp && comp) noexcept:
+      m_comp(std::forward<Comp>(comp))
     {
     }
 
@@ -81,8 +82,9 @@ class equal_to_comp final
     using container_value_type = yy_traits::remove_cvr_t<T>;
     using value_type = yy_traits::remove_cvr_t<V>;
 
-    constexpr explicit equal_to_comp(C comp) noexcept:
-      m_comp(std::move(comp))
+    template<typename Comp>
+    constexpr explicit equal_to_comp(Comp && comp) noexcept:
+      m_comp(std::forward<Comp>(comp))
     {
     }
 
@@ -159,26 +161,64 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           || yy_traits::is_array_v<T>,
                           bool> = true>
-constexpr pos_end_type lower_bound_pos(T && container,
-                                       V && value,
-                                       C && comp = C{}) noexcept
+constexpr auto lower_bound(T && container,
+                           V && value,
+                           C && comp = C{}) noexcept
 {
   using container_value_type = yy_traits::container_type_t<T>;
   using value_type = yy_traits::remove_cvr_t<V>;
   using less_than = vector_detail::less_than_comp<container_value_type, value_type, C>;
 
-  const auto begin = container.data();
-  const auto end = begin + container.size();
-
-  auto iter = std::lower_bound(begin,
+  auto end = container.end();
+  auto iter = std::lower_bound(container.begin(),
                                end,
-                               value,
+                               std::forward<V>(value),
                                less_than{comp});
-  bool is_end = end == iter;
+  return std::make_tuple(iter, end == iter);
+}
+
+template<typename T,
+         typename V,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_cvr_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
+                          bool> = true>
+constexpr pos_end_type lower_bound_pos(T && container,
+                                       V && value,
+                                       C && comp = C{}) noexcept
+{
+  const auto begin = container.begin();
+  auto [iter, is_end] = lower_bound(std::forward<T>(container),
+                                    std::forward<V>(value),
+                                    std::forward<C>(comp));
 
   auto pos = std::distance(begin, iter);
 
   return pos_end_type{static_cast<std::size_t>(pos), is_end};
+}
+
+template<typename T,
+         typename V,
+         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
+                                                  yy_traits::remove_cvr_t<V>>,
+         std::enable_if_t<yy_traits::is_vector_v<T>
+                          || yy_traits::is_array_v<T>,
+                          bool> = true>
+constexpr auto find(T && container,
+                    V && value,
+                    C && comp = C{}) noexcept
+{
+  using container_type = yy_traits::remove_cvr_t<T>;
+  using container_value_type = yy_traits::container_type_t<container_type>;
+  using value_type = yy_traits::remove_cvr_t<V>;
+  using equal_to = vector_detail::equal_to_comp<container_value_type, value_type, C>;
+
+  auto [iter, is_end] = lower_bound(std::forward<T>(container), value, comp);
+
+  bool found = !is_end && equal_to{comp}(*iter, value);
+
+  return std::make_tuple(iter, found);
 }
 
 struct pos_found_type final
@@ -198,51 +238,14 @@ constexpr pos_found_type find_pos(T && container,
                                   V && value,
                                   C && comp = C{}) noexcept
 {
-  using container_type = yy_traits::remove_cvr_t<T>;
-  using container_value_type = yy_traits::container_type_t<container_type>;
-  using value_type = yy_traits::remove_cvr_t<V>;
-  using equal_to = vector_detail::equal_to_comp<container_value_type, value_type, C>;
-
-  auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
-
   const auto begin = container.data();
-  const auto iter = begin + pos;
+  auto [iter, found] = find(std::forward<T>(container),
+                            std::forward<V>(value),
+                            std::forward<C>(comp));
 
-  bool found = !is_end && equal_to{comp}(*iter, value);
+  auto pos = std::distance(begin, iter);
 
   return pos_found_type{static_cast<std::size_t>(pos), found};
-}
-
-template<typename T,
-         typename V,
-         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_cvr_t<V>>,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_array_v<T>,
-                          bool> = true>
-constexpr auto lower_bound(T && container,
-                           V && value,
-                           C && comp = C{}) noexcept
-{
-  auto [pos, is_end] = lower_bound_pos(container, value, std::forward<C>(comp));
-
-  return std::make_tuple(container.begin() + static_cast<std::ptrdiff_t>(pos), is_end);
-}
-
-template<typename T,
-         typename V,
-         typename C = vector_detail::default_comp<yy_traits::container_type_t<T>,
-                                                  yy_traits::remove_cvr_t<V>>,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_array_v<T>,
-                          bool> = true>
-constexpr auto find(T && container,
-                    V && value,
-                    C && comp = C{}) noexcept
-{
-  auto [pos, found] = find_pos(container, value, std::forward<C>(comp));
-
-  return std::make_tuple(container.begin() + static_cast<std::ptrdiff_t>(pos), found);
 }
 
 template<typename T,
