@@ -277,19 +277,6 @@ class static_flat_map final
       return const_ref_type{*key(pos), *value(pos)};
     }
 
-    struct add_empty_type final
-    {
-        key_ptr key = nullptr;
-        value_ptr value = nullptr;
-        EmplaceResult result = EmplaceResult::Full;
-    };
-
-    [[nodiscard]]
-    constexpr add_empty_type add_empty(size_type p_pos) noexcept
-    {
-      return add_empty(m_keys.begin() + p_pos);
-    }
-
     struct pos_result_type final
     {
         size_type pos{};
@@ -470,6 +457,13 @@ class static_flat_map final
     }
 
   private:
+    struct add_empty_type final
+    {
+        key_ptr key = nullptr;
+        value_ptr value = nullptr;
+        EmplaceResult result = EmplaceResult::Full;
+    };
+
     [[nodiscard]]
     constexpr add_empty_type add_empty(key_ptr p_pos) noexcept
     {
