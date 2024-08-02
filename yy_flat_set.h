@@ -395,6 +395,15 @@ class flat_set final
     template<typename Visitor>
     void visit(Visitor && visitor)
     {
+      for(auto & value : m_values)
+      {
+        visitor(value);
+      }
+    }
+
+    template<typename Visitor>
+    void visit(Visitor && visitor) const
+    {
       for(const auto & value : m_values)
       {
         visitor(value);

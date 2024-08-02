@@ -456,6 +456,30 @@ class static_flat_map final
       return size() == other.size();
     }
 
+    template<typename Visitor>
+    void visit(Visitor && visitor)
+    {
+      value_ptr value_iter = m_values.begin();
+
+      for(auto & key : m_keys)
+      {
+        visitor(key, *value_iter);
+        ++value_iter;
+      }
+    }
+
+    template<typename Visitor>
+    void visit(Visitor && visitor) const
+    {
+      const_value_ptr value_iter = m_values.begin();
+
+      for(const auto & key : m_keys)
+      {
+        visitor(key, *value_iter);
+        ++value_iter;
+      }
+    }
+
   private:
     struct add_empty_type final
     {
