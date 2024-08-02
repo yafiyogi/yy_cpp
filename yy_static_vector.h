@@ -555,7 +555,9 @@ class static_vector
     {
       m_data = std::move(other.m_data);
       m_size = std::move(other.m_size);
+      other.m_size = 0;
       m_offset = std::move(other.m_offset);
+      other.m_offset = 0;
     }
 
     [[nodiscard]]
@@ -1050,6 +1052,7 @@ class static_simple_vector
     {
       m_data = std::move(other.m_data);
       m_size = std::move(other.m_size);
+      other.m_size = 0;
     }
 
     struct distance_valid_type final
