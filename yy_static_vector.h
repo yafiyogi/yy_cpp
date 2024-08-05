@@ -542,18 +542,29 @@ class static_vector
       }
     }
 
-    constexpr void swap(static_vector && other) noexcept
+    constexpr void swap(static_vector && other,
+                        ClearAction action = default_action) noexcept
     {
       if(this != &other)
       {
-        move(std::move(other));
+        move(std::move(other), action);
       }
     }
 
   private:
-    constexpr void move(static_vector && other) noexcept
+    constexpr void move(static_vector && other,
+                        ClearAction action = default_action) noexcept
     {
-      m_data = std::move(other.m_data);
+      std::move(other.begin(), other.end(), begin());
+
+      if(ClearAction::Clear ==  action)
+      {
+        for(size_type idx = other.m_size; idx < m_size; ++idx)
+        {
+          m_data[idx] = value_type{};
+        }
+      }
+
       m_size = std::move(other.m_size);
       other.m_size = 0;
       m_offset = std::move(other.m_offset);
@@ -1039,18 +1050,29 @@ class static_simple_vector
       }
     }
 
-    constexpr void swap(static_simple_vector && other) noexcept
+    constexpr void swap(static_simple_vector && other,
+                        ClearAction action = default_action) noexcept
     {
       if(this != &other)
       {
-        move(std::move(other));
+        move(std::move(other), action);
       }
     }
 
   private:
-    constexpr void move(static_simple_vector && other) noexcept
+    constexpr void move(static_simple_vector && other,
+                        ClearAction action = default_action) noexcept
     {
-      m_data = std::move(other.m_data);
+      std::move(other.begin(), other.end(), begin());
+
+      if(ClearAction::Clear ==  action)
+      {
+        for(size_type idx = other.m_size; idx < m_size; ++idx)
+        {
+          m_data[idx] = value_type{};
+        }
+      }
+
       m_size = std::move(other.m_size);
       other.m_size = 0;
     }
