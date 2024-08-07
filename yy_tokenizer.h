@@ -74,7 +74,10 @@ class tokenizer
     [[nodiscard]]
     constexpr span_type scan() noexcept
     {
-      ++m_token_idx;
+      if(!empty())
+      {
+        ++m_token_idx;
+      }
       auto pos = std::find(m_span.begin(), m_span.end(), m_delim);
 
       m_more = pos != m_span.end();
@@ -125,9 +128,9 @@ class tokenizer
     }
 
   private:
-    span_type m_token;
+    span_type m_token{};
     size_type m_token_idx = none;
-    span_type m_span;
+    span_type m_span{};
     value_type m_delim{};
     bool m_more = false;
 };
