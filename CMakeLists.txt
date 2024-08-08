@@ -100,7 +100,7 @@ target_sources(yy_cpp
       yy_trie.h
       yy_type_traits.h
       yy_utility.h
-      yy_variant_traits.h
+      yy_variant_util.h
       yy_vector.h
       yy_vector_traits.h
       yy_vector_util.h )

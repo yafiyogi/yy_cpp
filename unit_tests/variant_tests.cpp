@@ -29,7 +29,7 @@
 
 #include <gtest/gtest.h>
 
-#include "yy_variant_traits.h"
+#include "yy_variant_util.h"
 
 namespace yafiyogi::yy_cpp::tests {
 
@@ -50,16 +50,16 @@ TEST_F(TestVariantTraits, TestTypeIsInVariant)
 {
   using var = std::variant<bool, double, std::string>;
 
-  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, bool>));
-  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, double>));
-  ASSERT_TRUE((yy_traits::check_variant_for_type_v<var, std::string>));
+  ASSERT_TRUE((yy_util::check_variant_for_type_v<var, bool>));
+  ASSERT_TRUE((yy_util::check_variant_for_type_v<var, double>));
+  ASSERT_TRUE((yy_util::check_variant_for_type_v<var, std::string>));
 }
 
 TEST_F(TestVariantTraits, TestTypeIsNotInVariant)
 {
   using var = std::variant<bool, double, std::string>;
 
-  ASSERT_FALSE((yy_traits::check_variant_for_type_v<var, int>));
+  ASSERT_FALSE((yy_util::check_variant_for_type_v<var, int>));
 }
 
 } // namespace yafiyogi::yy_cpp::tests
