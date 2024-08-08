@@ -34,7 +34,7 @@
 
 #include "yy_type_traits.h"
 
-namespace yafiyogi::yy_traits {
+namespace yafiyogi::yy_util {
 namespace variant_detail {
 
 template<typename V,
@@ -65,4 +65,16 @@ inline static constexpr bool check_variant_for_type_v = variant_detail::check_va
                                                                                                yy_traits::remove_cvr_t<T>,
                                                                                                std::variant_size_v<VariantType>>::has_type;
 
-} // namespace yafiyogi::yy_traits
+// From https://en.cppreference.com/w/cpp/utility/variant/visit
+template<class... Types>
+struct overloaded:
+      Types...
+{
+  using Types::operator()...;
+};
+
+// explicit deduction guide (not needed as of C++20)
+template<class... Types>
+overloaded(Types...) -> overloaded<Types...>;
+
+} // namespace yafiyogi::yy_util
