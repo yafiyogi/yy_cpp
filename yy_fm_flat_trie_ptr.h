@@ -69,10 +69,14 @@ struct trie_node_idx_traits final
     using label_r_value_ref = typename common_traits::label_r_value_ref;
     using label_span_type = typename common_traits::label_span_type;
     using value_type = typename common_traits::value_type;
+    using value_ptr = std::add_pointer_t<value_type>;
+    using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
 
     using node_type = trie_node_idx<LabelType, ValueType>;
+    using node_ptr = std::add_pointer_t<node_type>;
+    using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
     using node_idx_type = std::size_t;
-    using data_idx_type = std::size_t;
+    using value_idx_type = std::size_t;
     using edges_type = flat_map<label_type, node_idx_type>;
     using size_type = typename edges_type::size_type;
 };
@@ -89,15 +93,15 @@ class trie_node_idx final
     using node_idx_type = typename traits::node_idx_type;
     using node_type = typename traits::node_type;
     using value_type = typename traits::value_type;
-    using data_idx_type = typename traits::data_idx_type;
+    using value_idx_type = typename traits::value_idx_type;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
     static constexpr node_idx_type root_idx{};
     static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
-    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
+    static constexpr value_idx_type no_data = std::numeric_limits<value_idx_type>::max();
 
-    constexpr explicit trie_node_idx(const data_idx_type p_data) noexcept:
+    constexpr explicit trie_node_idx(const value_idx_type p_data) noexcept:
       m_data(p_data)
     {
     }
@@ -149,19 +153,19 @@ class trie_node_idx final
       return m_edges.size();
     }
 
-    constexpr void data(const data_idx_type p_data) noexcept
+    constexpr void data(const value_idx_type p_data) noexcept
     {
       m_data = p_data;
     }
 
     [[nodiscard]]
-    constexpr data_idx_type data() const noexcept
+    constexpr value_idx_type data() const noexcept
     {
       return m_data;
     }
 
   private:
-    data_idx_type m_data = no_data;
+    value_idx_type m_data = no_data;
     edges_type m_edges;
 };
 
@@ -175,9 +179,13 @@ struct trie_node_ptr_traits final
     using label_r_value_ref = typename common_traits::label_r_value_ref;
     using label_span_type = typename common_traits::label_span_type;
     using value_type = typename common_traits::value_type;
+    using value_ptr = std::add_pointer_t<value_type>;
+    using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
 
     using node_type = trie_node_ptr<LabelType, ValueType>;
-    using edges_type = flat_map<label_type, node_type *>;
+    using node_ptr = std::add_pointer_t<node_type>;
+    using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
+    using edges_type = flat_map<label_type, node_ptr>;
     using size_type = typename edges_type::size_type;
 };
 
@@ -191,11 +199,15 @@ class trie_node_ptr final
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using value_type = typename traits::value_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
-    constexpr explicit trie_node_ptr(const value_type * p_data) noexcept:
+    constexpr explicit trie_node_ptr(const_value_ptr p_data) noexcept:
       m_data(p_data)
     {
     }
@@ -209,14 +221,14 @@ class trie_node_ptr final
     constexpr trie_node_ptr & operator=(trie_node_ptr && node) noexcept = default;
 
     constexpr void add_edge(label_r_value_ref label,
-                            node_type * node)
+                            node_ptr node)
     {
       std::ignore = m_edges.emplace(m_edges.size(), std::move(label), node);
     }
 
     struct found_edge_type
     {
-        node_type * edge_node = nullptr;
+        node_ptr edge_node = nullptr;
         bool found = false;
     };
 
@@ -246,25 +258,25 @@ class trie_node_ptr final
       return nullptr == m_data;
     }
 
-    constexpr void data(value_type * p_data) noexcept
+    constexpr void data(value_ptr p_data) noexcept
     {
       m_data = p_data;
     }
 
     [[nodiscard]]
-    constexpr value_type * data() noexcept
+    constexpr value_ptr data() noexcept
     {
       return m_data;
     }
 
     [[nodiscard]]
-    constexpr const value_type * data() const noexcept
+    constexpr const_value_ptr data() const noexcept
     {
       return m_data;
     }
 
   private:
-    value_type * m_data;
+    value_ptr m_data;
     edges_type m_edges;
 };
 
@@ -278,7 +290,11 @@ struct trie_ptr_traits final
     using label_r_value_ref = typename traits::label_r_value_ref;
     using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using value_type = typename traits::value_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
@@ -297,7 +313,11 @@ class Automaton final
     using label_r_value_ref = typename traits::label_r_value_ref;
     using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using value_type = typename traits::value_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
@@ -360,7 +380,7 @@ class Automaton final
       reset();
 
       auto node = m_state;
-      auto next_node_do = [&node](node_type ** edge_node, size_type)
+      auto next_node_do = [&node](node_ptr * edge_node, size_type)
       {
         node = *edge_node;
       };
@@ -381,7 +401,7 @@ class Automaton final
 
     trie_vector m_nodes;
     data_vector m_data;
-    node_type * m_state = nullptr;
+    node_ptr m_state = nullptr;
 };
 
 template<typename LabelType,
@@ -394,9 +414,13 @@ struct trie_idx_traits final
     using label_r_value_ref = typename traits::label_r_value_ref;
     using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
-    using data_idx_type = typename traits::data_idx_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
+    using value_idx_type = typename traits::value_idx_type;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
@@ -418,9 +442,13 @@ class fm_flat_trie_ptr
     using label_r_value_ref = typename traits::label_r_value_ref;
     using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
-    using data_idx_type = typename traits::data_idx_type;
+    using value_ptr = typename traits::value_ptr;
+    using const_value_ptr = typename traits::const_value_ptr;
+    using value_idx_type = typename traits::value_idx_type;
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
@@ -444,7 +472,7 @@ class fm_flat_trie_ptr
 
     struct data_added_type final
     {
-        value_type * data = nullptr;
+        value_ptr data = nullptr;
         bool added = false;
     };
 
@@ -468,9 +496,9 @@ class fm_flat_trie_ptr
       typename automaton::data_vector new_data{m_data};
 
       // Transform node_idx_type to node_type *,
-      // and transform data_idx_type to value_type *.
-      typename automaton::node_type * nodes_begin = new_nodes.begin();
-      typename automaton::value_type * data_begin = new_data.begin();
+      // and transform value_idx_type to value_type *.
+      auto nodes_begin = new_nodes.begin();
+      auto data_begin = new_data.begin();
 
       for(size_type idx = 0; idx < m_nodes.size(); ++idx)
       {
@@ -484,10 +512,10 @@ class fm_flat_trie_ptr
         });
 
         // Transform data.
-        if(data_idx_type data_idx = node.data();
-           node_type::no_data != data_idx)
+        if(value_idx_type value_idx = node.data();
+           node_type::no_data != value_idx)
         {
-          new_node.data(data_begin + data_idx);
+          new_node.data(data_begin + value_idx);
         }
       }
 
@@ -496,53 +524,53 @@ class fm_flat_trie_ptr
 
   private:
     [[nodiscard]]
-    constexpr node_type * get_node(const node_idx_type idx) noexcept
+    constexpr node_ptr get_node(const node_idx_type idx) noexcept
     {
       return get_node(m_nodes.data(), idx);
     }
 
     [[nodiscard]]
-    constexpr const node_type * get_node(const node_idx_type idx) const noexcept
+    constexpr const_node_ptr get_node(const node_idx_type idx) const noexcept
     {
       return get_node(m_nodes.data(), idx);
     }
 
     [[nodiscard]]
-    static constexpr node_type * get_node(node_type * raw_nodes,
+    static constexpr node_ptr get_node(node_ptr raw_nodes,
                                           const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    static constexpr const node_type * get_node(const node_type * raw_nodes,
+    static constexpr const_node_ptr get_node(const_node_ptr raw_nodes,
                                                 const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    constexpr value_type & get_data(const data_idx_type idx) noexcept
+    constexpr value_type & get_data(const value_idx_type idx) noexcept
     {
       return get_data(m_data, idx);
     }
 
     [[nodiscard]]
-    constexpr const value_type & get_data(const data_idx_type idx) const noexcept
+    constexpr const value_type & get_data(const value_idx_type idx) const noexcept
     {
       return get_data(m_data, idx);
     }
 
     [[nodiscard]]
     static constexpr value_type & get_data(data_vector & data,
-                                           const data_idx_type idx) noexcept
+                                           const value_idx_type idx) noexcept
     {
       return *get_data_ptr(data, idx);
     }
 
     [[nodiscard]]
     static constexpr const value_type & get_data(const data_vector & data,
-                                                 const data_idx_type idx) noexcept
+                                                 const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
@@ -550,14 +578,14 @@ class fm_flat_trie_ptr
     }
 
     [[nodiscard]]
-    constexpr value_type * get_data_ptr(const data_idx_type idx) noexcept
+    constexpr value_ptr get_data_ptr(const value_idx_type idx) noexcept
     {
       return get_data_ptr(m_data, idx);
     }
 
     [[nodiscard]]
-    static constexpr value_type * get_data_ptr(data_vector & data,
-                                               const data_idx_type idx) noexcept
+    static constexpr value_ptr get_data_ptr(data_vector & data,
+                                               const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
@@ -566,29 +594,29 @@ class fm_flat_trie_ptr
 
     template<typename InternalValueType>
     [[nodiscard]]
-    static constexpr data_idx_type add_data(data_vector & data,
+    static constexpr value_idx_type add_data(data_vector & data,
                                             InternalValueType && value)
     {
       static_assert(std::is_same_v<value_type, yy_traits::remove_cvr_t<InternalValueType>>,
                     "The data type of value is not 'value_type'");
-      data_idx_type data_idx = data.size();
+      value_idx_type value_idx = data.size();
 
       data.emplace_back(std::forward<InternalValueType>(value));
 
-      return data_idx;
+      return value_idx;
     }
 
     [[nodiscard]]
     static constexpr node_idx_type add_node(trie_vector & nodes,
-                                            node_type * node,
+                                            node_ptr node,
                                             size_type pos,
                                             label_type label,
-                                            const data_idx_type data_idx)
+                                            const value_idx_type value_idx)
     {
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(pos, std::move(label), node_idx);
 
-      nodes.emplace_back(node_type{data_idx});
+      nodes.emplace_back(node_type{value_idx});
 
       return node_idx;
     }
@@ -658,18 +686,18 @@ class fm_flat_trie_ptr
           }
 
           // Add new data item, & update node data idx
-          auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
-          edge_node.data(data_idx);
+          auto value_idx = add_data(m_data, std::forward<InputValueType>(value));
+          edge_node.data(value_idx);
 
           return data_added_type{get_data_ptr(edge_node.data()), true};
         }
 
         // No data node exists.
         // Add data node.
-        auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
-        std::ignore = add_node(m_nodes, node, edge_pos, label.back(), data_idx);
+        auto value_idx = add_data(m_data, std::forward<InputValueType>(value));
+        std::ignore = add_node(m_nodes, node, edge_pos, label.back(), value_idx);
 
-        return data_added_type{get_data_ptr(data_idx), true};
+        return data_added_type{get_data_ptr(value_idx), true};
       }
 
       return data_added_type{};
