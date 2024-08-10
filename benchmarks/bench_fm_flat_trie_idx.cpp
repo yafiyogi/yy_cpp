@@ -33,7 +33,6 @@ namespace yafiyogi::benchmark {
 BENCHMARK_F(TrieLookup, fm_flat_idx_lookup)(::benchmark::State & state)
 {
   auto automaton = fm_flat_trie_idx.create_automaton();
-  assert(!automaton.empty());
 
   size_t idx = 0;
   std::size_t count = 0;
