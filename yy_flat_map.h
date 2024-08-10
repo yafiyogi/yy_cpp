@@ -35,7 +35,7 @@
 
 #include "yy_assert.h"
 #include "yy_clear_action.h"
-//#include "yy_lower_bound.h"
+#include "yy_find_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -114,17 +114,13 @@ class flat_map final
     constexpr flat_map & operator=(const flat_map &) noexcept = default;
     constexpr flat_map & operator=(flat_map &&) noexcept = default;
 
-    struct pos_end_type final
-    {
-        size_type pos{};
-        bool is_end = false;
-    };
+    using pos_end_type = find_util_detail::pos_end_type;
 
     template<typename KeyParamType>
     [[nodiscard]]
     constexpr pos_end_type lower_bound_pos(const KeyParamType & p_key) const noexcept
     {
-      return do_lower_bound(p_key);
+      return do_lower_bound(m_keys, p_key);
     }
 
     template<typename KeyParamType,
@@ -133,7 +129,7 @@ class flat_map final
     constexpr bool lower_bound(Visitor && visitor,
                                const KeyParamType & p_key) noexcept
     {
-      auto [pos, is_end] = do_lower_bound(p_key);
+      auto [pos, is_end] = do_lower_bound(m_keys, p_key);
 
       if(!is_end)
       {
@@ -149,7 +145,7 @@ class flat_map final
     constexpr bool lower_bound(Visitor && visitor,
                                const KeyParamType & p_key) const noexcept
     {
-      auto [pos, is_end] = do_lower_bound(p_key);
+      auto [pos, is_end] = do_lower_bound(m_keys, p_key);
 
       if(!is_end)
       {
@@ -170,7 +166,7 @@ class flat_map final
     [[nodiscard]]
     constexpr key_value_pos_type find(const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = do_find(p_key);
+      auto [pos, found] = do_find(m_keys, p_key);
 
       if(found)
       {
@@ -191,7 +187,7 @@ class flat_map final
     [[nodiscard]]
     constexpr const_key_value_pos_type find(const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = do_find(p_key);
+      auto [pos, found] = do_find(m_keys, p_key);
 
       if(found)
       {
@@ -201,11 +197,7 @@ class flat_map final
       return const_key_value_pos_type{nullptr, nullptr, pos};
     }
 
-    struct pos_found_type final
-    {
-        size_type pos{};
-        bool found = false;
-    };
+    using pos_found_type = find_util_detail::pos_found_type;
 
     template<typename KeyParamType,
              typename Visitor>
@@ -213,7 +205,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = do_find(p_key);
+      auto [pos, found] = do_find(m_keys, p_key);
 
       if(found)
       {
@@ -229,7 +221,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = do_find(p_key);
+      auto [pos, found] = do_find(m_keys, p_key);
 
       if(found)
       {
@@ -243,7 +235,7 @@ class flat_map final
     [[nodiscard]]
     constexpr pos_found_type find_pos(const KeyParamType & p_key) const noexcept
     {
-      return do_find(p_key);
+      return do_find(m_keys, p_key);
     }
 
     struct ref_type final
@@ -288,7 +280,7 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [key_iter, found] = do_find_raw(p_key);
+      auto [key_iter, found] = do_find_raw(m_keys, p_key);
       auto pos = static_cast<size_type>(key_iter - m_keys.begin());
 
       if(!found)
@@ -333,7 +325,7 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [key_iter, found] = do_find_raw(p_key);
+      auto [key_iter, found] = do_find_raw(m_keys, p_key);
       auto pos = (key_iter - m_keys.begin());
       auto value_iter = m_values.begin() + pos;
 
@@ -352,7 +344,7 @@ class flat_map final
     template<typename InputKeyType>
     constexpr void erase(InputKeyType && p_key)
     {
-      if(auto [key_iter, found] = do_find_raw(p_key);
+      if(auto [key_iter, found] = do_find_raw(m_keys, p_key);
          found)
       {
         m_keys.erase(key_iter);
@@ -542,173 +534,6 @@ class flat_map final
     constexpr const_value_ptr value(size_type idx) const noexcept
     {
       return m_values.data() + idx;
-    }
-
-    struct iter_end_type final
-    {
-        key_ptr iter = nullptr;
-        bool is_end = false;
-    };
-
-    struct const_iter_end_type final
-    {
-        const_key_ptr iter = nullptr;
-        bool is_end = false;
-    };
-
-    struct iter_found_type final
-    {
-        key_ptr iter = nullptr;
-        bool found = false;
-    };
-
-    struct const_iter_found_type final
-    {
-        const_key_ptr iter = nullptr;
-        bool found = false;
-    };
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr iter_end_type do_lower_bound_raw(const KeyParamType & p_key) noexcept
-    {
-      key_ptr begin = m_keys.begin();
-      key_ptr end = m_keys.end();
-      //key_ptr iter = yy_data::lower_bound(begin, end, p_key);
-      key_ptr iter = std::lower_bound(begin, end, p_key);
-
-      return iter_end_type{iter, iter == end};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr const_iter_end_type do_lower_bound_raw(const KeyParamType & p_key) const noexcept
-    {
-      const_key_ptr begin = m_keys.begin();
-      const_key_ptr end = m_keys.end();
-      //const_key_ptr iter = yy_data::lower_bound(begin, end, p_key);
-      const_key_ptr iter = std::lower_bound(begin, end, p_key);
-
-      return const_iter_end_type{iter, iter == end};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr pos_end_type do_lower_bound(const KeyParamType & p_key) const noexcept
-    {
-      auto [iter, is_end] = do_lower_bound_raw(p_key);
-
-      return pos_end_type{static_cast<size_type>(iter - m_keys.data()), is_end};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr iter_end_type do_upper_bound_raw(const KeyParamType & p_key) noexcept
-    {
-      key_ptr begin = m_keys.begin();
-      key_ptr end = m_keys.end();
-      key_ptr iter = std::upper_bound(begin, end, p_key);
-
-      return iter_end_type{iter, iter == end};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr const_iter_end_type do_upper_bound_raw(const KeyParamType & p_key) const noexcept
-    {
-      const_key_ptr begin = m_keys.begin();
-      const_key_ptr end = m_keys.end();
-      const_key_ptr iter = std::upper_bound(begin, end, p_key);
-
-      return const_iter_end_type{iter, iter == end};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr pos_end_type do_upper_bound(const KeyParamType & p_key) const noexcept
-    {
-      auto [iter, is_end] = do_upper_bound_raw(p_key);
-
-      return pos_end_type{static_cast<size_type>(iter - m_keys.data()), is_end};
-    }
-
-    using range = yy_util::Range<key_ptr>;
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr range do_range_raw(const KeyParamType & p_key) noexcept
-    {
-      auto [begin, begin_is_end] = lower_bound_raw(m_keys.begin(), m_keys.end(), p_key);
-
-      if(begin_is_end)
-      {
-        return range{begin, begin};
-      }
-
-      auto [end, end_is_end] = lower_bound_raw(begin, m_keys.end(), p_key);
-
-      return range{begin, end};
-    }
-
-    using const_range = yy_util::Range<const_key_ptr>;
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr range do_range_raw(const KeyParamType & p_key) const noexcept
-    {
-      auto [begin, begin_is_end] = lower_bound_raw(m_keys.begin(), m_keys.end(), p_key);
-
-      if(begin_is_end)
-      {
-        return const_range{begin, begin};
-      }
-
-      auto [end, end_is_end] = lower_bound_raw(begin, m_keys.end(), p_key);
-
-      return const_range{begin, end};
-    }
-
-    using pos_range = yy_util::Range<size_type>;
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr pos_range do_range(const KeyParamType & p_key) const noexcept
-    {
-      auto range_found = do_range_raw(p_key);
-      const_key_ptr begin = m_keys.begin();
-
-      return pos_range{range_found.begin() - begin, range_found.end() - begin()};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr iter_found_type do_find_raw(const KeyParamType & p_key) noexcept
-    {
-      auto [key_iter, is_end] = do_lower_bound_raw(p_key);
-
-      bool found = !is_end && (*key_iter == p_key);
-
-      return iter_found_type{key_iter, found};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr const_iter_found_type do_find_raw(const KeyParamType & p_key) const noexcept
-    {
-      auto [key_iter, is_end] = do_lower_bound_raw(p_key);
-
-      bool found = !is_end && (*key_iter == p_key);
-
-      return const_iter_found_type{key_iter, found};
-    }
-
-    template<typename KeyParamType>
-    [[nodiscard]]
-    constexpr pos_found_type do_find(const KeyParamType & p_key) const noexcept
-    {
-      auto [key_iter, found] = do_find_raw(p_key);
-
-      return pos_found_type{static_cast<size_type>(key_iter - m_keys.data()), found};
     }
 
     key_vector m_keys;

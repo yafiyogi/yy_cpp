@@ -34,6 +34,7 @@
 #include <type_traits>
 
 #include "yy_clear_action.h"
+#include "yy_find_util.h"
 #include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
@@ -100,17 +101,13 @@ class flat_set final
     constexpr flat_set & operator=(const flat_set &) noexcept = default;
     constexpr flat_set & operator=(flat_set &&) noexcept = default;
 
-    struct pos_end_type final
-    {
-        std::size_t pos{};
-        bool is_end = false;
-    };
+    using pos_end_type = find_util_detail::pos_end_type;
 
     template<typename ValueParamType>
     [[nodiscard]]
     constexpr pos_end_type lower_bound_pos(const ValueParamType & p_value) const noexcept
     {
-      return do_lower_bound(p_value);
+      return do_lower_bound(m_values, p_value);
     }
 
     template<typename ValueParamType,
@@ -119,7 +116,7 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) noexcept
     {
-      auto [pos, is_end] = do_lower_bound(p_value);
+      auto [pos, is_end] = do_lower_bound(m_values, p_value);
 
       if(!is_end)
       {
@@ -135,7 +132,7 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) const noexcept
     {
-      auto [pos, is_end] = do_lower_bound(p_value);
+      auto [pos, is_end] = do_lower_bound(m_values, p_value);
 
       if(!is_end)
       {
@@ -155,7 +152,7 @@ class flat_set final
     [[nodiscard]]
     constexpr value_pos_type find(const ValueParamType & p_value) noexcept
     {
-      auto [pos, found] = do_find(p_value);
+      auto [pos, found] = do_find(m_values, m_values, p_value);
 
       if(found)
       {
@@ -167,7 +164,7 @@ class flat_set final
 
     struct const_value_pos_type final
     {
-        value_ptr value = nullptr;
+        const_value_ptr value = nullptr;
         size_type pos{};
     };
 
@@ -175,7 +172,7 @@ class flat_set final
     [[nodiscard]]
     constexpr const_value_pos_type find(const ValueParamType & p_value) const noexcept
     {
-      auto [pos, found] = do_find(p_value);
+      auto [pos, found] = do_find(m_values, p_value);
 
       if(found)
       {
@@ -185,11 +182,7 @@ class flat_set final
       return const_value_pos_type{nullptr, pos};
     }
 
-    struct pos_found_type final
-    {
-        std::size_t pos{};
-        bool found = false;
-    };
+    using pos_found_type = find_util_detail::pos_found_type;
 
     template<typename ValueParamType,
              typename Visitor>
@@ -197,7 +190,7 @@ class flat_set final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) noexcept
     {
-      auto [pos, found] = do_find(p_value);
+      auto [pos, found] = do_find(m_values, p_value);
 
       if(found)
       {
@@ -213,7 +206,7 @@ class flat_set final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) const noexcept
     {
-      auto [pos, found] = do_find(p_value);
+      auto [pos, found] = do_find(m_values, p_value);
 
       if(found)
       {
@@ -227,7 +220,7 @@ class flat_set final
     [[nodiscard]]
     constexpr pos_found_type find_pos(const ValueParamType & p_value) const noexcept
     {
-      return do_find(p_value);
+      return do_find(m_values, p_value);
     }
 
     [[nodiscard]]
@@ -270,7 +263,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = do_find_raw(p_value);
+      auto [iter, found] = do_find_raw(m_values, p_value);
 
       if(!found)
       {
@@ -288,7 +281,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = do_find_raw(p_value);
+      auto [iter, found] = do_find_raw(m_values, p_value);
       if(!found)
       {
         iter = add_empty(iter);
@@ -433,171 +426,6 @@ class flat_set final
     constexpr const_value_ptr value(size_type idx) const noexcept
     {
       return m_values.data() + idx;
-    }
-
-    struct iter_end_type final
-    {
-        iterator iter = nullptr;
-        bool is_end = false;
-    };
-
-    struct const_iter_end_type final
-    {
-        const_iterator iter = nullptr;
-        bool is_end = false;
-    };
-
-    struct iter_found_type final
-    {
-        iterator iter = nullptr;
-        bool found = false;
-    };
-
-    struct const_iter_found_type final
-    {
-        const_iterator iter = nullptr;
-        bool found = false;
-    };
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr iter_end_type do_lower_bound_raw(const ValueParamType & p_value) noexcept
-    {
-      iterator begin = m_values.begin();
-      iterator end = m_values.end();
-      iterator iter = yy_data::lower_bound(begin, end, p_value);
-
-      return iter_end_type{iter, iter == end};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr const_iter_end_type do_lower_bound_raw(const ValueParamType & p_value) const noexcept
-    {
-      const_iterator begin = m_values.begin();
-      const_iterator end = m_values.end();
-      const_iterator iter = yy_data::lower_bound(begin, end, p_value);
-
-      return const_iter_end_type{iter, iter == end};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr pos_end_type do_lower_bound(const ValueParamType & p_value) const noexcept
-    {
-      auto [iter, is_end] = do_lower_bound_raw(p_value);
-
-      return pos_end_type{static_cast<size_type>(iter - m_values.data()), is_end};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr iter_end_type do_upper_bound_raw(const ValueParamType & p_value) noexcept
-    {
-      value_ptr begin = m_values.begin();
-      value_ptr end = m_values.end();
-      value_ptr iter = std::upper_bound(begin, end, p_value);
-
-      return iter_end_type{iter, iter == end};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr const_iter_end_type do_upper_bound_raw(const ValueParamType & p_value) const noexcept
-    {
-      const_value_ptr begin = m_values.begin();
-      const_value_ptr end = m_values.end();
-      const_value_ptr iter = std::upper_bound(begin, end, p_value);
-
-      return const_iter_end_type{iter, iter == end};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr pos_end_type do_upper_bound(const ValueParamType & p_value) const noexcept
-    {
-      auto [iter, is_end] = do_upper_bound_raw(p_value);
-
-      return pos_end_type{static_cast<size_type>(iter - m_values.data()), is_end};
-    }
-
-    using range = yy_util::Range<value_ptr>;
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr range do_range_raw(const ValueParamType & p_value) noexcept
-    {
-      auto [begin, begin_is_end] = lower_bound_raw(m_values.begin(), m_values.end(), p_value);
-
-      if(begin_is_end)
-      {
-        return range{begin, begin};
-      }
-
-      auto [end, end_is_end] = lower_bound_raw(begin, m_values.end(), p_value);
-
-      return range{begin, end};
-    }
-
-    using const_range = yy_util::Range<const_value_ptr>;
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr range do_range_raw(const ValueParamType & p_value) const noexcept
-    {
-      auto [begin, begin_is_end] = lower_bound_raw(m_values.begin(), m_values.end(), p_value);
-
-      if(begin_is_end)
-      {
-        return const_range{begin, begin};
-      }
-
-      auto [end, end_is_end] = lower_bound_raw(begin, m_values.end(), p_value);
-
-      return const_range{begin, end};
-    }
-
-    using pos_range = yy_util::Range<size_type>;
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr pos_range do_range(const ValueParamType & p_value) const noexcept
-    {
-      auto range_found = do_range_raw(p_value);
-      const_value_ptr begin = m_values.begin();
-
-      return pos_range{range_found.begin() - begin, range_found.end() - begin()};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr iter_found_type do_find_raw(const ValueParamType & p_value) noexcept
-    {
-      auto [iter, is_end] = do_lower_bound_raw(p_value);
-
-      bool found = !is_end && (*iter == p_value);
-
-      return iter_found_type{iter, found};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr const_iter_found_type do_find_raw(const ValueParamType & p_value) const noexcept
-    {
-      auto [iter, is_end] = do_lower_bound_raw(p_value);
-
-      bool found = !is_end && (*iter == p_value);
-
-      return const_iter_found_type{iter, found};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr pos_found_type do_find(const ValueParamType & p_value) const noexcept
-    {
-      auto [iter, found] = do_find_raw(p_value);
-
-      return pos_found_type{static_cast<size_type>(iter - m_values.data()), found};
     }
 
     value_vector m_values;
