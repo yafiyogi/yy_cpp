@@ -48,14 +48,19 @@ template<typename LabelType,
          typename ValueType>
 class trie_node_ptr;
 
-template<typename LabelType,
-         typename ValueType>
-struct trie_node_common_traits final
+template<typename LabelType>
+struct trie_node_common_label_traits final
 {
     using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using label_span_type = typename yy_quad::const_span<label_type>;
+};
+
+
+template<typename ValueType>
+struct trie_node_common_value_traits final
+{
     using value_type = yy_traits::remove_cvr_t<ValueType>;
 };
 
@@ -63,12 +68,13 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_idx_traits final
 {
-    using common_traits = trie_node_common_traits<LabelType, ValueType>;
-    using label_type = typename common_traits::label_type;
-    using label_l_value_ref = typename common_traits::label_l_value_ref;
-    using label_r_value_ref = typename common_traits::label_r_value_ref;
-    using label_span_type = typename common_traits::label_span_type;
-    using value_type = typename common_traits::value_type;
+    using label_traits = trie_node_common_label_traits<LabelType>;
+    using value_traits = trie_node_common_value_traits<ValueType>;
+    using label_type = typename label_traits::label_type;
+    using label_l_value_ref = typename label_traits::label_l_value_ref;
+    using label_r_value_ref = typename label_traits::label_r_value_ref;
+    using label_span_type = typename label_traits::label_span_type;
+    using value_type = typename value_traits::value_type;
     using value_ptr = std::add_pointer_t<value_type>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
 
@@ -173,12 +179,13 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_ptr_traits final
 {
-    using common_traits = trie_node_common_traits<LabelType, ValueType>;
-    using label_type = typename common_traits::label_type;
-    using label_l_value_ref = typename common_traits::label_l_value_ref;
-    using label_r_value_ref = typename common_traits::label_r_value_ref;
-    using label_span_type = typename common_traits::label_span_type;
-    using value_type = typename common_traits::value_type;
+    using label_traits = trie_node_common_label_traits<LabelType>;
+    using value_traits = trie_node_common_value_traits<ValueType>;
+    using label_type = typename label_traits::label_type;
+    using label_l_value_ref = typename label_traits::label_l_value_ref;
+    using label_r_value_ref = typename label_traits::label_r_value_ref;
+    using label_span_type = typename label_traits::label_span_type;
+    using value_type = typename value_traits::value_type;
     using value_ptr = std::add_pointer_t<value_type>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
 
