@@ -61,14 +61,14 @@ struct less_val final
 
     [[nodiscard]]
     constexpr std::size_t comp_bool(const type item,
-                               const value_type & val) const noexcept
+                                    const value_type & val) const noexcept
     {
       return static_cast<std::size_t>(*item < val);
     }
 
     [[nodiscard]]
     constexpr std::size_t comp_mask(const type item,
-                               const value_type & val) const noexcept
+                                    const value_type & val) const noexcept
     {
       static_assert(mask == (std::size_t{0} - std::size_t{1}), "Your platform/complier doesn't wrap unsigned integers. You are going to have to use std::lower_bound. Sorry!");
 
@@ -77,8 +77,8 @@ struct less_val final
 
     [[nodiscard]]
     constexpr std::size_t comp_mask(const type item,
-                               const value_type & val,
-                               const std::size_t val_to_mask) const noexcept
+                                    const value_type & val,
+                                    const std::size_t val_to_mask) const noexcept
     {
       return val_to_mask & comp_mask(item, val);
     }

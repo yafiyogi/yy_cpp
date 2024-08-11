@@ -44,8 +44,8 @@ constexpr std::size_t hash_combine(std::size_t & seed, const T & val) noexcept
 
 template <typename T, typename... Types>
 constexpr st::size_t hash_combine(std::size_t& seed,
-                                         const T& val,
-                                         const Types&... args) noexcept
+                                  const T& val,
+                                  const Types&... args) noexcept
 {
   hash_combine(seed, val);
   hash_combine(seed, args...);

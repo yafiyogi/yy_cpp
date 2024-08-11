@@ -92,7 +92,7 @@ class observer_class_method final:
     observer_class_method & operator=(observer_class_method &&) = delete;
 
     constexpr return_type event(const void * p_data,
-                               OtherArgs && ...p_args) override
+                                OtherArgs && ...p_args) override
     {
       T * obj = m_obj.get();
 
@@ -131,7 +131,7 @@ class observer_functor final:
     observer_functor & operator=(observer_functor &&) = delete;
 
     constexpr return_type event(const void * p_data,
-                               OtherArgs && ...p_args) override
+                                OtherArgs && ...p_args) override
     {
       return m_func(static_cast<arg_type>(p_data),
                     std::forward<OtherArgs>(p_args)...);
@@ -166,7 +166,7 @@ class observer_fn final:
     observer_fn & operator=(observer_fn &&) = delete;
 
     constexpr return_type event(const void * p_data,
-                               OtherArgs && ...p_args) override
+                                OtherArgs && ...p_args) override
     {
       return m_func(static_cast<ParamType *>(p_data),
                     std::forward<OtherArgs>(p_args)...);
@@ -217,7 +217,7 @@ class subject final
          m_observers.end() != found)
       {
         return value_valid_type{found->second->event(p_data,
-                                     std::forward<OtherArgs>(p_args)...), true};
+                                                     std::forward<OtherArgs>(p_args)...), true};
       }
       return value_valid_type{return_type{}, false};
     }
@@ -228,7 +228,7 @@ class subject final
     constexpr bool add(const key_type & p_key,
                        typename std::shared_ptr<T> & p_obj,
                        return_type (T::*p_method)(const ParamType *,
-                                                 OtherArgs && ...args))
+                                                  OtherArgs && ...args))
     {
       using observer_type = subject_observer_detail::observer_class_method<T, return_type, ParamType, OtherArgs...>;
 

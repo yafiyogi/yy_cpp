@@ -74,7 +74,7 @@ template<typename T,
          typename V,
          typename CompareLT = lb_detail::less_val<T, V>,
          typename CompareEQ = bs_detail::equal_val<T, V>>
-    [[nodiscard]]
+[[nodiscard]]
 constexpr bs_detail::result<T> binary_search(T begin,
                                              T end,
                                              const V & val,

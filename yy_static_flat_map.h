@@ -304,7 +304,7 @@ class static_flat_map final
     template<typename InputKeyType,
              typename InputValueType>
     constexpr pos_result_type emplace(InputKeyType && p_key,
-                                        InputValueType && p_value) noexcept
+                                      InputValueType && p_value) noexcept
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputKeyType>, key_type>
                     || (std::is_pointer_v<InputKeyType> && std::is_base_of_v<key_type, yy_traits::remove_cvr_t<std::remove_pointer<InputKeyType>>>),

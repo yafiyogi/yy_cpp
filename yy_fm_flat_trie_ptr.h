@@ -544,14 +544,14 @@ class fm_flat_trie_ptr
 
     [[nodiscard]]
     static constexpr node_ptr get_node(node_ptr raw_nodes,
-                                          const node_idx_type idx) noexcept
+                                       const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
     static constexpr const_node_ptr get_node(const_node_ptr raw_nodes,
-                                                const node_idx_type idx) noexcept
+                                             const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -592,7 +592,7 @@ class fm_flat_trie_ptr
 
     [[nodiscard]]
     static constexpr value_ptr get_data_ptr(data_vector & data,
-                                               const value_idx_type idx) noexcept
+                                            const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
@@ -602,7 +602,7 @@ class fm_flat_trie_ptr
     template<typename InternalValueType>
     [[nodiscard]]
     static constexpr value_idx_type add_data(data_vector & data,
-                                            InternalValueType && value)
+                                             InternalValueType && value)
     {
       static_assert(std::is_same_v<value_type, yy_traits::remove_cvr_t<InternalValueType>>,
                     "The data type of value is not 'value_type'");

@@ -237,7 +237,7 @@ class flat_set final
 
     template<typename InputValueType>
     constexpr iterator emplace(iterator p_pos,
-                                InputValueType && p_value)
+                               InputValueType && p_value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
