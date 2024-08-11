@@ -32,9 +32,9 @@
 #include <utility>
 #include <vector>
 
+#include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_utility.h"
-#include "yy_vector_util.h"
 
 namespace yafiyogi::yy_data {
 namespace ac_trie_detail {
@@ -89,25 +89,31 @@ struct trie_node_edge final
       return static_cast<bool>(m_node);
     }
 
+    constexpr bool operator<(const trie_node_edge & other) const noexcept
+    {
+      return m_label < other.m_label;
+    }
+
+    friend bool operator<(const trie_node_edge & lhs,
+                          const label_type & rhs) noexcept
+    {
+      return lhs.m_label < rhs;
+    }
+
+    constexpr bool operator==(const trie_node_edge & other) const noexcept
+    {
+      return m_label == other.m_label;
+    }
+
+    friend bool operator==(const trie_node_edge & lhs,
+                           const label_type & rhs) noexcept
+    {
+      return lhs.m_label == rhs;
+    }
+
     label_type m_label = label_type{};
     node_ptr m_node{};
 };
-
-template<typename LabelType,
-         typename ValueType>
-constexpr bool operator==(const typename trie_node_edge<LabelType, ValueType>::label_type & lhs,
-                          const trie_node_edge<LabelType, ValueType> & rhs) noexcept
-{
-  return lhs == rhs.m_label;
-}
-
-template<typename LabelType,
-         typename ValueType>
-constexpr bool operator<(const typename trie_node_edge<LabelType, ValueType>::label_type & lhs,
-                         const trie_node_edge<LabelType, ValueType> & rhs) noexcept
-{
-  return lhs < rhs.m_label;
-}
 
 template<typename LabelType,
          typename ValueType>
@@ -136,7 +142,7 @@ class trie_node
     constexpr node_type * add(label_type label,
                               node_type * fail)
     {
-      auto [iter, found] = yy_util::find(m_edges, label);
+      auto [iter, found] = yy_data::do_find_raw(m_edges, label);
 
       if(found)
       {
@@ -146,18 +152,20 @@ class trie_node
       auto node = std::make_unique<trie_node>(fail);
       trie_node * node_rv = node.get();
 
-      m_edges.emplace(iter, node_edge{std::move(label), std::move(node)});
+      auto pos = iter - m_edges.data();
+      m_edges.emplace(m_edges.begin() + pos, node_edge{std::move(label), std::move(node)});
 
       return node_rv;
     }
 
     constexpr void add(node_edge edge)
     {
-      auto [iter, found] = yy_util::find(m_edges, edge.m_label);
+      auto [iter, found] = yy_data::do_find_raw(m_edges, edge.m_label);
 
       if(!found)
       {
-        m_edges.emplace(iter, std::move(edge));
+        auto pos = iter - m_edges.data();
+        m_edges.emplace(m_edges.begin() + pos, std::move(edge));
       }
       else
       {
@@ -173,7 +181,7 @@ class trie_node
     [[nodiscard]]
     constexpr trie_node * find(const label_type & label) const noexcept
     {
-      auto [iter, found] = yy_util::find(m_edges, label);
+      auto [iter, found] = yy_data::do_find_raw(m_edges, label);
 
       if(!found)
       {

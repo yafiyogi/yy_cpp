@@ -32,10 +32,10 @@
 #include <memory>
 #include <vector>
 
+#include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
-#include "yy_vector_util.h"
 
 
 namespace yafiyogi::yy_data {
@@ -46,13 +46,6 @@ struct trie_node_edge;
 
 template<typename LabelType>
 class trie_node;
-
-template<typename EdgesIterator>
-struct found_value final
-{
-    EdgesIterator iter{};
-    bool found = false;
-};
 
 template<typename LabelType>
 struct trie_node_traits final
@@ -65,8 +58,9 @@ struct trie_node_traits final
     using data_idx_type = std::size_t;
     using node_edge = trie_node_edge<label_type>;
     using edges_type = std::vector<node_edge>;
-    using edges_iterator = typename edges_type::iterator;
-    using found_value_type = found_value<edges_iterator>;
+    using edge_traits = find_util_detail::traits_type<node_edge>;
+    using edge_ptr = typename edge_traits::key_ptr;
+    using found_value_type = typename edge_traits::iter_found_type;
 
     static constexpr node_idx_type root_idx{};
     static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
@@ -126,23 +120,31 @@ struct trie_node_edge final
       return traits::empty_idx != m_idx;
     }
 
+    constexpr bool operator<(const trie_node_edge & other) const noexcept
+    {
+      return m_label < other.m_label;
+    }
+
+    friend bool operator<(const trie_node_edge & lhs,
+                          const label_type & rhs) noexcept
+    {
+      return lhs.m_label < rhs;
+    }
+
+    constexpr bool operator==(const trie_node_edge & other) const noexcept
+    {
+      return m_label == other.m_label;
+    }
+
+    friend bool operator==(const trie_node_edge & lhs,
+                           const label_type & rhs) noexcept
+    {
+      return lhs.m_label == rhs;
+    }
+
     label_type m_label{};
     node_idx_type m_idx = traits::empty_idx;
 };
-
-template<typename LabelType>
-constexpr bool operator==(const typename trie_node_edge<LabelType>::label_type & lhs,
-                          const trie_node_edge<LabelType> & rhs) noexcept
-{
-  return lhs == rhs.m_label;
-}
-
-template<typename LabelType>
-constexpr bool operator<(const typename trie_node_edge<LabelType>::label_type & lhs,
-                         const trie_node_edge<LabelType> & rhs) noexcept
-{
-  return lhs < rhs.m_label;
-}
 
 template<typename LabelType>
 class trie_node final
@@ -157,7 +159,7 @@ class trie_node final
     using node_edge = typename traits::node_edge;
     using found_value_type = typename traits::found_value_type;
     using edges_type = typename traits::edges_type;
-    using edges_iterator = typename traits::edges_iterator;
+    using edge_ptr = typename traits::edge_ptr;
 
     static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
@@ -174,18 +176,17 @@ class trie_node final
     constexpr trie_node & operator=(const trie_node & node) noexcept = default;
     constexpr trie_node & operator=(trie_node && node) noexcept = default;
 
-    constexpr void add_edge(edges_iterator iter,
+    constexpr void add_edge(edge_ptr iter,
                             node_edge edge)
     {
-      m_edges.emplace(iter, std::move(edge));
+      auto pos = iter - m_edges.data();
+      m_edges.emplace(m_edges.begin() + pos, std::move(edge));
     }
 
     [[nodiscard]]
     constexpr found_value_type find(const label_type & label) noexcept
     {
-      auto [iter, found] = yy_util::find(m_edges, label);
-
-      return found_value_type{std::move(iter), found};
+      return yy_data::do_find_raw(m_edges, label);
     }
 
     template<typename Visitor>
@@ -392,7 +393,7 @@ class flat_trie
     using node_idx_type = typename traits::node_idx_type;
     using data_idx_type = typename traits::data_idx_type;
     using node_edge = typename traits::node_edge;
-    using edges_iterator = typename node_type::edges_iterator;
+    using edge_ptr = typename node_type::edge_ptr;
     using value_type = typename traits::value_type;
     using automaton = Automaton;
     using trie_ptr = typename traits::trie_ptr;
@@ -477,7 +478,7 @@ class flat_trie
     }
 
     constexpr node_idx_type add_node(node_type * node,
-                                     edges_iterator edge_iter,
+                                     edge_ptr edge_iter,
                                      const label_type & label,
                                      const data_idx_type data_idx)
     {

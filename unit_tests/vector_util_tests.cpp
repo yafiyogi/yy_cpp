@@ -46,30 +46,6 @@ class TestVectorUtil:
     }
 };
 
-TEST_F(TestVectorUtil, TestFindInt)
-{
-  std::vector<int> v{1, 2, 3, 4, 6, 8, 10};
-
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, 4)));
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, 1)));
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, 10)));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, 0)));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, 5)));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, 12)));
-}
-
-TEST_F(TestVectorUtil, TestFindString)
-{
-  std::vector<std::string> v{"aa", "c", "da", "db"};
-
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, std::string("aa"))));
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, std::string("c"))));
-  EXPECT_TRUE(std::get<1>(yy_util::find(v, std::string("db"))));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, std::string("a"))));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, std::string("b"))));
-  EXPECT_FALSE(std::get<1>(yy_util::find(v, std::string("z"))));
-}
-
 TEST_F(TestVectorUtil, TestSortInt)
 {
   std::vector<int> v{6, 2, 4, 10, 8};

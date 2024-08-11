@@ -30,11 +30,11 @@
 #include <stdexcept>
 #include <vector>
 
+#include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
-#include "yy_vector_util.h"
 
 namespace yafiyogi::yy_data {
 namespace trie_detail {
@@ -46,13 +46,6 @@ struct trie_node_edge;
 template<typename LabelType,
          typename ValueType>
 class trie_node;
-
-template<typename EdgesIterator>
-struct found_value final
-{
-    EdgesIterator iter{};
-    bool found = false;
-};
 
 template<typename LabelType,
          typename ValueType>
@@ -67,8 +60,9 @@ struct trie_node_traits final
     using root_node_ptr = std::shared_ptr<node_type>;
     using node_edge = trie_node_edge<label_type, value_type>;
     using edges_type = std::vector<node_edge>;
-    using edges_iterator = typename edges_type::iterator;
-    using found_value_type = found_value<edges_iterator>;
+    using edge_traits = find_util_detail::traits_type<node_edge>;
+    using edge_ptr = typename edge_traits::key_ptr;
+    using found_value_type = typename edge_traits::iter_found_type;
 };
 
 template<typename LabelType,
@@ -101,6 +95,28 @@ struct trie_node_edge final
     constexpr explicit operator bool() const noexcept
     {
       return static_cast<bool>(m_node);
+    }
+
+    constexpr bool operator<(const trie_node_edge & other) const noexcept
+    {
+      return m_label < other.m_label;
+    }
+
+    friend bool operator<(const trie_node_edge & lhs,
+                          const label_type & rhs) noexcept
+    {
+      return lhs.m_label < rhs;
+    }
+
+    constexpr bool operator==(const trie_node_edge & other) const noexcept
+    {
+      return m_label == other.m_label;
+    }
+
+    friend bool operator==(const trie_node_edge & lhs,
+                           const label_type & rhs) noexcept
+    {
+      return lhs.m_label == rhs;
     }
 
     label_type m_label = label_type{};
@@ -137,7 +153,7 @@ class trie_node
     using value_type = typename traits::value_type;
     using found_value_type = typename traits::found_value_type;
     using edges_type = typename traits::edges_type;
-    using edges_iterator = typename traits::edges_iterator;
+    using edge_ptr = typename traits::edge_ptr;
 
     constexpr trie_node() noexcept = default;
     constexpr trie_node(const trie_node & node) noexcept = default;
@@ -147,18 +163,18 @@ class trie_node
     constexpr trie_node & operator=(const trie_node & node) noexcept = default;
     constexpr trie_node & operator=(trie_node && node) noexcept = default;
 
-    constexpr void add_edge(edges_iterator iter,
+    constexpr void add_edge(edge_ptr iter,
                             node_edge edge)
     {
-      m_edges.emplace(iter, std::move(edge));
+      auto pos = iter - m_edges.data();
+
+      m_edges.emplace(m_edges.begin() + pos, std::move(edge));
     }
 
     [[nodiscard]]
     constexpr found_value_type find_edge(const label_l_value_ref label) noexcept
     {
-      auto [iter, found] = yy_util::find(m_edges, label);
-
-      return found_value_type{std::move(iter), found};
+      return yy_data::do_find_raw(m_edges, label);
     }
 
     [[nodiscard]]
@@ -360,7 +376,7 @@ class trie
     using node_ptr = typename traits::node_ptr;
     using root_node_ptr = typename traits::root_node_ptr;
     using node_edge = typename traits::node_edge;
-    using edges_iterator = typename node_type::edges_iterator;
+    using edge_ptr = typename node_type::edge_ptr;
     using value_type = typename traits::value_type;
     using value_node = typename trie_detail::Payload<label_type, value_type>;
     using automaton = Automaton;
@@ -405,7 +421,7 @@ class trie
 
   private:
     constexpr node_type * add_node(node_type * node,
-                                   edges_iterator edge_iter,
+                                   edge_ptr edge_iter,
                                    const label_type & label)
     {
       node_ptr new_node{std::make_unique<node_type>()};

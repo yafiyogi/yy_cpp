@@ -32,10 +32,10 @@
 #include <vector>
 
 #include "yy_assert.h"
+#include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
-#include "yy_vector_util.h"
 
 namespace yafiyogi::yy_data {
 namespace radix_trie_detail {
@@ -65,7 +65,8 @@ struct trie_node_traits final
     using node_edge = trie_node_edge<LabelElemType, value_type>;
     using edges_type = std::vector<node_edge>;
     using size_type = typename edges_type::size_type;
-    using edges_iterator = typename edges_type::iterator;
+    using edge_traits = find_util_detail::traits_type<node_edge>;
+    using edge_ptr = typename edge_traits::key_ptr;
     using found_value_type = found_value<LabelElemType, ValueType>;
 };
 
@@ -74,10 +75,10 @@ template<typename LabelElemType,
 struct found_value final
 {
     using traits = trie_node_traits<LabelElemType, ValueType>;
-    using edges_iterator = typename traits::edges_iterator;
+    using edge_ptr = typename traits::edge_ptr;
     using size_type = typename traits::size_type;
 
-    edges_iterator iter{};
+    edge_ptr iter{};
     size_type common{};
     size_type remaining{};
 };
@@ -168,7 +169,7 @@ class trie_node
     using node_edge = typename traits::node_edge;
     using value_type = typename traits::value_type;
     using edges_type = typename traits::edges_type;
-    using edges_iterator = typename traits::edges_iterator;
+    using edge_ptr = typename traits::edge_ptr;
     using size_type = typename traits::size_type;
     using found_value_type = typename traits::found_value_type;
 
@@ -183,16 +184,21 @@ class trie_node
     constexpr void add_edge(label_type && label,
                             node_ptr && node)
     {
-      auto [iter, is_end] = yy_util::lower_bound(m_edges, label[0]);
+      auto begin = m_edges.data();
+      auto end = begin + m_edges.size();
+      auto [iter, is_end] = yy_data::do_lower_bound_raw(begin , end, label[0]);
 
-      m_edges.emplace(iter, std::move(label), std::move(node));
+      add_edge(iter,
+               std::forward<label_type>(label),
+               std::forward<node_ptr>(node));
     }
 
-    constexpr void add_edge(edges_iterator iter,
+    constexpr void add_edge(edge_ptr iter,
                             label_type && label,
                             node_ptr && node)
     {
-      m_edges.emplace(iter, std::move(label), std::move(node));
+      auto pos = iter - m_edges.data();
+      m_edges.emplace(m_edges.begin() + pos, std::move(label), std::move(node));
     }
 
     template<typename InputLabelType>
@@ -202,14 +208,15 @@ class trie_node
       static_assert(yy_traits::is_span_v<InputLabelType>,
                     "trie_node::find(): InputLabelType is not a yy_quad::span<>");
 
-      auto edge_iter = std::lower_bound(m_edges.begin(),
-                                        m_edges.end(),
+      auto edges_begin = m_edges.data();
+      auto edges_end = edges_begin + m_edges.size();
+      auto edge_iter = std::lower_bound(edges_begin,
+                                        edges_end,
                                         label_target[0]);
 
-      if(m_edges.end() != edge_iter)
+      if(edges_end != edge_iter)
       {
-        node_edge & edge = *edge_iter;
-        auto label_edge = yy_quad::make_const_span(edge.m_label);
+        auto label_edge = yy_quad::make_const_span(edge_iter->m_label);
 
         auto [target_first, edge_first] = std::mismatch(label_target.begin(),
                                                         label_target.end(),
@@ -218,12 +225,12 @@ class trie_node
 
         const auto common_size = static_cast<size_type>(std::distance(label_target.begin(), target_first));
 
-        return found_value_type{std::move(edge_iter),
+        return found_value_type{edge_iter,
                                 common_size,
                                 label_edge.size() - common_size};
       }
 
-      return found_value_type{m_edges.end(), 0, label_target.size()};
+      return found_value_type{edges_end, 0, label_target.size()};
     }
 
     template<typename Visitor>
