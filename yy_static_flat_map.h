@@ -212,7 +212,25 @@ class static_flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      size_type pos{};
+      bool found = false;
+
+      if constexpr(Capacity > 16)
+      {
+        std::tie(pos, found) = do_find(m_keys, p_key);
+      }
+      else
+      {
+        key_ptr begin = m_keys.data();
+        key_ptr end = begin + m_keys.size();
+
+        key_ptr iter = std::find_if(begin, end, [&p_key](const auto & key) -> bool {
+          return p_key == key;
+        });
+
+        found = iter != end;
+        pos = static_cast<size_type>(iter - begin);
+      }
 
       if(found)
       {
