@@ -251,22 +251,6 @@ constexpr inline auto do_range_raw(const KeyStore & p_keys,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto do_range(KeyStore & p_keys,
-                               const InputKeyType & p_key) noexcept
-{
-  using traits = find_util_detail::traits_type<typename KeyStore::value_type>;
-  using key_ptr = typename traits::key_type;
-  using pos_range = typename traits::pos_range;
-
-  auto range_found{do_range_raw(p_key)};
-  key_ptr begin{p_keys.begin()};
-
-  return pos_range{range_found.begin() - begin, range_found.end() - begin};
-}
-
-template<typename KeyStore,
-         typename InputKeyType>
-[[nodiscard]]
 constexpr inline auto do_range(const KeyStore & p_keys,
                                const InputKeyType & p_key) noexcept
 {
@@ -316,17 +300,6 @@ constexpr inline auto do_find_raw(const KeyStore & p_keys,
   bool found = !is_end && (*key_iter == p_key);
 
   return const_iter_found_type{key_iter, found};
-}
-
-template<typename KeyStore,
-         typename InputKeyType>
-[[nodiscard]]
-constexpr inline auto do_find(KeyStore & p_keys,
-                              const InputKeyType & p_key) noexcept
-{
-  auto [key_iter, found] = do_find_raw(p_keys, p_key);
-
-  return find_util_detail::pos_found_type{static_cast<find_util_detail::size_type>(key_iter - p_keys.data()), found};
 }
 
 template<typename KeyStore,
