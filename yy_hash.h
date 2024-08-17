@@ -42,13 +42,13 @@ constexpr std::size_t hash_combine(std::size_t & seed, const T & val) noexcept
   return seed;
 }
 
-template <typename T, typename... Types>
+template <typename T, typename... RestTypes>
 constexpr st::size_t hash_combine(std::size_t& seed,
                                   const T& val,
-                                  const Types&... args) noexcept
+                                  const RestTypes & ...rest_args) noexcept
 {
   hash_combine(seed, val);
-  hash_combine(seed, args...);
+  (..., hash_combine(seed, rest_args));
 
   return seed;
 }
