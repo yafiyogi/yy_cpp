@@ -86,7 +86,6 @@ struct trie_node_edge final
     constexpr trie_node_edge() noexcept = default;
     constexpr trie_node_edge(const trie_node_edge & edge) noexcept = default;
     constexpr trie_node_edge(trie_node_edge && edge) noexcept = default;
-    constexpr ~trie_node_edge() = default;
 
     constexpr trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
     constexpr trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
@@ -236,7 +235,6 @@ class Payload final:
     Payload() = delete;
     constexpr Payload(const Payload &) noexcept = default;
     constexpr Payload(Payload &&) noexcept = default;
-    constexpr ~Payload() noexcept override = default;
 
     constexpr Payload & operator=(const Payload &) noexcept = default;
     constexpr Payload & operator=(Payload &&) noexcept = default;
@@ -287,7 +285,6 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
-    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -388,7 +385,6 @@ class trie
 
     trie(const trie &) = delete;
     constexpr trie(trie &&) noexcept = default;
-    constexpr ~trie() noexcept = default;
 
     trie & operator=(const trie &) = delete;
     constexpr trie & operator=(trie &&) noexcept = default;

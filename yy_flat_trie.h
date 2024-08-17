@@ -110,7 +110,6 @@ struct trie_node_edge final
     constexpr trie_node_edge() noexcept = default;
     constexpr trie_node_edge(const trie_node_edge & edge) noexcept = default;
     constexpr trie_node_edge(trie_node_edge && edge) noexcept = default;
-    constexpr ~trie_node_edge() noexcept = default;
 
     constexpr trie_node_edge & operator=(const trie_node_edge & node) noexcept = default;
     constexpr trie_node_edge & operator=(trie_node_edge && node) noexcept = default;
@@ -171,7 +170,6 @@ class trie_node final
     constexpr trie_node() noexcept = default;
     constexpr trie_node(const trie_node & node) noexcept = default;
     constexpr trie_node(trie_node && node) noexcept = default;
-    constexpr ~trie_node() noexcept = default;
 
     constexpr trie_node & operator=(const trie_node & node) noexcept = default;
     constexpr trie_node & operator=(trie_node && node) noexcept = default;
@@ -251,7 +249,6 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
-    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -409,7 +406,6 @@ class flat_trie
 
     flat_trie(const flat_trie &) = delete;
     constexpr flat_trie(flat_trie &&) noexcept = default;
-    constexpr ~flat_trie() noexcept = default;
 
     flat_trie & operator=(const flat_trie &) = delete;
     constexpr flat_trie & operator=(flat_trie &&) noexcept = default;

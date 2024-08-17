@@ -256,7 +256,6 @@ class Payload final:
     Payload() = delete;
     constexpr Payload(const Payload &) noexcept = default;
     constexpr Payload(Payload &&) noexcept = default;
-    constexpr ~Payload() noexcept = default;
 
     constexpr Payload & operator=(const Payload &) noexcept = default;
     constexpr Payload & operator=(Payload &&) noexcept = default;
@@ -304,7 +303,6 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
-    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -402,7 +400,6 @@ class fm_radix_trie
 
     fm_radix_trie(const fm_radix_trie &) = delete;
     constexpr fm_radix_trie(fm_radix_trie &&) noexcept = default;
-    constexpr ~fm_radix_trie() noexcept = default;
 
     fm_radix_trie & operator=(const fm_radix_trie &) = delete;
     constexpr fm_radix_trie & operator=(fm_radix_trie &&) noexcept = default;
