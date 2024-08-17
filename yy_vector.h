@@ -329,6 +329,12 @@ class vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    template<typename ...Args>
+    constexpr void emplace_back(Args && ...args)
+    {
+      emplace(end(), std::forward<Args>(args)...);
+    }
+
     template<typename InputValueType>
     constexpr void push_back(InputValueType && value)
     {
@@ -376,13 +382,24 @@ class vector
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
-
-
       return_value rv = add_empty(pos);
 
       if(rv.inserted)
       {
         *rv.iter = std::forward<InputValueType>(value);
+      }
+
+      return rv;
+    }
+
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(rv.inserted)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
       }
 
       return rv;
@@ -965,6 +982,12 @@ class simple_vector
       emplace(end(), std::forward<InputValueType>(value));
     }
 
+    template<typename ...Args>
+    constexpr void emplace_back(Args && ...args)
+    {
+      emplace(end(), std::forward<Args>(args)...);
+    }
+
     template<typename InputValueType>
     constexpr void push_back(InputValueType && value)
     {
@@ -1017,6 +1040,19 @@ class simple_vector
       if(rv.inserted)
       {
         *rv.iter = std::forward<InputValueType>(value);
+      }
+
+      return rv;
+    }
+
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(rv.inserted)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
       }
 
       return rv;

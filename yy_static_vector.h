@@ -357,6 +357,19 @@ class static_vector
       return rv;
     }
 
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(EmplaceResult::Ok == rv.result)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return rv;
+    }
+
     template<typename InputValueType>
     constexpr EmplaceResult emplace_back(InputValueType && value)
     {
@@ -365,6 +378,14 @@ class static_vector
                     "Value is of an incompatible type.");
 
       auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
+
+      return result;
+    }
+
+    template<typename ...Args>
+    constexpr EmplaceResult emplace_back(Args && ...args)
+    {
+      auto [ignore, result] = emplace(end(), std::forward<Args>(args)...);
 
       return result;
     }
@@ -909,6 +930,19 @@ class static_simple_vector
       return rv;
     }
 
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(EmplaceResult::Ok == rv.result)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return rv;
+    }
+
     template<typename InputValueType>
     constexpr EmplaceResult emplace_back(InputValueType && value)
     {
@@ -917,6 +951,14 @@ class static_simple_vector
                     "Value is of an incompatible type.");
 
       auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
+
+      return result;
+    }
+
+    template<typename ...Args>
+    constexpr EmplaceResult emplace_back(Args && ...args)
+    {
+      auto [ignore, result] = emplace(end(), std::forward<Args>(args)...);
 
       return result;
     }
