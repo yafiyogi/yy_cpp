@@ -39,7 +39,7 @@ class traits final
   public:
     using value_type = yy_traits::remove_cvr_t<T>;
     using const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
-    using span_type = yy_quad::const_span<value_type>;
+    using token_type = yy_quad::const_span<value_type>;
 };
 
 } // namespace tokenizer_detail
@@ -51,13 +51,13 @@ class tokenizer
     using traits = tokenizer_detail::traits<T>;
     using value_type = typename traits::value_type;
     using const_l_value_ref = typename traits::const_l_value_ref;
-    using span_type = typename traits::span_type;
-    using const_iterator = typename span_type::const_iterator;
-    using size_type = typename span_type::size_type;
+    using token_type = typename traits::token_type;
+    using const_iterator = typename token_type::const_iterator;
+    using size_type = typename token_type::size_type;
 
     static constexpr size_type none{};
 
-    constexpr explicit tokenizer(span_type p_span, const_l_value_ref p_delim) noexcept:
+    constexpr explicit tokenizer(token_type p_span, const_l_value_ref p_delim) noexcept:
       m_span(p_span),
       m_delim(p_delim)
     {
@@ -72,7 +72,7 @@ class tokenizer
     constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
 
     [[nodiscard]]
-    constexpr span_type scan() noexcept
+    constexpr token_type scan() noexcept
     {
       if(!empty())
       {
@@ -82,15 +82,15 @@ class tokenizer
 
       m_more = pos != m_span.end();
 
-      m_token = span_type{m_span.begin(), pos};
-      m_span = span_type{pos, m_span.end()};
+      m_token = token_type{m_span.begin(), pos};
+      m_span = token_type{pos, m_span.end()};
       m_span.inc_begin();
 
       return token();
     }
 
     [[nodiscard]]
-    constexpr span_type token() const noexcept
+    constexpr token_type token() const noexcept
     {
       return m_token;
     }
@@ -117,7 +117,7 @@ class tokenizer
       return m_more;
     }
 
-    constexpr span_type source() const noexcept
+    constexpr token_type source() const noexcept
     {
       return m_span;
     }
@@ -128,9 +128,9 @@ class tokenizer
     }
 
   private:
-    span_type m_token{};
+    token_type m_token{};
     size_type m_token_idx = none;
-    span_type m_span{};
+    token_type m_span{};
     value_type m_delim{};
     bool m_more = false;
 };
@@ -143,11 +143,11 @@ class tokenizer_first:
     using traits = typename tokenizer<T>::traits;
     using value_type = tokenizer<T>::value_type;
     using const_l_value_ref = tokenizer<T>::const_l_value_ref;
-    using span_type = tokenizer<T>::span_type;
+    using token_type = tokenizer<T>::token_type;
     using const_iterator = tokenizer<T>::const_iterator;
     using size_type = tokenizer<T>::size_type;
 
-    constexpr explicit tokenizer_first(span_type p_span, const_l_value_ref p_delim) noexcept:
+    constexpr explicit tokenizer_first(token_type p_span, const_l_value_ref p_delim) noexcept:
       tokenizer<T>(p_span, p_delim)
     {
       if(auto src = tokenizer<T>::source();
