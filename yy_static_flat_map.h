@@ -212,12 +212,11 @@ class static_flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      size_type pos{};
-      bool found = false;
+      pos_found_type pos_found{};
 
       if constexpr(Capacity > 16)
       {
-        std::tie(pos, found) = do_find(m_keys, p_key);
+        pos_found = do_find(m_keys, p_key);
       }
       else
       {
@@ -228,16 +227,16 @@ class static_flat_map final
           return p_key == key;
         });
 
-        found = iter != end;
-        pos = static_cast<size_type>(iter - begin);
+        pos_found.found = iter != end;
+        pos_found.pos = static_cast<size_type>(iter - begin);
       }
 
-      if(found)
+      if(pos_found.found)
       {
-        visitor(value(pos), pos);
+        visitor(value(pos_found.pos), pos_found.pos);
       }
 
-      return pos_found_type{pos, found};
+      return pos_found;
     }
 
     template<typename KeyParamType,
@@ -246,14 +245,31 @@ class static_flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      pos_found_type pos_found{};
 
-      if(found)
+      if constexpr(Capacity > 16)
       {
-        visitor(value(pos), pos);
+        pos_found = do_find(m_keys, p_key);
+      }
+      else
+      {
+        const_key_ptr begin = m_keys.data();
+        const_key_ptr end = begin + m_keys.size();
+
+        const_key_ptr iter = std::find_if(begin, end, [&p_key](const auto & key) -> bool {
+          return p_key == key;
+        });
+
+        pos_found.found = iter != end;
+        pos_found.pos = static_cast<size_type>(iter - begin);
       }
 
-      return pos_found_type{pos, found};
+      if(pos_found.found)
+      {
+        visitor(value(pos_found.pos), pos_found.pos);
+      }
+
+      return pos_found;
     }
 
     template<typename KeyParamType>

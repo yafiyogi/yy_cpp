@@ -205,14 +205,14 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      auto pos_found = do_find(m_keys, p_key);
 
-      if(found)
+      if(pos_found.found)
       {
-        visitor(value(pos), pos);
+        visitor(value(pos_found.pos), pos_found.pos);
       }
 
-      return pos_found_type{pos, found};
+      return pos_found;
     }
 
     template<typename KeyParamType,
@@ -221,14 +221,14 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      auto pos_found = do_find(m_keys, p_key);
 
-      if(found)
+      if(pos_found.found)
       {
-        visitor(value(pos), pos);
+        visitor(value(pos_found.pos), pos_found.pos);
       }
 
-      return pos_found_type{pos, found};
+      return pos_found;
     }
 
     template<typename KeyParamType>
