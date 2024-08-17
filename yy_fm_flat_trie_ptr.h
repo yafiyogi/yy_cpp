@@ -115,7 +115,6 @@ class trie_node_idx final
     constexpr trie_node_idx() noexcept = default;
     constexpr trie_node_idx(const trie_node_idx & node) noexcept = default;
     constexpr trie_node_idx(trie_node_idx && node) noexcept = default;
-    constexpr ~trie_node_idx() noexcept = default;
 
     constexpr trie_node_idx & operator=(const trie_node_idx & node) noexcept = default;
     constexpr trie_node_idx & operator=(trie_node_idx && node) noexcept = default;
@@ -222,7 +221,6 @@ class trie_node_ptr final
     constexpr trie_node_ptr() noexcept = default;
     constexpr trie_node_ptr(const trie_node_ptr & node) noexcept = default;
     constexpr trie_node_ptr(trie_node_ptr && node) noexcept = default;
-    constexpr ~trie_node_ptr() noexcept = default;
 
     constexpr trie_node_ptr & operator=(const trie_node_ptr & node) noexcept = default;
     constexpr trie_node_ptr & operator=(trie_node_ptr && node) noexcept = default;
@@ -342,7 +340,6 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
-    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -472,7 +469,6 @@ class fm_flat_trie_ptr
 
     fm_flat_trie_ptr(const fm_flat_trie_ptr &) = delete;
     constexpr fm_flat_trie_ptr(fm_flat_trie_ptr &&) noexcept = default;
-    constexpr ~fm_flat_trie_ptr() noexcept = default;
 
     fm_flat_trie_ptr & operator=(const fm_flat_trie_ptr &) = delete;
     constexpr fm_flat_trie_ptr & operator=(fm_flat_trie_ptr &&) noexcept = default;
