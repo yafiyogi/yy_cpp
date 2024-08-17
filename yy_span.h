@@ -146,7 +146,6 @@ class span final
     constexpr span() noexcept = default;
     constexpr span(const span &) noexcept = default;
     constexpr span(span &&) noexcept = default;
-    constexpr ~span() noexcept = default;
 
     constexpr span & operator=(const span &) noexcept = default;
     constexpr span & operator=(span &&) noexcept = default;
@@ -414,7 +413,6 @@ class const_span final
     constexpr const_span() noexcept = default;
     constexpr const_span(const const_span &) noexcept = default;
     constexpr const_span(const_span &&) noexcept = default;
-    constexpr ~const_span() noexcept = default;
 
     constexpr const_span & operator=(const const_span &) noexcept = default;
     constexpr const_span & operator=(const_span &&) noexcept = default;

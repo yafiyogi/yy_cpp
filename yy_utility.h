@@ -62,7 +62,6 @@ class Range final
     Range() = delete;
     constexpr Range(const Range &) noexcept = default;
     constexpr Range(Range &&) noexcept = default;
-    constexpr ~Range() noexcept = default;
 
     constexpr Range & operator=(const Range &) noexcept = default;
     constexpr Range & operator=(Range &&) noexcept = default;

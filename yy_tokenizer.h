@@ -66,7 +66,6 @@ class tokenizer
     constexpr tokenizer() noexcept = default;
     constexpr tokenizer(const tokenizer &) noexcept = default;
     constexpr tokenizer(tokenizer &&) noexcept = default;
-    constexpr ~tokenizer() noexcept = default;
 
     constexpr tokenizer & operator=(const tokenizer &) noexcept = default;
     constexpr tokenizer & operator=(tokenizer &&) noexcept = default;

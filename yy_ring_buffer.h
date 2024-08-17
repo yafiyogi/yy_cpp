@@ -63,7 +63,7 @@ class ring_buffer final
         return false;
       }
 
-      m_buffer[old_pos] = std::forward<value_type>(value);
+      m_buffer[old_pos] = std::move(value);
       m_write_pos.store(new_pos);
 
       wake();
@@ -87,6 +87,48 @@ class ring_buffer final
       return true;
     }
 
+    template<typename InputValueType>
+    bool swap_in(InputValueType & value) noexcept
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "Value is of an incompatible type.");
+
+      const auto old_pos = m_write_pos.load();
+      const auto new_pos = calc_new_pos(old_pos);
+
+      if(const auto read_pos = m_read_pos.load();
+         new_pos == read_pos)
+      {
+        return false;
+      }
+
+      std::swap(m_buffer[old_pos], value);
+
+      m_write_pos.store(new_pos);
+
+      wake();
+
+      return true;
+    }
+
+    bool swap_out(value_type & value) noexcept
+    {
+      const auto write_pos = m_write_pos.load();
+      const auto old_pos = m_read_pos.load();
+
+      if(write_pos == old_pos)
+      {
+        return false;
+      }
+
+      std::swap(m_buffer[old_pos], value);
+
+      m_read_pos.store(calc_new_pos(old_pos));
+
+      return true;
+    }
+
     bool empty() const noexcept
     {
       return m_write_pos.load() == m_read_pos.load();
@@ -97,8 +139,14 @@ class ring_buffer final
       return m_size;
     }
 
-    template<typename Pred,
-             typename Duration>
+    void wait(const std::chrono::nanoseconds duration)
+    {
+      std::unique_lock lck{m_mxt};
+
+      m_cv.wait(lck, duration);
+    }
+
+    template<typename Duration>
     void wait(const Duration & duration,
               Pred && pred)
     {
@@ -120,12 +168,15 @@ class ring_buffer final
     }
 
     static constexpr size_type m_size = Capacity;
-    array_type m_buffer;
+    array_type m_buffer{};
     std::atomic<size_type> m_read_pos = 0;
     std::atomic<size_type> m_write_pos = 0;
 
-    std::mutex m_mtx;
-    std::condition_variable m_cv;
+    std::mutex m_mtx{};
+    std::condition_variable m_cv{};
+
+    value_type m_read_value_tmp;
+    value_type m_write_value_tmp;
 };
 
 } // namespace yafiyogi::yy_data
