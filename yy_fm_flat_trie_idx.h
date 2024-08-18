@@ -97,7 +97,7 @@ class trie_node_idx final
     static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
     static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
-    constexpr explicit trie_node_idx(const data_idx_type p_data) noexcept:
+    constexpr explicit trie_node_idx(data_idx_type p_data) noexcept:
       m_data(p_data)
     {
     }
@@ -497,7 +497,7 @@ class fm_flat_trie_idx
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(pos, std::move(label), node_idx);
 
-      nodes.emplace_back(node_type{data_idx});
+      nodes.emplace_back(data_idx);
 
       return node_idx;
     }

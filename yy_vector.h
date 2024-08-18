@@ -118,10 +118,14 @@ class vector
     constexpr vector(std::initializer_list<value_type> p_il) noexcept
     {
       reserve(p_il.size());
-      for(auto & item : p_il)
+      value_ptr item = data();
+
+      for(auto & il_item : p_il)
       {
-        emplace_back(std::move(item));
+        *item = std::move(il_item);
+        ++item;
       }
+      m_size = p_il.size();
     }
 
     constexpr ~vector() noexcept
@@ -319,14 +323,34 @@ class vector
       return 0 == size();
     }
 
-    template<typename InputValueType>
-    constexpr void emplace_back(InputValueType && value)
+    constexpr return_value emplace(iterator pos, value_type && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      return_value rv = add_empty(pos);
 
-      emplace(end(), std::forward<InputValueType>(value));
+      if(rv.inserted)
+      {
+        *rv.iter = std::move(value);
+      }
+
+      return rv;
+    }
+
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(rv.inserted)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return rv;
+    }
+
+    constexpr void emplace_back(value_type && value)
+    {
+      emplace(end(), std::move(value));
     }
 
     template<typename ...Args>
@@ -335,14 +359,19 @@ class vector
       emplace(end(), std::forward<Args>(args)...);
     }
 
-    template<typename InputValueType>
-    constexpr void push_back(InputValueType && value)
+    constexpr void push_back(const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      auto [iter, inserted] = add_empty(end());
 
-      emplace(end(), std::forward<InputValueType>(value));
+      if(inserted)
+      {
+        *iter = value;
+      }
+    }
+
+    constexpr void push_back(value_type && value)
+    {
+      emplace(end(), std::move(value));
     }
 
     [[nodiscard]]
@@ -357,7 +386,7 @@ class vector
         if(m_size == m_capacity)
         {
           reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
-          // Can't use the parameter pos after this point!
+          // Can't use the parameter 'pos' after this point!
         }
         else
         {
@@ -370,36 +399,6 @@ class vector
         rv.iter = begin() + distance;
         rv.inserted = true;
         ++m_size;
-      }
-
-      return rv;
-    }
-
-    template<typename InputValueType>
-    constexpr return_value emplace(iterator pos, InputValueType && value)
-    {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
-
-      return_value rv = add_empty(pos);
-
-      if(rv.inserted)
-      {
-        *rv.iter = std::forward<InputValueType>(value);
-      }
-
-      return rv;
-    }
-
-    template<typename ...Args>
-    constexpr return_value emplace(iterator pos, Args && ...args)
-    {
-      return_value rv = add_empty(pos);
-
-      if(rv.inserted)
-      {
-        *rv.iter = value_type{std::forward<Args>(args)...};
       }
 
       return rv;
@@ -777,10 +776,14 @@ class simple_vector
     constexpr simple_vector(std::initializer_list<value_type> p_il) noexcept
     {
       reserve(p_il.size());
-      for(auto & item : p_il)
+      value_ptr item = data();
+
+      for(auto & il_item : p_il)
       {
-        emplace_back(std::move(item));
+        *item = std::move(il_item);
+        ++item;
       }
+      m_size = p_il.size();
     }
 
     constexpr ~simple_vector() noexcept
@@ -972,14 +975,34 @@ class simple_vector
       return 0 == size();
     }
 
-    template<typename InputValueType>
-    constexpr void emplace_back(InputValueType && value)
+    constexpr return_value emplace(iterator pos, value_type && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      return_value rv = add_empty(pos);
 
-      emplace(end(), std::forward<InputValueType>(value));
+      if(rv.inserted)
+      {
+        *rv.iter = std::move(value);
+      }
+
+      return rv;
+    }
+
+    template<typename ...Args>
+    constexpr return_value emplace(iterator pos, Args && ...args)
+    {
+      return_value rv = add_empty(pos);
+
+      if(rv.inserted)
+      {
+        *rv.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return rv;
+    }
+
+    constexpr void emplace_back(value_type && value)
+    {
+      emplace(end(), std::move(value));
     }
 
     template<typename ...Args>
@@ -988,14 +1011,19 @@ class simple_vector
       emplace(end(), std::forward<Args>(args)...);
     }
 
-    template<typename InputValueType>
-    constexpr void push_back(InputValueType && value)
+    constexpr void push_back(const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      auto [iter, inserted] = add_empty(end());
 
-      emplace(end(), std::forward<InputValueType>(value));
+      if(inserted)
+      {
+        *iter = value;
+      }
+    }
+
+    constexpr void push_back(value_type && value)
+    {
+      emplace(end(), std::move(value));
     }
 
     [[nodiscard]]
@@ -1010,7 +1038,7 @@ class simple_vector
         if(m_size == m_capacity)
         {
           reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
-          // Can't use the parameter pos after this point!
+          // Can't use the parameter 'pos' after this point!
         }
         else
         {
@@ -1023,36 +1051,6 @@ class simple_vector
         rv.iter = begin() + distance;
         rv.inserted = true;
         ++m_size;
-      }
-
-      return rv;
-    }
-
-    template<typename InputValueType>
-    constexpr return_value emplace(iterator pos, InputValueType && value)
-    {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
-
-      return_value rv = add_empty(pos);
-
-      if(rv.inserted)
-      {
-        *rv.iter = std::forward<InputValueType>(value);
-      }
-
-      return rv;
-    }
-
-    template<typename ...Args>
-    constexpr return_value emplace(iterator pos, Args && ...args)
-    {
-      return_value rv = add_empty(pos);
-
-      if(rv.inserted)
-      {
-        *rv.iter = value_type{std::forward<Args>(args)...};
       }
 
       return rv;

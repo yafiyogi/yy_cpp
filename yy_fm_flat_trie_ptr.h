@@ -619,7 +619,7 @@ class fm_flat_trie_ptr
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(pos, std::move(label), node_idx);
 
-      nodes.emplace_back(node_type{value_idx});
+      nodes.emplace_back(value_idx);
 
       return node_idx;
     }

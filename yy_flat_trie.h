@@ -482,7 +482,7 @@ class flat_trie
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(edge_iter, node_edge{label, node_idx});
 
-      nodes.emplace_back(node_type{data_idx});
+      nodes.emplace_back(data_idx);
 
       return node_idx;
     }

@@ -120,12 +120,15 @@ class static_vector
 
     constexpr static_vector(std::initializer_list<value_type> p_il) noexcept
     {
-      for(auto & item : p_il)
+      value_ptr item = data();
+      auto p_il_item = p_il.data();
+
+      m_size = std::min(p_il.size(), Capacity);
+      for(size_type idx = 0; idx < m_size; ++idx)
       {
-        if(EmplaceResult::Full == emplace_back(std::move(item)))
-        {
-          break;
-        }
+        *item = std::move(*p_il_item);
+        ++item;
+        ++p_il_item;
       }
     }
 
@@ -340,18 +343,25 @@ class static_vector
       return return_value{iter, result};
     }
 
-    template<typename InputValueType>
-    constexpr return_value emplace(iterator pos, InputValueType && value)
+    constexpr return_value emplace(iterator pos, const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
-
       return_value rv = add_empty(pos);
 
       if(EmplaceResult::Ok == rv.result)
       {
-        *rv.iter = std::forward<InputValueType>(value);
+        *rv.iter = value;
+      }
+
+      return rv;
+    }
+
+    constexpr return_value emplace(iterator pos, value_type && value)
+    {
+      return_value rv = add_empty(pos);
+
+      if(EmplaceResult::Ok == rv.result)
+      {
+        *rv.iter = std::move(value);
       }
 
       return rv;
@@ -370,14 +380,16 @@ class static_vector
       return rv;
     }
 
-    template<typename InputValueType>
-    constexpr EmplaceResult emplace_back(InputValueType && value)
+    constexpr EmplaceResult emplace_back(const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      auto [ignore, result] = emplace(end(), value);
 
-      auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
+      return result;
+    }
+
+    constexpr EmplaceResult emplace_back(value_type && value)
+    {
+      auto [ignore, result] = emplace(end(), std::move(value));
 
       return result;
     }
@@ -694,13 +706,15 @@ class static_simple_vector
 
     constexpr static_simple_vector(std::initializer_list<value_type> p_il) noexcept
     {
-      reserve(p_il.size());
-      for(auto & item : p_il)
+      value_ptr item = data();
+      auto p_il_item = p_il.data();
+
+      m_size = std::min(p_il.size(), Capacity);
+      for(size_type idx = 0; idx < m_size; ++idx)
       {
-        if(EmplaceResult::Full == emplace_back(std::move(item)))
-        {
-          break;
-        }
+        *item = std::move(*p_il_item);
+        ++item;
+        ++p_il_item;
       }
     }
 
@@ -913,18 +927,25 @@ class static_simple_vector
       return return_value{iter, result};
     }
 
-    template<typename InputValueType>
-    constexpr return_value emplace(iterator pos, InputValueType && value)
+    constexpr return_value emplace(iterator pos, const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
-
       return_value rv = add_empty(pos);
 
       if(EmplaceResult::Ok == rv.result)
       {
-        *rv.iter = std::forward<InputValueType>(value);
+        *rv.iter = value;
+      }
+
+      return rv;
+    }
+
+    constexpr return_value emplace(iterator pos, value_type && value)
+    {
+      return_value rv = add_empty(pos);
+
+      if(EmplaceResult::Ok == rv.result)
+      {
+        *rv.iter = std::move(value);
       }
 
       return rv;
@@ -943,14 +964,16 @@ class static_simple_vector
       return rv;
     }
 
-    template<typename InputValueType>
-    constexpr EmplaceResult emplace_back(InputValueType && value)
+    constexpr EmplaceResult emplace_back(const value_type & value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
-                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
-                    "Value is of an incompatible type.");
+      auto [ignore, result] = emplace(end(), value);
 
-      auto [ignore, result] = emplace(end(), std::forward<InputValueType>(value));
+      return result;
+    }
+
+    constexpr EmplaceResult emplace_back(value_type && value)
+    {
+      auto [ignore, result] = emplace(end(), std::move(value));
 
       return result;
     }
