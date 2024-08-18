@@ -242,9 +242,20 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto value = add_empty(p_pos);
+      value_ptr value = add_empty(p_pos);
 
-      value = std::forward<InputValueType>(p_value);
+      *value = std::forward<InputValueType>(p_value);
+
+      return value;
+    }
+
+    template<typename ...Args>
+    constexpr iterator emplace(iterator p_pos,
+                               Args && ...args)
+    {
+      value_ptr value = add_empty(p_pos);
+
+      *value = value_type{std::forward<Args>(args)...};
 
       return value;
     }
