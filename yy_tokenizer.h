@@ -37,7 +37,7 @@ template<typename T>
 class traits final
 {
   public:
-    using value_type = yy_traits::remove_cvr_t<T>;
+    using value_type = T;
     using const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using token_type = yy_quad::const_span<value_type>;
 };
@@ -57,8 +57,8 @@ class tokenizer
 
     static constexpr size_type none{};
 
-    constexpr explicit tokenizer(token_type p_span, const_l_value_ref p_delim) noexcept:
-      m_span(p_span),
+    constexpr explicit tokenizer(token_type p_source, const_l_value_ref p_delim) noexcept:
+      m_source(p_source),
       m_delim(p_delim)
     {
     }
@@ -77,13 +77,13 @@ class tokenizer
       {
         ++m_token_idx;
       }
-      auto pos = std::find(m_span.begin(), m_span.end(), m_delim);
+      auto pos = std::find(m_source.begin(), m_source.end(), m_delim);
 
-      m_more = pos != m_span.end();
+      m_has_more = pos != m_source.end();
 
-      m_token = token_type{m_span.begin(), pos};
-      m_span = token_type{pos, m_span.end()};
-      m_span.inc_begin();
+      m_token = token_type{m_source.begin(), pos};
+      m_source = token_type{pos, m_source.end()};
+      m_source.inc_begin();
 
       return token();
     }
@@ -107,20 +107,28 @@ class tokenizer
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return m_span.empty() && !more();
+      return !has_source() && !has_more();
     }
 
     [[nodiscard]]
-    constexpr bool more() const noexcept
+    constexpr bool has_more() const noexcept
     {
-      return m_more;
+      return m_has_more;
     }
 
+    [[nodiscard]]
+    constexpr bool has_source() const noexcept
+    {
+      return !m_source.empty();
+    }
+
+    [[nodiscard]]
     constexpr token_type source() const noexcept
     {
-      return m_span;
+      return m_source;
     }
 
+    [[nodiscard]]
     constexpr value_type delim() const noexcept
     {
       return m_delim;
@@ -129,9 +137,9 @@ class tokenizer
   private:
     token_type m_token{};
     size_type m_token_idx = none;
-    token_type m_span{};
+    token_type m_source{};
     value_type m_delim{};
-    bool m_more = false;
+    bool m_has_more = true;
 };
 
 template<typename T>
@@ -146,8 +154,8 @@ class tokenizer_first:
     using const_iterator = tokenizer<T>::const_iterator;
     using size_type = tokenizer<T>::size_type;
 
-    constexpr explicit tokenizer_first(token_type p_span, const_l_value_ref p_delim) noexcept:
-      tokenizer<T>(p_span, p_delim)
+    constexpr explicit tokenizer_first(token_type p_source, const_l_value_ref p_delim) noexcept:
+      tokenizer<T>(p_source, p_delim)
     {
       if(auto src = tokenizer<T>::source();
          !src.empty() && (tokenizer<T>::delim() == src[0]))
