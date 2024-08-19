@@ -603,9 +603,9 @@ class fm_flat_trie_ptr
     using data_vector = typename traits::data_vector;
 
     using tokenizer_type = Tokenizer<label_type>;
-    using automaton_type = Automaton<label_type, value_type, tokenizer_type>;
     using source_type = tokenizer_type::source_type;
     using token_type = tokenizer_type::token_type;
+    using automaton_type = Automaton<label_type, value_type, tokenizer_type>;
 
     constexpr fm_flat_trie_ptr() noexcept:
       m_nodes(1), // add root node
