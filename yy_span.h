@@ -92,10 +92,10 @@ struct span_traits
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
-    using ptr = value_type *;
-    using const_ptr = const value_type *;
-    using iterator = value_type *;
-    using const_iterator = const value_type *;
+    using ptr = std::add_pointer_t<value_type>;
+    using const_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
+    using iterator = ptr;
+    using const_iterator = const_ptr;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 };
@@ -621,7 +621,10 @@ template<typename T,
          typename Enable = void>
 struct span_traits_helper final
 {
-    static_assert(true, "I can't use this type to create a span!");
+    using traits = typename span_detail::span_traits<T>;
+    using value_type = typename traits::value_type;
+    using span_type = span<value_type>;
+    using const_span_type = const_span<value_type>;
 };
 
 template<typename T>
@@ -632,8 +635,9 @@ struct span_traits_helper<T,
   span_detail::span_traits<typename T::value_type>
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
-    using span_type = span<typename traits::value_type>;
-    using const_span_type = const_span<typename traits::value_type>;
+    using value_type = typename traits::value_type;
+    using span_type = span<value_type>;
+    using const_span_type = const_span<value_type>;
 };
 
 template<typename T>
@@ -642,8 +646,9 @@ struct span_traits_helper<T,
   span_detail::span_traits<typename T::value_type>
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
-    using span_type = const_span<typename traits::value_type>;
-    using const_span_type = const_span<typename traits::value_type>;
+    using value_type = typename traits::value_type;
+    using span_type = const_span<value_type>;
+    using const_span_type = const_span<value_type>;
 };
 
 template<typename T>
@@ -652,8 +657,9 @@ struct span_traits_helper<T,
   span_detail::span_traits<std::remove_pointer_t<std::decay_t<T>>>
 {
     using traits = typename span_detail::span_traits<std::remove_pointer_t<std::decay_t<T>>>;
-    using span_type = const_span<typename traits::value_type>;
-    using const_span_type = const_span<typename traits::value_type>;
+    using value_type = typename traits::value_type;
+    using span_type = const_span<value_type>;
+    using const_span_type = const_span<value_type>;
 };
 
 template<typename T,
