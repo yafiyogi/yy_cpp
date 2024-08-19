@@ -33,7 +33,16 @@ namespace yafiyogi::yy_util {
 std::string_view trim_left(std::string_view str,
                            const std::string_view chs) noexcept
 {
-  str.remove_prefix(str.find_first_not_of(chs));
+  if(!str.empty())
+  {
+    auto pos = str.find_first_not_of(chs);
+
+    if(std::string_view::npos == pos)
+    {
+      pos = str.size();
+    }
+    str.remove_prefix(pos);
+  }
 
   return str;
 }
@@ -41,7 +50,14 @@ std::string_view trim_left(std::string_view str,
 std::string_view trim_right(std::string_view str,
                             const std::string_view chs) noexcept
 {
-  str.remove_suffix(str.size() - str.find_last_not_of(chs) - 1);
+  if(!str.empty())
+  {
+    if(auto pos = str.find_last_not_of(chs);
+       std::string_view::npos != pos)
+    {
+      str.remove_suffix(str.size() - pos - 1);
+    }
+  }
 
   return str;
 }
