@@ -263,6 +263,7 @@ class Payload final:
     Payload() = delete;
     constexpr Payload(const Payload &) noexcept = default;
     constexpr Payload(Payload &&) noexcept = default;
+    constexpr ~Payload() noexcept override = default;
 
     constexpr Payload & operator=(const Payload &) noexcept = default;
     constexpr Payload & operator=(Payload &&) noexcept = default;
@@ -307,6 +308,7 @@ class add_edges_visitor final
     add_edges_visitor() = delete;
     add_edges_visitor(const add_edges_visitor &) = delete;
     add_edges_visitor(add_edges_visitor &&) = delete;
+    constexpr ~add_edges_visitor() noexcept = default;
 
     add_edges_visitor & operator=(const add_edges_visitor &) = delete;
     add_edges_visitor & operator=(add_edges_visitor &&) = delete;
@@ -344,6 +346,7 @@ class compile_visitor final
     compile_visitor() = delete;
     compile_visitor(const compile_visitor &) = delete;
     compile_visitor(compile_visitor &&) = delete;
+    constexpr ~compile_visitor() noexcept = default;
 
     compile_visitor & operator=(const compile_visitor &) = delete;
     compile_visitor & operator=(compile_visitor &&) = delete;
@@ -401,6 +404,7 @@ class Automaton final
     Automaton() = delete;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton &) = delete;
     constexpr Automaton & operator=(Automaton &&) noexcept = default;
@@ -519,7 +523,7 @@ class Automaton final
 
 template<typename LabelType,
          typename ValueType>
-class ac_trie
+class ac_trie final
 {
   public:
     using traits = typename ac_trie_detail::trie_node_traits<LabelType, ValueType>;
@@ -541,6 +545,7 @@ class ac_trie
 
     ac_trie(const ac_trie &) = delete;
     constexpr ac_trie(ac_trie &&) noexcept = default;
+    constexpr ~ac_trie() noexcept = default;
 
     ac_trie & operator=(const ac_trie &) = delete;
     ac_trie & operator=(ac_trie &&) noexcept = delete;
