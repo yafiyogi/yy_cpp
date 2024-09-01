@@ -34,7 +34,7 @@
 #include "yy_span.h"
 #include "yy_flat_map.h"
 #include "yy_ref_traits.h"
-#include "yy_tokenizer.h"
+#include "yy_trie_common.h"
 #include "yy_type_traits.h"
 #include "yy_vector.h"
 
@@ -49,32 +49,15 @@ template<typename LabelType,
          typename ValueType>
 class trie_node_ptr;
 
-template<typename LabelType>
-struct trie_node_common_label_traits final
-{
-    using label_type = LabelType;
-    using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
-    using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
-    using span_traits = typename yy_quad::span_traits_helper<label_type>;
-    using label_span_type = typename span_traits::const_span_type;
-};
-
-template<typename ValueType>
-struct trie_node_common_value_traits final
-{
-    using value_type = yy_traits::remove_cvr_t<ValueType>;
-};
-
 template<typename LabelType,
          typename ValueType>
 struct trie_node_idx_traits final
 {
-    using label_traits = trie_node_common_label_traits<LabelType>;
-    using value_traits = trie_node_common_value_traits<ValueType>;
+    using label_traits = yy_trie::label_traits<LabelType>;
+    using value_traits = yy_trie::value_traits<ValueType>;
     using label_type = typename label_traits::label_type;
     using label_l_value_ref = typename label_traits::label_l_value_ref;
     using label_r_value_ref = typename label_traits::label_r_value_ref;
-    using label_span_type = typename label_traits::label_span_type;
     using value_type = typename value_traits::value_type;
 
     using node_type = trie_node_idx<LabelType, ValueType>;
@@ -112,6 +95,7 @@ class trie_node_idx final
     constexpr trie_node_idx() noexcept = default;
     constexpr trie_node_idx(const trie_node_idx & node) noexcept = default;
     constexpr trie_node_idx(trie_node_idx && node) noexcept = default;
+    constexpr ~trie_node_idx() noexcept = default;
 
     constexpr trie_node_idx & operator=(const trie_node_idx & node) noexcept = default;
     constexpr trie_node_idx & operator=(trie_node_idx && node) noexcept = default;
@@ -180,7 +164,6 @@ struct trie_idx_traits final
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
-    using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
@@ -202,7 +185,6 @@ class Automaton final
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
-    using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
@@ -213,6 +195,7 @@ class Automaton final
     using trie_vector = typename traits::trie_vector;
     using data_vector = typename traits::data_vector;
     using tokenizer_type = TokenizerType;
+    using label_span_type = typename tokenizer_type::label_span_type;
 
     constexpr explicit Automaton(trie_vector && p_nodes,
                                  data_vector && p_data) noexcept:
@@ -225,6 +208,7 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -351,155 +335,19 @@ class Automaton final
     node_idx_type m_state = node_type::root_idx;
 };
 
-template<typename LabelType>
-class default_label_tokenizer
-{
-  public:
-    using traits = trie_node_common_label_traits<LabelType>;
-    using label_type = typename traits::label_type;
-    using source_type = typename traits::label_span_type;;
-    using token_type = label_type;
-
-    constexpr default_label_tokenizer(const source_type & p_source):
-      m_source(yy_quad::make_const_span(p_source))
-    {
-    }
-
-    constexpr default_label_tokenizer(token_type p_source):
-      m_source(yy_quad::make_const_span(p_source))
-    {
-    }
-
-    [[nodiscard]]
-    constexpr token_type scan() noexcept
-    {
-      if(!m_source.empty())
-      {
-        m_token = *m_source.begin();
-        m_source.inc_begin();
-      }
-      m_has_more = !m_source.empty();
-
-      return token();
-    }
-
-    [[nodiscard]]
-    constexpr token_type token() const noexcept
-    {
-      return m_token;
-    }
-
-    [[nodiscard]]
-    constexpr bool has_more() const noexcept
-    {
-      return m_has_more;
-    }
-
-    [[nodiscard]]
-    constexpr source_type source() const noexcept
-    {
-      return m_source;
-    }
-
-    [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return !m_source.empty();
-    }
-
-    [[nodiscard]]
-    constexpr bool empty() const noexcept
-    {
-      return !has_source() && !has_more();
-    }
-
-    static constexpr label_type create(token_type & token) noexcept
-    {
-      return token;
-    }
-
-  private:
-    source_type m_source{};
-    token_type m_token{};
-    bool m_has_more = true;
-};
-
-template<typename LabelType,
-         typename LabelType::value_type t_delim,
-         template<typename L> class Tokenizer = yy_util::tokenizer>
-class label_word_tokenizer
-{
-  public:
-    using traits = trie_node_common_label_traits<LabelType>;
-    using label_type = typename traits::label_type;
-    using source_type = typename traits::label_span_type;
-    using token_type = typename traits::label_span_type;
-
-    constexpr label_word_tokenizer(token_type p_source):
-      m_tokenizer(p_source, t_delim)
-    {
-    }
-
-    [[nodiscard]]
-    constexpr token_type scan() noexcept
-    {
-      return m_tokenizer.scan();
-    }
-
-    [[nodiscard]]
-    constexpr token_type token() const noexcept
-    {
-      return m_tokenizer.token();
-    }
-
-    [[nodiscard]]
-    constexpr bool has_more() const noexcept
-    {
-      return m_tokenizer.has_more();
-    }
-
-    [[nodiscard]]
-    constexpr source_type source() const noexcept
-    {
-      return m_tokenizer.source();
-    }
-
-    [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return m_tokenizer.has_source();
-    }
-
-    [[nodiscard]]
-    constexpr bool empty() const noexcept
-    {
-      return m_tokenizer.empty();
-    }
-
-    static constexpr label_type create(token_type & token) noexcept
-    {
-      return label_type{token.begin(), token.end()};
-    }
-
-  private:
-    using tokenizer_type = Tokenizer<typename label_type::value_type>;
-    tokenizer_type m_tokenizer{};
-};
-
 } // namespace detail
 
 template<typename LabelType,
          typename ValueType,
          template<typename L, typename V, typename T> class Automaton = fm_flat_trie_idx_detail::Automaton,
-         template<typename L> class Tokenizer = fm_flat_trie_idx_detail::default_label_tokenizer>
-class fm_flat_trie_idx
+         template<typename L> class Tokenizer = yy_trie::default_label_tokenizer>
+class fm_flat_trie_idx final
 {
   public:
     using traits = typename fm_flat_trie_idx_detail::trie_idx_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
-    using label_span_type = typename traits::label_span_type;
     using node_type = typename traits::node_type;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
@@ -511,6 +359,7 @@ class fm_flat_trie_idx
     using data_vector = typename traits::data_vector;
 
     using tokenizer_type = Tokenizer<label_type>;
+    using label_span_type = tokenizer_type::label_span_type;
     using source_type = tokenizer_type::source_type;
     using token_type = tokenizer_type::token_type;
     using automaton_type = Automaton<label_type, value_type, tokenizer_type>;
@@ -523,6 +372,7 @@ class fm_flat_trie_idx
 
     fm_flat_trie_idx(const fm_flat_trie_idx &) = delete;
     constexpr fm_flat_trie_idx(fm_flat_trie_idx &&) noexcept = default;
+    constexpr ~fm_flat_trie_idx() noexcept = default;
 
     fm_flat_trie_idx & operator=(const fm_flat_trie_idx &) = delete;
     constexpr fm_flat_trie_idx & operator=(fm_flat_trie_idx &&) noexcept = default;
@@ -681,7 +531,7 @@ class fm_flat_trie_idx
         auto node = get_node(nodes.data(), node_idx);
         auto [edge_pos, ignore] = node->find_edge_pos(token);
 
-        node_idx = add_node(nodes, node, edge_pos, token, node_type::no_data);
+        node_idx = add_node(nodes, node, edge_pos, tokenizer_type::create(token), node_type::no_data);
 
         token = p_tokenizer.scan();
       }
