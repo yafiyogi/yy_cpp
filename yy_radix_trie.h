@@ -29,13 +29,13 @@
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
-#include <vector>
 
 #include "yy_assert.h"
 #include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
+#include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
 namespace radix_trie_detail {
@@ -56,14 +56,14 @@ template<typename LabelElemType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = std::vector<yy_traits::remove_cvr_t<LabelElemType>>;
+    using label_type = yy_quad::simple_vector<yy_traits::remove_cvr_t<LabelElemType>>;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
     using value_type = ValueType;
     using node_type = trie_node<LabelElemType, value_type>;
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
     using node_edge = trie_node_edge<LabelElemType, value_type>;
-    using edges_type = std::vector<node_edge>;
+    using edges_type = yy_quad::simple_vector<node_edge>;
     using size_type = typename edges_type::size_type;
     using edge_traits = find_util_detail::traits_type<node_edge>;
     using edge_ptr = typename edge_traits::key_ptr;
@@ -153,7 +153,7 @@ struct trie_node_edge final
       return a.m_label[0] < b;
     }
 
-    std::vector<LabelElemType> m_label{};
+    yy_quad::simple_vector<LabelElemType> m_label{};
     node_ptr m_node = nullptr;
 };
 
@@ -290,6 +290,7 @@ class Payload final:
     Payload() = delete;
     constexpr Payload(const Payload &) noexcept = default;
     constexpr Payload(Payload &&) noexcept = default;
+    constexpr ~Payload() noexcept override = default;
 
     constexpr Payload & operator=(const Payload &) noexcept = default;
     constexpr Payload & operator=(Payload &&) noexcept = default;
@@ -338,6 +339,7 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -415,7 +417,7 @@ class Automaton final
 template<typename LabelElemType,
          typename ValueType,
          typename Automaton = radix_trie_detail::Automaton<LabelElemType, ValueType>>
-class radix_trie
+class radix_trie final
 {
   public:
     using traits = typename radix_trie_detail::trie_node_traits<LabelElemType, ValueType>;
@@ -433,8 +435,10 @@ class radix_trie
       m_root(std::make_shared<node_type>())
     {
     }
+
     radix_trie(const radix_trie &) = delete;
     constexpr radix_trie(radix_trie &&) noexcept = default;
+    constexpr ~radix_trie() noexcept = default;
 
     radix_trie & operator=(const radix_trie &) = delete;
     constexpr radix_trie & operator=(radix_trie &&) noexcept = default;

@@ -30,7 +30,6 @@
 
 #include <memory>
 #include <stdexcept>
-#include <vector>
 
 #include "yy_assert.h"
 #include "yy_span.h"
@@ -38,6 +37,7 @@
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
+#include "yy_vector.h"
 
 
 namespace yafiyogi::yy_data {
@@ -59,7 +59,7 @@ template<typename LabelElemType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = std::vector<yy_traits::remove_cvr_t<LabelElemType>>;
+    using label_type = yy_quad::simple_vector<yy_traits::remove_cvr_t<LabelElemType>>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
@@ -256,6 +256,7 @@ class Payload final:
     Payload() = delete;
     constexpr Payload(const Payload &) noexcept = default;
     constexpr Payload(Payload &&) noexcept = default;
+    constexpr ~Payload() noexcept override = default;
 
     constexpr Payload & operator=(const Payload &) noexcept = default;
     constexpr Payload & operator=(Payload &&) noexcept = default;
@@ -380,7 +381,7 @@ class Automaton final
 template<typename LabelElemType,
          typename ValueType,
          typename Automaton = fm_radix_trie_detail::Automaton<LabelElemType, ValueType>>
-class fm_radix_trie
+class fm_radix_trie final
 {
   public:
     using traits = typename fm_radix_trie_detail::trie_node_traits<LabelElemType, ValueType>;
