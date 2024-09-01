@@ -42,7 +42,7 @@ enum class FastFloatRV:uint8_t { Ok, Overflow, NoValue};
 namespace fast_atoi_detail {
 
 template<typename I>
-struct val_valid_type
+struct val_valid_type final
 {
     using value_type = yy_traits::remove_cvr_t<I>;
     value_type value{};

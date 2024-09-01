@@ -116,6 +116,7 @@ class static_flat_map final
     constexpr static_flat_map() noexcept = default;
     constexpr static_flat_map(const static_flat_map &) noexcept = default;
     constexpr static_flat_map(static_flat_map &&) noexcept = default;
+    constexpr ~static_flat_map() noexcept = default;
 
     constexpr static_flat_map & operator=(const static_flat_map &) noexcept = default;
     constexpr static_flat_map & operator=(static_flat_map &&) noexcept = default;

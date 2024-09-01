@@ -35,7 +35,7 @@ namespace yafiyogi::yy_util {
 namespace digits_detail {
 
 template<std::size_t num>
-struct DigitsHelper
+struct DigitsHelper final
 {
     static constexpr const uint64_t digits = 1 + DigitsHelper<num / 10>::digits;
 };
@@ -49,7 +49,7 @@ struct DigitsHelper<0>
 } // namespace digits_detail
 
 template<typename I>
-struct Digits
+struct Digits final
 {
     static constexpr const uint64_t digits = digits_detail::DigitsHelper<std::numeric_limits<I>::max()>::digits;
 };

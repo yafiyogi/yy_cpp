@@ -42,7 +42,7 @@ class Init final
       }
     }
 
-    constexpr Init(const T & p_obj) noexcept:
+    constexpr explicit Init(const T & p_obj) noexcept:
       m_obj(p_obj)
     {
       if(0 == m_count++)
@@ -51,7 +51,7 @@ class Init final
       }
     }
 
-    constexpr Init(T && p_obj) noexcept:
+    constexpr explicit Init(T && p_obj) noexcept:
       m_obj(std::move(p_obj))
     {
       if(0 == m_count++)

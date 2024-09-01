@@ -48,6 +48,7 @@ struct equal_val final
     constexpr equal_val() noexcept = default;
     constexpr equal_val(const equal_val &) noexcept = default;
     constexpr equal_val(equal_val &&) noexcept = default;
+    constexpr ~equal_val() noexcept = default;
 
     constexpr equal_val & operator=(const equal_val &) noexcept = default;
     constexpr equal_val & operator=(equal_val &&) noexcept = default;

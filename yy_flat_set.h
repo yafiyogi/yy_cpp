@@ -96,6 +96,7 @@ class flat_set final
     constexpr flat_set() noexcept = default;
     constexpr flat_set(const flat_set &) noexcept = default;
     constexpr flat_set(flat_set &&) noexcept = default;
+    constexpr ~flat_set() noexcept = default;
 
     constexpr flat_set & operator=(const flat_set &) noexcept = default;
     constexpr flat_set & operator=(flat_set &&) noexcept = default;

@@ -62,6 +62,7 @@ class Range final
     Range() = delete;
     constexpr Range(const Range &) noexcept = default;
     constexpr Range(Range &&) noexcept = default;
+    constexpr ~Range() noexcept = default;
 
     constexpr Range & operator=(const Range &) noexcept = default;
     constexpr Range & operator=(Range &&) noexcept = default;
@@ -91,8 +92,8 @@ class Range final
     }
 
   private:
-    iterator m_begin;
-    iterator m_end;
+    iterator m_begin{};
+    iterator m_end{};
 };
 
 template<typename Iterator>

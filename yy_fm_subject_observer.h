@@ -86,6 +86,7 @@ class observer_class_method final:
     observer_class_method() = delete;
     observer_class_method(const observer_class_method &) = delete;
     observer_class_method(observer_class_method &&) = delete;
+    constexpr ~observer_class_method() noexcept override = default;
 
     observer_class_method & operator=(const observer_class_method &) = delete;
     observer_class_method & operator=(observer_class_method &&) = delete;
@@ -124,6 +125,7 @@ class observer_functor final:
     observer_functor() = delete;
     observer_functor(const observer_functor &) = delete;
     observer_functor(observer_functor &&) = delete;
+    constexpr ~observer_functor() noexcept override = default;
 
     observer_functor & operator=(const observer_functor &) = delete;
     observer_functor & operator=(observer_functor &&) = delete;
@@ -158,6 +160,7 @@ class observer_fn final:
     observer_fn() = delete;
     observer_fn(const observer_fn &) = delete;
     observer_fn(observer_fn &&) = delete;
+    constexpr ~observer_fn() noexcept override = default;
 
     observer_fn & operator=(const observer_fn &) = delete;
     observer_fn & operator=(observer_fn &&) = delete;
@@ -174,7 +177,7 @@ class observer_fn final:
 };
 
 template<typename ReturnType>
-struct value_valid_type
+struct value_valid_type final
 {
     using return_type = yy_traits::remove_cvr_t<ReturnType>;
 
@@ -201,6 +204,7 @@ class fm_subject final
     constexpr fm_subject() noexcept = default;
     fm_subject(const fm_subject &) = delete;
     constexpr fm_subject(fm_subject &&) noexcept = default;
+    constexpr ~fm_subject() noexcept = default;
 
     fm_subject & operator=(const fm_subject &) = delete;
     fm_subject & operator=(fm_subject &&) noexcept = default;
@@ -289,6 +293,7 @@ class fm_subject<KeyType,
     constexpr fm_subject() noexcept = default;
     fm_subject(const fm_subject &) = delete;
     constexpr fm_subject(fm_subject &&) noexcept = default;
+    constexpr ~fm_subject() noexcept = default;
 
     fm_subject & operator=(const fm_subject &) = delete;
     fm_subject & operator=(fm_subject &&) noexcept = default;

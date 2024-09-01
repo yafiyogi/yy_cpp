@@ -41,6 +41,7 @@ struct lockable_value_visitor_traits final
     constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
     constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
     constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
@@ -68,6 +69,7 @@ struct lockable_value_visitor_traits<Value,
     constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
     constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
     constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
@@ -100,6 +102,7 @@ struct lockable_value_visitor_traits<Value,
     constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
     constexpr lockable_value_visitor_traits(lockable_value_visitor_traits &&) noexcept = default;
+    constexpr ~lockable_value_visitor_traits() noexcept = default;
 
     lockable_value_visitor_traits & operator=(const lockable_value_visitor_traits&) = delete;
     constexpr lockable_value_visitor_traits & operator=(lockable_value_visitor_traits &&) noexcept = default;
@@ -144,6 +147,7 @@ class lockable_value final
     constexpr lockable_value() noexcept = default;
     lockable_value(const lockable_value &) = delete;
     constexpr lockable_value(lockable_value &&) noexcept = default;
+    constexpr ~lockable_value() noexcept = default;
 
     lockable_value & operator=(const lockable_value &) = delete;
     constexpr lockable_value & operator=(lockable_value && rhs) noexcept = default;
@@ -232,6 +236,7 @@ class lock_type final
     constexpr lock_type() noexcept = default;
     lock_type(const lock_type &) = delete;
     constexpr lock_type(lock_type &&) noexcept = default;
+    constexpr ~lock_type() noexcept = default;
 
     lock_type & operator=(const lock_type &) = delete;
     constexpr lock_type & operator=(lock_type && rhs) noexcept = default;

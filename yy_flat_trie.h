@@ -170,6 +170,7 @@ class trie_node final
     constexpr trie_node() noexcept = default;
     constexpr trie_node(const trie_node & node) noexcept = default;
     constexpr trie_node(trie_node && node) noexcept = default;
+    constexpr ~trie_node() noexcept = default;
 
     constexpr trie_node & operator=(const trie_node & node) noexcept = default;
     constexpr trie_node & operator=(trie_node && node) noexcept = default;
@@ -249,6 +250,7 @@ class Automaton final
     constexpr Automaton() noexcept = default;
     Automaton(const Automaton &) = delete;
     constexpr Automaton(Automaton &&) noexcept = default;
+    constexpr ~Automaton() noexcept = default;
 
     Automaton & operator=(const Automaton & other) = delete;
     constexpr Automaton & operator=(Automaton && other) noexcept = default;
@@ -379,7 +381,7 @@ class Automaton final
 template<typename LabelType,
          typename ValueType,
          typename Automaton = flat_trie_detail::Automaton<LabelType, ValueType>>
-class flat_trie
+class flat_trie final
 {
   public:
     using traits = typename flat_trie_detail::trie_traits<LabelType, ValueType>;
@@ -406,6 +408,7 @@ class flat_trie
 
     flat_trie(const flat_trie &) = delete;
     constexpr flat_trie(flat_trie &&) noexcept = default;
+    constexpr ~flat_trie() noexcept = default;
 
     flat_trie & operator=(const flat_trie &) = delete;
     constexpr flat_trie & operator=(flat_trie &&) noexcept = default;

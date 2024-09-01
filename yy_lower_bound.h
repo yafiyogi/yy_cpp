@@ -47,6 +47,7 @@ struct less_val final
     constexpr less_val() noexcept = default;
     constexpr less_val(const less_val &) noexcept = default;
     constexpr less_val(less_val &&) noexcept = default;
+    constexpr ~less_val() noexcept = default;
 
     constexpr less_val & operator=(const less_val &) noexcept = default;
     constexpr less_val & operator=(less_val &&) noexcept = default;
