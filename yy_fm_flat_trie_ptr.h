@@ -512,8 +512,8 @@ class fm_flat_trie_ptr final
         ptr_node.reserve(idx_node.edges());
 
         idx_node.visit([ptr_nodes_begin, &ptr_node](label_type & label, node_idx_type node_idx) {
-          ptr_node.add_edge(label, ptr_nodes_begin + node_idx);
-          // ptr_node.add_edge(std::move(label), ptr_nodes_begin + node_idx);
+          // BUG! leave 'std::move(label)' as it causes performance reduction.
+          ptr_node.add_edge(std::move(label), ptr_nodes_begin + node_idx);
         });
 
         // Transform data.
