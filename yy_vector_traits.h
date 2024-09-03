@@ -29,22 +29,66 @@
 #include <type_traits>
 #include <vector>
 
+#include "yy_clear_action.h"
 #include "yy_type_traits.h"
+
+namespace yafiyogi::yy_quad {
+
+template<typename T,
+         yy_data::ClearAction ct>
+class vector;
+
+template<typename T,
+         yy_data::ClearAction ct>
+class simple_vector;
+
+} // namespace yafiyogi::yy_quad
 
 namespace yafiyogi::yy_traits {
 namespace traits_detail {
+
+template<typename T>
+struct vector_traits:
+      std::false_type
+{
+};
+
+template<typename T,
+         yy_data::ClearAction ct>
+struct vector_traits<yy_quad::vector<T, ct>>:
+      std::true_type
+{
+};
+
+template<typename T,
+         yy_data::ClearAction ct>
+struct container_traits<yy_quad::vector<T, ct>>:
+      std::true_type
+{
+    using value_type = typename yy_quad::vector<T, ct>::value_type;
+};
+
+template<typename T,
+         yy_data::ClearAction ct>
+struct vector_traits<yy_quad::simple_vector<T, ct>>:
+      std::true_type
+{
+    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
+};
+
+template<typename T,
+         yy_data::ClearAction ct>
+struct container_traits<yy_quad::simple_vector<T, ct>>:
+      std::true_type
+{
+    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
+};
 
 template<typename T>
 struct container_traits<std::vector<T>>:
       std::true_type
 {
     using value_type = typename std::vector<T>::value_type;
-};
-
-template<typename T>
-struct vector_traits:
-      std::false_type
-{
 };
 
 template<typename T>
