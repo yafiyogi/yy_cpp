@@ -36,57 +36,15 @@
 
 #include "yy_array_traits.h"
 #include "yy_ref_traits.h"
+#include "yy_span_traits.h"
 #include "yy_string_traits.h"
-#include "yy_type_traits.h"
 #include "yy_vector_traits.h"
 
-namespace yafiyogi {
-namespace yy_quad {
-
-template<typename ValueType>
-class span;
-
-template<typename ValueType>
-class const_span;
-
-} //namespace yy_quad
-
-namespace yy_traits {
-
-template<typename T>
-struct SpanTraits:
-      std::false_type
-{
-};
-
-template<typename T>
-struct SpanTraits<yy_quad::span<T>>:
-      std::true_type
-{
-};
-
-template<typename T>
-struct SpanTraits<yy_quad::const_span<T>>:
-      std::true_type
-{
-};
-
-template<typename T>
-using is_span = SpanTraits<T>;
-
-template<typename T>
-using is_span_t = typename is_span<T>::type;
-
-template<typename T>
-inline constexpr bool is_span_v = is_span<T>::value;
-
-} // namespace yy_traits
-
-namespace yy_quad {
+namespace yafiyogi::yy_quad {
 namespace span_detail {
 
 template<typename ValueType>
-struct span_traits
+struct span_traits final
 {
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
@@ -146,6 +104,7 @@ class span final
     constexpr span() noexcept = default;
     constexpr span(const span &) noexcept = default;
     constexpr span(span &&) noexcept = default;
+    constexpr ~span() noexcept = default;
 
     constexpr span & operator=(const span &) noexcept = default;
     constexpr span & operator=(span &&) noexcept = default;
@@ -223,7 +182,7 @@ class span final
     }
 
     [[nodiscard]]
-    constexpr const_ptr data() noexcept
+    constexpr ptr data() noexcept
     {
       return m_begin;
     }
@@ -287,7 +246,7 @@ class span final
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {
-      return static_cast<size_type>(std::distance(m_begin, m_end));
+      return static_cast<size_type>(m_end - m_begin);
     }
 
     [[nodiscard]]
@@ -413,6 +372,7 @@ class const_span final
     constexpr const_span() noexcept = default;
     constexpr const_span(const const_span &) noexcept = default;
     constexpr const_span(const_span &&) noexcept = default;
+    constexpr ~const_span() noexcept = default;
 
     constexpr const_span & operator=(const const_span &) noexcept = default;
     constexpr const_span & operator=(const_span &&) noexcept = default;
@@ -508,7 +468,7 @@ class const_span final
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {
-      return static_cast<size_type>(std::distance(m_begin, m_end));
+      return static_cast<size_type>(m_end - m_begin);
     }
 
     [[nodiscard]]
@@ -631,8 +591,7 @@ template<typename T>
 struct span_traits_helper<T,
                           std::enable_if_t<yy_traits::is_vector_v<T>
                                            || yy_traits::is_std_string_v<T>
-                                           || yy_traits::is_array_v<T>>> final:
-  span_detail::span_traits<typename T::value_type>
+                                           || yy_traits::is_array_v<T>>> final
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
     using value_type = typename traits::value_type;
@@ -642,8 +601,7 @@ struct span_traits_helper<T,
 
 template<typename T>
 struct span_traits_helper<T,
-                          std::enable_if_t<yy_traits::is_std_string_view_v<T>>> final:
-  span_detail::span_traits<typename T::value_type>
+                          std::enable_if_t<yy_traits::is_std_string_view_v<T>>> final
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
     using value_type = typename traits::value_type;
@@ -653,8 +611,7 @@ struct span_traits_helper<T,
 
 template<typename T>
 struct span_traits_helper<T,
-                          std::enable_if_t<yy_traits::is_c_string_v<T>>> final:
-  span_detail::span_traits<std::remove_pointer_t<std::decay_t<T>>>
+                          std::enable_if_t<yy_traits::is_c_string_v<T>>> final
 {
     using traits = typename span_detail::span_traits<std::remove_pointer_t<std::decay_t<T>>>;
     using value_type = typename traits::value_type;
@@ -733,5 +690,4 @@ constexpr auto make_const_span(T p_span)
   return T{p_span};
 }
 
-} // namespace yy_quad
-} // namespace yafiyog
+} // namespace yafiyogi::yy_quad
