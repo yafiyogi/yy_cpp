@@ -103,6 +103,25 @@ class static_vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
+    constexpr static_vector(std::initializer_list<value_type> p_il) noexcept
+    {
+      auto l_size = std::min(static_cast<size_type>(std::distance(p_il.begin(), p_il.end())), m_capacity);
+
+      std::move(p_il.begin(), p_il.begin() + l_size, data());
+
+      m_size = p_il.size();
+    }
+
+    template<typename InputIterator>
+    constexpr static_vector(InputIterator p_begin, InputIterator p_end) noexcept
+    {
+      auto l_size = std::min(static_cast<size_type>(std::distance(p_begin, p_end)), m_capacity);
+
+      std::copy(p_begin, p_begin + l_size, data());
+
+      m_size = l_size;
+    }
+
     constexpr static_vector() noexcept = default;
 
     constexpr static_vector(const static_vector & other)
@@ -116,20 +135,6 @@ class static_vector
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
 
       move(std::move(other));
-    }
-
-    constexpr static_vector(std::initializer_list<value_type> p_il) noexcept
-    {
-      value_ptr item = data();
-      auto p_il_item = p_il.data();
-
-      m_size = std::min(p_il.size(), Capacity);
-      for(size_type idx = 0; idx < m_size; ++idx)
-      {
-        *item = std::move(*p_il_item);
-        ++item;
-        ++p_il_item;
-      }
     }
 
     constexpr ~static_vector() noexcept
@@ -689,6 +694,25 @@ class static_simple_vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
+    constexpr static_simple_vector(std::initializer_list<value_type> p_il) noexcept
+    {
+      auto l_size = std::min(static_cast<size_type>(std::distance(p_il.begin(), p_il.end())), m_capacity);
+
+      std::move(p_il.begin(), p_il.begin() + l_size, data());
+
+      m_size = p_il.size();
+    }
+
+    template<typename InputIterator>
+    constexpr static_simple_vector(InputIterator p_begin, InputIterator p_end) noexcept
+    {
+      auto l_size = std::min(static_cast<size_type>(std::distance(p_begin, p_end)), m_capacity);
+
+      std::copy(p_begin, p_begin + l_size, data());
+
+      m_size = l_size;
+    }
+
     constexpr static_simple_vector() noexcept = default;
 
     constexpr static_simple_vector(const static_simple_vector & other)
@@ -702,20 +726,6 @@ class static_simple_vector
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
 
       move(std::move(other));
-    }
-
-    constexpr static_simple_vector(std::initializer_list<value_type> p_il) noexcept
-    {
-      value_ptr item = data();
-      auto p_il_item = p_il.data();
-
-      m_size = std::min(p_il.size(), Capacity);
-      for(size_type idx = 0; idx < m_size; ++idx)
-      {
-        *item = std::move(*p_il_item);
-        ++item;
-        ++p_il_item;
-      }
     }
 
     constexpr ~static_simple_vector() noexcept

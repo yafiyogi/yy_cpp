@@ -61,7 +61,7 @@ struct vector_traits final
     using const_iterator = const_value_ptr;
     using size_type = std::size_t;
     using distance_type = std::ptrdiff_t;
-    struct return_value
+    struct return_value final
     {
         iterator iter{};
         bool inserted{};
@@ -100,6 +100,27 @@ class vector
       reserve(m_size);
     }
 
+    constexpr vector(std::initializer_list<value_type> p_il) noexcept
+    {
+      reserve(p_il.size());
+
+      std::move(p_il.begin(), p_il.end(), data());
+
+      m_size = p_il.size();
+    }
+
+    template<typename InputIterator>
+    constexpr vector(InputIterator p_begin, InputIterator p_end) noexcept
+    {
+      auto l_size = static_cast<size_type>(std::distance(p_begin, p_end));
+
+      reserve(l_size);
+
+      std::copy(p_begin, p_end, data());
+
+      m_size = l_size;
+    }
+
     constexpr vector() noexcept = default;
 
     constexpr vector(const vector & other)
@@ -113,19 +134,6 @@ class vector
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
 
       move(std::move(other));
-    }
-
-    constexpr vector(std::initializer_list<value_type> p_il) noexcept
-    {
-      reserve(p_il.size());
-      value_ptr item = data();
-
-      for(auto & il_item : p_il)
-      {
-        *item = std::move(il_item);
-        ++item;
-      }
-      m_size = p_il.size();
     }
 
     constexpr ~vector() noexcept
@@ -157,7 +165,9 @@ class vector
 
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -168,7 +178,9 @@ class vector
 
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const vector & b) noexcept
@@ -186,7 +198,9 @@ class vector
         && std::equal(begin(), end(), other.data());
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
@@ -196,7 +210,9 @@ class vector
         && std::equal(begin(), end(), other.data());
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const vector & b) noexcept
@@ -758,6 +774,27 @@ class simple_vector
       reserve(m_size);
     }
 
+    constexpr simple_vector(std::initializer_list<value_type> p_il) noexcept
+    {
+      reserve(p_il.size());
+
+      std::move(p_il.begin(), p_il.end(), data());
+
+      m_size = p_il.size();
+    }
+
+    template<typename InputIterator>
+    constexpr simple_vector(InputIterator p_begin, InputIterator p_end) noexcept
+    {
+      auto l_size = static_cast<size_type>(std::distance(p_begin, p_end));
+
+      reserve(l_size);
+
+      std::copy(p_begin, p_end, data());
+
+      m_size = l_size;
+    }
+
     constexpr simple_vector() noexcept = default;
 
     constexpr simple_vector(const simple_vector & other)
@@ -771,19 +808,6 @@ class simple_vector
       static_assert(std::is_move_constructible_v<value_type>, "T must be move constructable.");
 
       move(std::move(other));
-    }
-
-    constexpr simple_vector(std::initializer_list<value_type> p_il) noexcept
-    {
-      reserve(p_il.size());
-      value_ptr item = data();
-
-      for(auto & il_item : p_il)
-      {
-        *item = std::move(il_item);
-        ++item;
-      }
-      m_size = p_il.size();
     }
 
     constexpr ~simple_vector() noexcept
@@ -815,24 +839,24 @@ class simple_vector
 
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
-      static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
-
       return std::lexicographical_compare(begin(), end(),
                                           other.data(), other.data() + other.size());
 
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const simple_vector & b) noexcept
     {
-      static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
-
       return std::lexicographical_compare(a.data(), a.data() + a.size(),
                                           b.begin(), b.end());
     }
@@ -844,23 +868,23 @@ class simple_vector
         && std::equal(begin(), end(), other.data());
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
-      static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
-
       return (size() == other.size())
         && std::equal(begin(), end(), other.data());
     }
 
-    template<typename type>
+    template<typename type,
+             std::enable_if_t<yy_traits::is_container_v<type>
+                              && !yy_traits::is_span_v<type>>>
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const simple_vector & b) noexcept
     {
-      static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
-
       return (a.size() == b.size())
         && std::equal(a.data(), a.data() + a.size(), b.begin());
     }
@@ -1321,37 +1345,6 @@ class simple_vector
 } // namespace yy_quad
 
 namespace yy_traits::traits_detail {
-
-template<typename T,
-         yy_quad::ClearAction ct>
-struct vector_traits<yy_quad::vector<T, ct>>:
-      std::true_type
-{
-};
-
-template<typename T,
-         yy_quad::ClearAction ct>
-struct container_traits<yy_quad::vector<T, ct>>:
-      std::true_type
-{
-    using value_type = typename yy_quad::vector<T, ct>::value_type;
-};
-
-template<typename T,
-         yy_quad::ClearAction ct>
-struct vector_traits<yy_quad::simple_vector<T, ct>>:
-      std::true_type
-{
-    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
-};
-
-template<typename T,
-         yy_quad::ClearAction ct>
-struct container_traits<yy_quad::simple_vector<T, ct>>:
-      std::true_type
-{
-    using value_type = typename yy_quad::simple_vector<T, ct>::value_type;
-};
 
 } // namespace yy_traits::traits_detail
 } // namespace yafiyogi
