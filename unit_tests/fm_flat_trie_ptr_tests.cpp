@@ -38,10 +38,10 @@ class TestFMFlatTriePtr:
       public testing::Test
 {
   public:
-    using traits = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>::traits;
+    using traits = typename yafiyogi::yy_data::fm_flat_trie_ptr<char, int>::trie_traits;
     using flat_trie_type = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
-    using trie_node = flat_trie_type::node_type;
+    using idx_trie_node = traits::idx_node_type;
 
     void SetUp() override
     {
@@ -57,7 +57,7 @@ TEST_F(TestFMFlatTriePtr, TrieNodeGetBeforeAdd)
   //auto edge_getter = [](auto &){};
 
   // No child nodes added.
-  trie_node node{trie_node::no_data};
+  idx_trie_node node{idx_trie_node::no_data};
 
   EXPECT_FALSE(node.find_edge([](auto, auto){}, 'a').found);
   EXPECT_FALSE(node.find_edge([](auto, auto){}, 'b').found);
@@ -68,7 +68,7 @@ TEST_F(TestFMFlatTriePtr, TrieNodeGetAfterAdd)
   //auto edge_getter = [](auto &){};
 
   // Add 'a' node, but not 'b' node.
-  trie_node node{trie_node::no_data};
+  idx_trie_node node{idx_trie_node::no_data};
   node.add_edge(node.find_edge_pos('a').pos, 'a', 1);
 
   EXPECT_TRUE(node.find_edge([](auto, auto){}, 'a').found);
@@ -78,7 +78,7 @@ TEST_F(TestFMFlatTriePtr, TrieNodeGetAfterAdd)
 TEST_F(TestFMFlatTriePtr, TrieNodeAddDuplicate)
 {
   // Add 2 'b' nodes.
-  trie_node node{trie_node::no_data};
+  idx_trie_node node{idx_trie_node::no_data};
   node.add_edge(node.find_edge_pos('b').pos, 'b', 668);
   node.add_edge(node.find_edge_pos('b').pos, 'b', 777);
 
@@ -90,7 +90,7 @@ TEST_F(TestFMFlatTriePtr, TestNodeChildOrder)
 {
   // Add 'a', 'b', 'c', & 'd' nodes out of order.
   // Check node has children in order.
-  trie_node node{trie_node::no_data};
+  idx_trie_node node{idx_trie_node::no_data};
   const char * result = "abcd";
   const size_t idxs[] = {2, 1, 4, 3};
   const size_t * idx = idxs;

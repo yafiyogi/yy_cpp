@@ -91,6 +91,7 @@ target_sources(yy_cpp
       yy_ref_traits.h
       yy_ring_buffer.h
       yy_span.h
+      yy_span_traits.h
       yy_static_flat_map.h
       yy_static_vector.h
       yy_string_case.h
@@ -99,6 +100,7 @@ target_sources(yy_cpp
       yy_subject_observer.h
       yy_tokenizer.h
       yy_trie.h
+      yy_trie_common.h
       yy_type_traits.h
       yy_utility.h
       yy_variant_util.h
@@ -122,9 +124,6 @@ write_basic_package_version_file("yy_cppConfigVersion.cmake"
 
 install(FILES "yy_cppConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/yy_cppConfigVersion.cmake"
     DESTINATION lib/cmake/yy_cpp)
-
-get_target_property(YY_CPP_HEADERS yy_cpp HEADER_SET)
-get_target_property(YY_CPP_SOURCES yy_cpp SOURCES)
 
 add_subdirectory(unit_tests)
 add_subdirectory(examples)

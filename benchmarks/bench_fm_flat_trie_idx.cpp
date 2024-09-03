@@ -32,18 +32,16 @@ namespace yafiyogi::benchmark {
 
 BENCHMARK_F(TrieLookup, fm_flat_idx_lookup)(::benchmark::State & state)
 {
-  auto automaton = fm_flat_trie_idx.create_automaton();
-
   size_t idx = 0;
   std::size_t count = 0;
 
   while(state.KeepRunning())
   {
-    bool found = automaton.find(TrieLookup::query(idx));
+    bool found = fm_flat_trie_idx.find(TrieLookup::query(idx));
     ::benchmark::DoNotOptimize(found);
     if(found)
     {
-      automaton.visit([&count](auto &) {
+      fm_flat_trie_idx.visit([&count](auto &) {
         ::benchmark::DoNotOptimize(++count);
       });
     }

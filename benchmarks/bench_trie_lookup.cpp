@@ -487,8 +487,11 @@ FlatRadixTrie TrieLookup::flat_radix_trie;
 FMTrie TrieLookup::fm_trie;
 FMRadixTrie TrieLookup::fm_radix_trie;
 
-FMFlatTrieIdx TrieLookup::fm_flat_trie_idx;
-FMFlatTriePtr TrieLookup::fm_flat_trie_ptr;
+FMFlatTrieIdx::automaton_type TrieLookup::fm_flat_trie_idx;
+FMFlatTrieIdxWord::automaton_type TrieLookup::fm_flat_trie_idx_word;
+FMFlatTriePtr::automaton_type TrieLookup::fm_flat_trie_ptr;
+FMFlatTriePtrWord::automaton_type TrieLookup::fm_flat_trie_ptr_word;
+
 
 Map TrieLookup::map;
 UOMap TrieLookup::uo_map;
@@ -503,6 +506,11 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
 
   if(!done)
   {
+    FMFlatTrieIdx fm_flat_trie_idx_builder;
+    FMFlatTrieIdxWord fm_flat_trie_idx_word_builder;
+    FMFlatTriePtr fm_flat_trie_ptr_builder;
+    FMFlatTriePtrWord fm_flat_trie_ptr_word_builder;
+
     done = true;
     int count = 0;
     for(auto topic: topics)
@@ -518,12 +526,21 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
       fm_trie.add(topic, count);
       fm_radix_trie.add(topic, count);
 
-      fm_flat_trie_idx.add(topic, count);
-      fm_flat_trie_ptr.add(topic, count);
+      fm_flat_trie_idx_builder.add(topic, count);
+      fm_flat_trie_ptr_builder.add(topic, count);
+
+      fm_flat_trie_idx_word_builder.add(topic, count);
+      fm_flat_trie_ptr_word_builder.add(topic, count);
 
       map.emplace(topic, count);
       uo_map.emplace(topic, count);
     }
+
+    fm_flat_trie_idx = fm_flat_trie_idx_builder.create_automaton();
+    fm_flat_trie_ptr = fm_flat_trie_ptr_builder.create_automaton();
+
+    fm_flat_trie_idx_word = fm_flat_trie_idx_word_builder.create_automaton();
+    fm_flat_trie_ptr_word = fm_flat_trie_ptr_word_builder.create_automaton();
   }
 }
 

@@ -32,19 +32,16 @@ namespace yafiyogi::benchmark {
 
 BENCHMARK_F(TrieLookup, fm_flat_ptr_lookup_word)(::benchmark::State & state)
 {
-  auto automaton = fm_flat_trie_ptr_word.create_automaton();
-  assert(!automaton.empty());
-
   size_t idx = 0;
   std::size_t count = 0;
 
   while(state.KeepRunning())
   {
-    bool found = automaton.find(TrieLookup::query(idx));
+    bool found = fm_flat_trie_ptr_word.find(TrieLookup::query(idx));
     ::benchmark::DoNotOptimize(found);
     if(found)
     {
-      automaton.visit([&count](auto &) {
+      fm_flat_trie_ptr_word.visit([&count](auto &) {
         ::benchmark::DoNotOptimize(++count);
       });
     }
@@ -55,7 +52,7 @@ BENCHMARK_F(TrieLookup, fm_flat_ptr_lookup_word)(::benchmark::State & state)
       idx = 0;
     }
   }
-  //  fmt::print("count={}\n", count);
+  //fmt::print("count={}\n", count);
 }
 
 } // namespace yafiyogi::benchmark

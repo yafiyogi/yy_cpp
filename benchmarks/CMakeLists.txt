@@ -39,8 +39,9 @@ add_executable(benchmark_yy_cpp
   bench_fm_radix_trie.cpp
 
   bench_fm_flat_trie_idx.cpp
+  bench_fm_flat_trie_idx_word.cpp
   bench_fm_flat_trie_ptr.cpp
-
+  bench_fm_flat_trie_ptr_word.cpp
   bench_map.cpp
   bench_uo_map.cpp
 

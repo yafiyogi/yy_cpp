@@ -58,6 +58,17 @@ using FMRadixTrie = yafiyogi::yy_data::fm_radix_trie<char, int>;
 using FMFlatTrieIdx = yafiyogi::yy_data::fm_flat_trie_idx<char, int>;
 using FMFlatTriePtr = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
+template<typename LabelType>
+using tokenizer_type_word = yafiyogi::yy_trie::label_word_tokenizer<LabelType, '/'>;
+
+using FMFlatTrieIdxWord = yafiyogi::yy_data::fm_flat_trie_idx<yafiyogi::yy_quad::simple_vector<char>, int,
+                                                              yafiyogi::yy_data::fm_flat_trie_idx_detail::Automaton,
+                                                              tokenizer_type_word>;
+
+using FMFlatTriePtrWord = yafiyogi::yy_data::fm_flat_trie_ptr<yafiyogi::yy_quad::simple_vector<char>, int,
+                                                              yafiyogi::yy_data::fm_flat_trie_ptr_detail::Automaton,
+                                                              tokenizer_type_word>;
+
 using Map = std::map<std::string, int>;
 using UOMap = std::unordered_map<std::string, int>;
 
@@ -83,12 +94,14 @@ struct TrieLookup:
     static FMTrie fm_trie;
     static FMRadixTrie fm_radix_trie;
 
-    static FMFlatTrieIdx fm_flat_trie_idx;
-    static FMFlatTriePtr fm_flat_trie_ptr;
+    static FMFlatTrieIdx::automaton_type fm_flat_trie_idx;
+    static FMFlatTrieIdxWord::automaton_type fm_flat_trie_idx_word;
+
+    static FMFlatTriePtr::automaton_type fm_flat_trie_ptr;
+    static FMFlatTriePtrWord::automaton_type fm_flat_trie_ptr_word;
 
     static Map map;
     static UOMap uo_map;
-
 };
 
 
