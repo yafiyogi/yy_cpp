@@ -37,6 +37,7 @@
 #include <utility>
 
 #include "yy_clear_action.h"
+#include "yy_compare_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -170,8 +171,7 @@ class static_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type>
@@ -181,8 +181,7 @@ class static_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     template<typename type>
@@ -191,8 +190,7 @@ class static_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
@@ -202,8 +200,7 @@ class static_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
     [[nodiscard]]
@@ -761,9 +758,7 @@ class static_simple_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
-
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type>
@@ -773,8 +768,7 @@ class static_simple_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     template<typename type>
@@ -783,8 +777,7 @@ class static_simple_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
@@ -794,8 +787,7 @@ class static_simple_vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
     [[nodiscard]]

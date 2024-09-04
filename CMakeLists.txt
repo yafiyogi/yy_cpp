@@ -68,6 +68,7 @@ target_sources(yy_cpp
       yy_binary_search.h
       yy_bit_twiddling.h
       yy_clear_action.h
+      yy_compare_util.h
       yy_fast_atoi.h
       yy_find_util.h
       yy_flat_map.h

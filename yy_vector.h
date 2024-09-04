@@ -35,6 +35,7 @@
 
 #include "yy_bit_twiddling.h"
 #include "yy_clear_action.h"
+#include "yy_compare_util.h"
 #include "yy_ref_traits.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
@@ -160,9 +161,7 @@ class vector
     [[nodiscard]]
     constexpr bool operator<(const vector & other) const noexcept
     {
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
-
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type,
@@ -173,9 +172,7 @@ class vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
-
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type,
@@ -187,15 +184,13 @@ class vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     [[nodiscard]]
     constexpr bool operator==(const vector & other) const noexcept
     {
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type,
@@ -206,8 +201,7 @@ class vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type,
@@ -219,8 +213,7 @@ class vector
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
     [[nodiscard]]
@@ -834,9 +827,7 @@ class simple_vector
     [[nodiscard]]
     constexpr bool operator<(const simple_vector & other) const noexcept
     {
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
-
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type,
@@ -845,9 +836,7 @@ class simple_vector
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
-
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type,
@@ -857,15 +846,13 @@ class simple_vector
     friend constexpr bool operator<(const type & a,
                                     const simple_vector & b) noexcept
     {
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     [[nodiscard]]
     constexpr bool operator==(const simple_vector & other) const noexcept
     {
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type,
@@ -874,8 +861,7 @@ class simple_vector
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type,
@@ -885,8 +871,7 @@ class simple_vector
     friend constexpr bool operator==(const type & a,
                                      const simple_vector & b) noexcept
     {
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
     [[nodiscard]]

@@ -35,6 +35,7 @@
 #include <type_traits>
 
 #include "yy_array_traits.h"
+#include "yy_compare_util.h"
 #include "yy_ref_traits.h"
 #include "yy_span_traits.h"
 #include "yy_string_traits.h"
@@ -156,10 +157,8 @@ class span final
 
     constexpr span & inc_begin(size_type step) noexcept
     {
-      if((m_begin != m_end) && (static_cast<size_type>((m_begin + step) - m_begin) <= size()))
-      {
-        m_begin += step;
-      }
+      m_begin += std::min(step, size());
+
       return *this;
     }
 
@@ -174,10 +173,8 @@ class span final
 
     constexpr span & dec_end(size_type step) noexcept
     {
-      if((m_begin != m_end) && ((m_end - step - m_begin) >= 0))
-      {
-        m_end -= step;
-      }
+      m_end -= std::min(step, size());
+
       return *this;
     }
 
@@ -283,8 +280,7 @@ class span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type>
@@ -294,8 +290,7 @@ class span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     template<typename type>
@@ -304,8 +299,7 @@ class span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
@@ -315,8 +309,7 @@ class span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
   private:
@@ -406,10 +399,8 @@ class const_span final
 
     constexpr const_span & inc_begin(size_type step) noexcept
     {
-      if((m_begin != m_end) && (static_cast<size_type>((m_begin + step) - m_begin) <= size()))
-      {
-        m_begin += step;
-      }
+      m_begin += std::min(step, size());
+
       return *this;
     }
 
@@ -424,10 +415,8 @@ class const_span final
 
     constexpr const_span & dec_end(size_type step) noexcept
     {
-      if((m_begin != m_end) && ((m_end - step - m_begin) >= 0))
-      {
-        m_end -= step;
-      }
+      m_end -= std::min(step, size());
+
       return *this;
     }
 
@@ -505,8 +494,7 @@ class const_span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(begin(), end(),
-                                          other.data(), other.data() + other.size());
+      return yy_util::less_than(*this, other);
     }
 
     template<typename type>
@@ -516,8 +504,7 @@ class const_span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return std::lexicographical_compare(a.data(), a.data() + a.size(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     template<typename type>
@@ -526,8 +513,7 @@ class const_span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.data());
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
@@ -537,38 +523,33 @@ class const_span final
     {
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
-      return (a.size() == b.size())
-        && std::equal(a.data(), a.data() + a.size(), b.begin());
+      return yy_util::equal(a, b);
     }
 
     [[nodiscard]]
     constexpr bool operator<(const span<value_type> other) const noexcept
     {
-      return std::lexicographical_compare(begin(), end(),
-                                          other.begin(), other.end());
+      return yy_util::less_than(*this, other);
     }
 
     [[nodiscard]]
     friend constexpr bool operator<(const span<value_type> a,
                                     const const_span b) noexcept
     {
-      return std::lexicographical_compare(a.begin(), a.end(),
-                                          b.begin(), b.end());
+      return yy_util::less_than(a, b);
     }
 
     [[nodiscard]]
     constexpr bool operator==(const span<value_type> other) const noexcept
     {
-      return (size() == other.size())
-        && std::equal(begin(), end(), other.begin());
+      return yy_util::equal(*this, other);
     }
 
     [[nodiscard]]
     friend constexpr bool operator==(const span<value_type> a,
                                      const const_span b) noexcept
     {
-      return (a.size() == b.size())
-        && std::equal(a.begin(), a.end(), b.begin());
+      return yy_util::equal(a, b);
     }
 
   private:
