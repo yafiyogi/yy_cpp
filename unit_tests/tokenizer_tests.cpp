@@ -56,7 +56,6 @@ TEST_F(TestTokenizer, TokenizeEmpty)
   EXPECT_TRUE(span.empty());
   EXPECT_EQ(span.size(), 0);
   EXPECT_EQ(span, std::string_view{""});
-
 }
 
 TEST_F(TestTokenizer, TokenizeSimple)
@@ -64,7 +63,7 @@ TEST_F(TestTokenizer, TokenizeSimple)
   std::string_view str{"/abc"};
   yy_util::tokenizer<std::string_view::value_type> tokenizer{yy_quad::make_const_span(str),
                                                              delim};
-  auto span = tokenizer.scan();
+  yy_quad::const_span<char> span{tokenizer.scan()};
   EXPECT_FALSE(tokenizer.empty());
   EXPECT_TRUE(span.empty());
   EXPECT_EQ(span.size(), 0);
