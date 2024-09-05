@@ -45,6 +45,7 @@ template<typename I>
 struct val_valid_type final
 {
     using value_type = yy_traits::remove_cvr_t<I>;
+
     value_type value{};
     FastFloatRV state = FastFloatRV::NoValue;
 };
@@ -52,103 +53,106 @@ struct val_valid_type final
 } // namespace fast_atoi_detail
 
 template<typename I>
-constexpr fast_atoi_detail::val_valid_type<I> fast_atoi(yy_quad::const_span<char> p_str)
+struct fast_atoi
 {
-  using val_valid_type = fast_atoi_detail::val_valid_type<I>;
-  using value_type = val_valid_type::value_type;
-  using digits_type = Digits<value_type>;
+    using val_valid_type = fast_atoi_detail::val_valid_type<I>;
 
-  static_assert(std::is_integral_v<value_type>, "fast_atoi() only works with integer types!");
-  static_assert(digits_type::digits <= 20, "fast_atoi(): type contains too many digits!");
+    static constexpr val_valid_type convert(yy_quad::const_span<char> p_str)
+    {
+      using value_type = val_valid_type::value_type;
+      using digits_type = Digits<value_type>;
 
-  if(p_str.size() > digits_type::digits)
-  {
-    return val_valid_type{};
-  }
+      static_assert(std::is_integral_v<value_type>, "fast_atoi() only works with integer types!");
+      static_assert(digits_type::digits <= 20, "fast_atoi(): type contains too many digits!");
 
-  value_type val = value_type{0};
-  FastFloatRV state = FastFloatRV::NoValue;
+      if(p_str.size() > digits_type::digits)
+      {
+        return val_valid_type{};
+      }
 
-  auto add = [&val, p_str]() mutable {
-    // Multiply current value by 10.
-    val = (val << value_type{1}) + (val << value_type{3});
+      value_type val = value_type{0};
+      FastFloatRV state = FastFloatRV::NoValue;
 
-    // Add next digit.
-    val += static_cast<value_type>(*p_str.begin() - '0');
-    p_str.inc_begin();
-  };
+      auto add = [&val, p_str]() mutable {
+        // Multiply current value by 10.
+        val = (val << value_type{1}) + (val << value_type{3});
 
-  switch(p_str.size())
-  {
-    case 20:
-      add();
-      [[fallthrough]];
-    case 19:
-      add();
-      [[fallthrough]];
-    case 18:
-      add();
-      [[fallthrough]];
-    case 17:
-      add();
-      [[fallthrough]];
-    case 16:
-      add();
-      [[fallthrough]];
-    case 15:
-      add();
-      [[fallthrough]];
-    case 14:
-      add();
-      [[fallthrough]];
-    case 13:
-      add();
-      [[fallthrough]];
-    case 12:
-      add();
-      [[fallthrough]];
-    case 11:
-      add();
-      [[fallthrough]];
-    case 10:
-      add();
-      [[fallthrough]];
-    case 9:
-      add();
-      [[fallthrough]];
-    case 8:
-      add();
-      [[fallthrough]];
-    case 7:
-      add();
-      [[fallthrough]];
-    case 6:
-      add();
-      [[fallthrough]];
-    case 5:
-      add();
-      [[fallthrough]];
-    case 4:
-      add();
-      [[fallthrough]];;
-    case 3:
-      add();
-      [[fallthrough]];
-    case 2:
-      add();
-      [[fallthrough]];
-    case 1:
-      add();
-      state = FastFloatRV::Ok;
-  }
+        // Add next digit.
+        val += static_cast<value_type>(*p_str.begin() - '0');
+        p_str.inc_begin();
+      };
 
-  return val_valid_type{val, state};
-}
+      switch(p_str.size())
+      {
+        case 20:
+          add();
+          [[fallthrough]];
+        case 19:
+          add();
+          [[fallthrough]];
+        case 18:
+          add();
+          [[fallthrough]];
+        case 17:
+          add();
+          [[fallthrough]];
+        case 16:
+          add();
+          [[fallthrough]];
+        case 15:
+          add();
+          [[fallthrough]];
+        case 14:
+          add();
+          [[fallthrough]];
+        case 13:
+          add();
+          [[fallthrough]];
+        case 12:
+          add();
+          [[fallthrough]];
+        case 11:
+          add();
+          [[fallthrough]];
+        case 10:
+          add();
+          [[fallthrough]];
+        case 9:
+          add();
+          [[fallthrough]];
+        case 8:
+          add();
+          [[fallthrough]];
+        case 7:
+          add();
+          [[fallthrough]];
+        case 6:
+          add();
+          [[fallthrough]];
+        case 5:
+          add();
+          [[fallthrough]];
+        case 4:
+          add();
+          [[fallthrough]];;
+        case 3:
+          add();
+          [[fallthrough]];
+        case 2:
+          add();
+          [[fallthrough]];
+        case 1:
+          add();
+          state = FastFloatRV::Ok;
+      }
 
-template<typename I>
-constexpr fast_atoi_detail::val_valid_type<I> fast_atoi(std::string_view p_str)
-{
-  return fast_atoi<I>(yy_quad::make_const_span(p_str));
-}
+      return val_valid_type{val, state};
+    }
+
+    static constexpr val_valid_type convert(std::string_view p_str)
+    {
+      return convert(yy_quad::make_const_span(p_str));
+    }
+};
 
 } // namespace yafiyogi::yy_util
