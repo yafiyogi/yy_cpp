@@ -56,10 +56,9 @@ class tokenizer
     using token_type = typename traits::token_type;
     using size_type = typename token_type::size_type;
 
-    static constexpr size_type none{};
-
     constexpr explicit tokenizer(token_type p_source, const_l_value_ref p_delim) noexcept:
       m_source(p_source),
+      m_token(p_source.begin(), p_source.begin()),
       m_delim(p_delim)
     {
     }
@@ -74,19 +73,13 @@ class tokenizer
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      if(!empty())
-      {
-        ++m_token_idx;
-      }
-
-      const_value_ptr source_begin = m_source.begin();
-      const_value_ptr source_end = m_source.end();
-      const_value_ptr token_end = std::find(source_begin, source_end, m_delim);
-
-      m_has_more = source_end != token_end;
+      auto source_begin{m_source.begin()};
+      auto source_end{m_source.end()};
+      auto token_end{std::find(source_begin, source_end, m_delim)};
 
       m_token = token_type{source_begin, token_end};
-      m_source.inc_begin(static_cast<size_type>(token_end - source_begin) + 1);
+      m_source = token_type{token_end, source_end};
+      m_source.inc_begin();
 
       return token();
     }
@@ -97,32 +90,16 @@ class tokenizer
       return m_token;
     }
 
-    // 0 -> no tokens.
-    // 1 -> token 1 found.
-    // 2 -> token 2 found.
-    // ... etc
     [[nodiscard]]
-    constexpr size_type token_idx() const noexcept
+    constexpr bool has_more() const noexcept
     {
-      return m_token_idx;
+      return m_token.end() != m_source.end();
     }
 
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return !has_source() && !has_more();
-    }
-
-    [[nodiscard]]
-    constexpr bool has_more() const noexcept
-    {
-      return m_has_more;
-    }
-
-    [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return !m_source.empty();
+      return m_source.empty();
     }
 
     [[nodiscard]]
@@ -138,11 +115,9 @@ class tokenizer
     }
 
   private:
-    token_type m_token{};
-    size_type m_token_idx = none;
     token_type m_source{};
+    token_type m_token{};
     value_type m_delim{};
-    bool m_has_more = true;
 };
 
 template<>
@@ -157,10 +132,9 @@ class tokenizer<char>
     using token_type = typename traits::token_type;
     using size_type = typename token_type::size_type;
 
-    static constexpr size_type none{};
-
     constexpr explicit tokenizer(token_type p_source, const_l_value_ref p_delim) noexcept:
       m_source(p_source),
+      m_token(p_source.begin(), p_source.begin()),
       m_delim(p_delim)
     {
     }
@@ -175,24 +149,19 @@ class tokenizer<char>
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      if(!empty())
-      {
-        ++m_token_idx;
-      }
+      token_type::iterator source_begin{m_source.begin()};
+      token_type::iterator source_end{m_source.end()};
+      token_type::iterator token_end{source_end};
 
-      const_value_ptr source_begin = m_source.begin();
-      const_value_ptr pos = char_traits::find(source_begin, m_source.size(), m_delim);
-
-      m_has_more = nullptr != pos;
-
-      const_value_ptr token_end = m_source.end();
-      if(m_has_more)
+      if(token_type::iterator pos{char_traits::find(source_begin.ptr(), m_source.size(), m_delim)};
+         not_found != pos)
       {
         token_end = pos;
       }
 
       m_token = token_type{source_begin, token_end};
-      m_source.inc_begin(static_cast<size_type>(token_end - source_begin) + 1);
+      m_source = token_type{token_end, source_end};
+      m_source.inc_begin();
 
       return token();
     }
@@ -203,32 +172,16 @@ class tokenizer<char>
       return m_token;
     }
 
-    // 0 -> no tokens.
-    // 1 -> token 1 found.
-    // 2 -> token 2 found.
-    // ... etc
     [[nodiscard]]
-    constexpr size_type token_idx() const noexcept
+    constexpr bool has_more() const noexcept
     {
-      return m_token_idx;
+      return m_token.end() != m_source.end();
     }
 
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return !has_source() && !has_more();
-    }
-
-    [[nodiscard]]
-    constexpr bool has_more() const noexcept
-    {
-      return m_has_more;
-    }
-
-    [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return !m_source.empty();
+      return m_source.empty();
     }
 
     [[nodiscard]]
@@ -244,11 +197,10 @@ class tokenizer<char>
     }
 
   private:
-    token_type m_token{};
-    size_type m_token_idx = none;
     token_type m_source{};
+    token_type m_token{};
     value_type m_delim{};
-    bool m_has_more = true;
+    static constexpr const token_type::iterator not_found{};
 };
 
 template<typename T>

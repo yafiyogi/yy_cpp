@@ -97,15 +97,9 @@ class default_label_tokenizer final
     }
 
     [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return !m_source.empty();
-    }
-
-    [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return !has_source() && !has_more();
+      return m_source.empty();
     }
 
     static constexpr label_type create(token_type & token) noexcept
@@ -159,12 +153,6 @@ class label_word_tokenizer final
     constexpr source_type source() const noexcept
     {
       return m_tokenizer.source();
-    }
-
-    [[nodiscard]]
-    constexpr bool has_source() const noexcept
-    {
-      return m_tokenizer.has_source();
     }
 
     [[nodiscard]]

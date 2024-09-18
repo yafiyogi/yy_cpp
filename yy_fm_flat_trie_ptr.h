@@ -159,7 +159,7 @@ class trie_node_idx final
 
   private:
     value_idx_type m_data = no_data;
-    edges_type m_edges;
+    edges_type m_edges{};
 };
 
 template<typename LabelType,
@@ -280,8 +280,8 @@ class trie_node_ptr final
     }
 
   private:
-    value_ptr m_data;
-    edges_type m_edges;
+    value_ptr m_data{};
+    edges_type m_edges{};
 };
 
 template<typename LabelType,
@@ -367,7 +367,7 @@ class Automaton final
 
     constexpr void reset() noexcept
     {
-      m_state = m_nodes.begin();
+      m_state = m_nodes.data();
     }
 
     [[nodiscard]]
@@ -407,7 +407,7 @@ class Automaton final
 
       while(!tokenizer.empty())
       {
-        if(auto label_part = tokenizer.scan();
+        if(auto label_part{tokenizer.scan()};
            !node->find_edge(next_node_do, label_part))
         {
           m_state = nullptr;
@@ -420,8 +420,8 @@ class Automaton final
       return has_payload();
     }
 
-    trie_vector m_nodes;
-    data_vector m_data;
+    trie_vector m_nodes{};
+    data_vector m_data{};
     node_ptr m_state = nullptr;
 };
 
@@ -500,8 +500,8 @@ class fm_flat_trie_ptr final
 
       // Transform node_idx_type to node_type *,
       // and transform value_idx_type to value_type *.
-      ptr_node_ptr ptr_nodes_begin = ptr_nodes.begin();
-      value_ptr ptr_data_begin = ptr_data.begin();
+      auto ptr_nodes_begin{ptr_nodes.data()};
+      auto ptr_data_begin{ptr_data.data()};
 
       for(size_type idx = 0; idx < m_nodes.size(); ++idx)
       {
@@ -647,7 +647,7 @@ class fm_flat_trie_ptr final
 
       token_type token{p_tokenizer.scan()};
       // Skip exising nodes.
-      while(p_tokenizer.has_source() && p_tokenizer.has_more())
+      while(!p_tokenizer.empty())
       {
         if(!get_node(p_nodes.data(), node_idx)->find_edge(next_node_do, token).found)
         {
@@ -657,7 +657,7 @@ class fm_flat_trie_ptr final
       }
 
       // Add new nodes;
-      while(p_tokenizer.has_source() && p_tokenizer.has_more())
+      while(!p_tokenizer.empty())
       {
         auto node = get_node(p_nodes.data(), node_idx);
         auto [edge_pos, ignore] = node->find_edge_pos(token);
@@ -720,8 +720,8 @@ class fm_flat_trie_ptr final
       return data_added_type{};
     }
 
-    idx_trie_vector m_nodes;
-    data_vector m_data;
+    idx_trie_vector m_nodes{};
+    data_vector m_data{};
 };
 
 } // namespace yafiyogi::yy_data

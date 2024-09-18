@@ -153,7 +153,7 @@ class trie_node_idx final
 
   private:
     data_idx_type m_data = no_data;
-    edges_type m_edges;
+    edges_type m_edges{};
 };
 
 template<typename LabelType,
@@ -317,7 +317,7 @@ class Automaton final
       while(!tokenizer.empty())
       {
 
-        if(const auto label_part = tokenizer.scan();
+        if(const auto label_part{tokenizer.scan()};
            !get_node(node_idx)->find_edge(next_node_do, label_part).found)
         {
           m_state = node_type::root_idx;
@@ -330,8 +330,8 @@ class Automaton final
       return has_payload();
     }
 
-    trie_vector m_nodes;
-    data_vector m_data;
+    trie_vector m_nodes{};
+    data_vector m_data{};
     node_idx_type m_state = node_type::root_idx;
 };
 
@@ -516,7 +516,7 @@ class fm_flat_trie_idx final
 
       token_type token{p_tokenizer.scan()};
       // Skip exising nodes.
-      while(p_tokenizer.has_source() && p_tokenizer.has_more())
+      while(!p_tokenizer.empty())
       {
         if(!get_node(nodes.data(), node_idx)->find_edge(next_node_do, token).found)
         {
@@ -526,7 +526,7 @@ class fm_flat_trie_idx final
       }
 
       // Add new nodes;
-      while(p_tokenizer.has_source() && p_tokenizer.has_more())
+      while(!p_tokenizer.empty())
       {
         auto node = get_node(nodes.data(), node_idx);
         auto [edge_pos, ignore] = node->find_edge_pos(token);
