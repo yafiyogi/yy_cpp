@@ -64,6 +64,7 @@ struct trie_node_traits final
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
     using label_span_l_value_ref = typename yy_traits::ref_traits<label_span_type>::l_value_ref;
+    using label_span_const_l_value_ref = typename yy_traits::ref_traits<label_span_type>::const_l_value_ref;
     using label_span_r_value_ref = typename yy_traits::ref_traits<label_span_type>::r_value_ref;
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using node_type = trie_node<LabelElemType, value_type>;
@@ -117,6 +118,7 @@ class trie_node
     using label_r_value_ref = typename traits::label_r_value_ref;
     using label_span_type = typename traits::label_span_type;
     using label_span_l_value_ref = typename traits::label_span_l_value_ref;
+    using label_span_const_l_value_ref = typename traits::label_span_const_l_value_ref;
     using label_span_r_value_ref = typename traits::label_span_r_value_ref;
     using node_ptr = typename traits::node_ptr;
     using value_type = typename traits::value_type;
@@ -152,7 +154,7 @@ class trie_node
     }
 
     [[nodiscard]]
-    constexpr edge_found_type find_edge(const label_span_l_value_ref label) noexcept
+    constexpr edge_found_type find_edge(label_span_const_l_value_ref label) noexcept
     {
       edge_found_type edge{nullptr, nullptr, m_edges.size(), 0, label.size()};
 
@@ -176,7 +178,7 @@ class trie_node
     }
 
     [[nodiscard]]
-    constexpr edge_part_found_type find_edge_part(const label_span_l_value_ref label) noexcept
+    constexpr edge_part_found_type find_edge_part(label_span_const_l_value_ref label) noexcept
     {
       edge_part_found_type edge_part{nullptr, 0, label.size()};
 
