@@ -87,60 +87,79 @@ struct fast_atoi
         case 20:
           add();
           [[fallthrough]];
+
         case 19:
           add();
           [[fallthrough]];
+
         case 18:
           add();
           [[fallthrough]];
+
         case 17:
           add();
           [[fallthrough]];
+
         case 16:
           add();
           [[fallthrough]];
+
         case 15:
           add();
           [[fallthrough]];
+
         case 14:
           add();
           [[fallthrough]];
+
         case 13:
           add();
           [[fallthrough]];
+
         case 12:
           add();
           [[fallthrough]];
+
         case 11:
           add();
           [[fallthrough]];
+
         case 10:
           add();
           [[fallthrough]];
+
         case 9:
           add();
           [[fallthrough]];
+
         case 8:
           add();
           [[fallthrough]];
+
         case 7:
           add();
           [[fallthrough]];
+
         case 6:
           add();
           [[fallthrough]];
+
         case 5:
           add();
           [[fallthrough]];
+
         case 4:
           add();
           [[fallthrough]];;
+
         case 3:
           add();
           [[fallthrough]];
+
         case 2:
           add();
           [[fallthrough]];
+
         case 1:
           add();
           state = FastFloatRV::Ok;
