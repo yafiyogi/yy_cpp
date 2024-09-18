@@ -45,6 +45,12 @@ namespace yafiyogi::yy_quad {
 namespace span_detail {
 
 template<typename ValueType>
+class iterator;
+
+template<typename ValueType>
+class const_iterator;
+
+template<typename ValueType>
 struct span_traits final
 {
     using value_type = yy_traits::remove_cvr_t<ValueType>;
@@ -53,10 +59,411 @@ struct span_traits final
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using ptr = std::add_pointer_t<value_type>;
     using const_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
-    using iterator = ptr;
-    using const_iterator = const_ptr;
+    using iterator_type = iterator<ValueType>;
+    using const_iterator_type = const_iterator<ValueType>;
     using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
+    using ssize_type = std::ptrdiff_t;
+};
+
+template<typename ValueType>
+class iterator
+{
+  public:
+    using traits = span_traits<ValueType>;
+
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = typename traits::ssize_type;
+    using value_type = typename traits::value_type;
+    using pointer = typename traits::ptr;
+    using const_pointer = typename traits::const_ptr;
+    using reference = std::add_lvalue_reference_t<value_type>;
+    using const_reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
+    using size_type = typename traits::size_type;
+    using ssize_type = typename traits::ssize_type;
+
+    constexpr iterator(pointer p_ptr) noexcept:
+      m_ptr(p_ptr)
+    {
+    }
+
+    constexpr iterator() noexcept = default;
+    constexpr iterator(const iterator &) noexcept = default;
+    constexpr iterator(iterator && other) noexcept:
+      m_ptr(other.m_ptr)
+    {
+      other.m_ptr = nullptr;
+    }
+
+    constexpr iterator & operator=(const iterator &) noexcept = default;
+    constexpr iterator & operator=(iterator && other) noexcept
+    {
+      if(this != &other)
+      {
+        m_ptr = other.m_ptr;
+        other.m_ptr = nullptr;
+      }
+      return *this;
+    }
+
+    constexpr iterator & operator++() noexcept
+    {
+      ++m_ptr;
+
+      return *this;
+    }
+
+    constexpr iterator & operator++(int) noexcept
+    {
+      iterator tmp{*this};
+
+      ++m_ptr;
+
+      return tmp;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr iterator & operator+=(IntType p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
+    constexpr iterator & operator+=(size_type p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
+    friend constexpr ssize_type operator+(const iterator & a,
+                                          const iterator & b) noexcept
+    {
+      return a.m_ptr + b.m_ptr;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    friend constexpr iterator operator+(const iterator & p_iter,
+                                        IntType p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    friend constexpr iterator operator+(const iterator & p_iter,
+                                        size_type p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    constexpr iterator & operator--() noexcept
+    {
+      --m_ptr;
+
+      return *this;
+    }
+
+    constexpr iterator & operator--(int) noexcept
+    {
+      iterator tmp{*this};
+
+      --m_ptr;
+
+      return tmp;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr iterator & operator-=(IntType p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    constexpr iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    friend constexpr ssize_type operator-(const iterator & a,
+                                          const iterator & b) noexcept
+    {
+      return a.m_ptr - b.m_ptr;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    friend constexpr iterator operator-(const iterator & p_iter,
+                                        IntType p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    friend constexpr iterator operator-(const iterator & p_iter,
+                                        size_type p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    constexpr bool operator==(const iterator & other) const noexcept
+    {
+      return m_ptr == other.m_ptr;
+    }
+
+    constexpr bool operator<(const iterator & other) const noexcept
+    {
+      return m_ptr < other.m_ptr;
+    }
+
+    constexpr bool operator>(const iterator & other) const noexcept
+    {
+      return m_ptr > other.m_ptr;
+    }
+
+    constexpr pointer ptr() noexcept
+    {
+      return m_ptr;
+    }
+
+    constexpr const_pointer ptr() const noexcept
+    {
+      return m_ptr;
+    }
+
+    constexpr reference operator*() noexcept
+    {
+      return *ptr();
+    }
+
+    constexpr const_reference operator*() const noexcept
+    {
+      return *ptr();
+    }
+
+    constexpr pointer operator->() noexcept
+    {
+      return ptr();
+    }
+
+    constexpr const_pointer operator->() const noexcept
+    {
+      return ptr();
+    }
+
+  private:
+    pointer m_ptr;
+};
+
+template<typename ValueType>
+class const_iterator
+{
+  public:
+    using traits = span_traits<ValueType>;
+
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = typename traits::ssize_type;
+    using value_type = typename traits::value_type;
+    using pointer = typename traits::const_ptr;
+    using reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
+    using size_type = typename traits::size_type;
+    using ssize_type = typename traits::ssize_type;
+
+    constexpr const_iterator(pointer p_ptr) noexcept:
+      m_ptr(p_ptr)
+    {
+    }
+
+    constexpr const_iterator() noexcept = default;
+    constexpr const_iterator(const const_iterator &) noexcept = default;
+    constexpr const_iterator(const_iterator && other) noexcept:
+      m_ptr(other.m_ptr)
+    {
+      other.m_ptr = nullptr;
+    }
+
+    constexpr const_iterator & operator=(const const_iterator &) noexcept = default;
+    constexpr const_iterator & operator=(const_iterator && other) noexcept
+    {
+      if(this != &other)
+      {
+        m_ptr = other.m_ptr;
+        other.m_ptr = nullptr;
+      }
+      return *this;
+    }
+
+    constexpr const_iterator & operator++() noexcept
+    {
+      ++m_ptr;
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator++(int) noexcept
+    {
+      const_iterator tmp{*this};
+
+      ++m_ptr;
+
+      return tmp;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr const_iterator & operator+=(IntType p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator+=(size_type p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
+    friend constexpr ssize_type operator+(const const_iterator & a,
+                                          const const_iterator & b) noexcept
+    {
+      return a.m_ptr + b.m_ptr;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+                                              IntType p_offset) noexcept
+    {
+      const_iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+                                              size_type p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    constexpr const_iterator & operator--() noexcept
+    {
+      --m_ptr;
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator--(int) noexcept
+    {
+      const_iterator tmp{*this};
+
+      --m_ptr;
+
+      return tmp;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr const_iterator & operator-=(IntType p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    friend constexpr ssize_type operator-(const const_iterator & a,
+                                          const const_iterator & b) noexcept
+    {
+      return a.m_ptr - b.m_ptr;
+    }
+
+    template<typename IntType,
+             std::enable_if_t<std::is_integral_v<IntType>>>
+    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+                                              IntType p_offset) noexcept
+    {
+      const_iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+                                              size_type p_offset) noexcept
+    {
+      const_iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    constexpr bool operator==(const const_iterator & other) const noexcept
+    {
+      return m_ptr == other.m_ptr;
+    }
+
+    constexpr bool operator<(const const_iterator & other) const noexcept
+    {
+      return m_ptr < other.m_ptr;
+    }
+
+    constexpr bool operator>(const const_iterator & other) const noexcept
+    {
+      return m_ptr > other.m_ptr;
+    }
+
+    constexpr pointer ptr() const noexcept
+    {
+      return m_ptr;
+    }
+
+    constexpr reference operator*() const noexcept
+    {
+      return *ptr();
+    }
+
+    constexpr pointer operator->() const noexcept
+    {
+      return ptr();
+    }
+
+  private:
+    pointer m_ptr;
 };
 
 } // namespace span_detail
@@ -71,34 +478,47 @@ class span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr =  typename traits::ptr;
-    using iterator =  typename traits::iterator;
+    using iterator =  typename traits::iterator_type;
     using const_ptr =  typename traits:: const_ptr;
-    using const_iterator =  typename traits::const_iterator;
+    using const_iterator =  typename traits::const_iterator_type;
     using size_type =  typename traits::size_type;
-    using difference_type =  typename traits::difference_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
     template<typename T,
              std::enable_if_t<yy_traits::is_container_v<T>
                               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
-    constexpr explicit span(const T & container):
-      m_begin(container.begin()),
-      m_end(container.end())
+    constexpr explicit span(const T & container) noexcept:
+      m_begin(container.data()),
+      m_end(container.data() + container.size())
     {
     }
 
     constexpr explicit span(ptr p_begin,
-                            ptr p_end):
+                            ptr p_end) noexcept:
       m_begin(p_begin),
       m_end(p_end)
     {
     }
 
-    constexpr explicit span(iterator p_begin,
+    constexpr explicit span(ptr p_begin,
                             size_type p_size) noexcept:
       m_begin(p_begin),
       m_end(p_begin + p_size)
+    {
+    }
+
+    constexpr explicit span(iterator p_begin,
+                            iterator p_end) noexcept:
+      m_begin(p_begin.ptr()),
+      m_end(p_end.ptr())
+    {
+    }
+
+    constexpr explicit span(iterator p_begin,
+                            size_type p_size) noexcept:
+      m_begin(p_begin.ptr),
+      m_end(p_begin.ptr + p_size)
     {
     }
 
@@ -125,25 +545,25 @@ class span final
     [[nodiscard]]
     constexpr iterator begin() noexcept
     {
-      return m_begin;
+      return iterator{m_begin};
     }
 
     [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
-      return m_begin;
+      return const_iterator{m_begin};
     }
 
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return m_end;
+      return iterator{m_end};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return m_end;
+      return const_iterator{m_end};
     }
 
     constexpr span & inc_begin() noexcept
@@ -326,49 +746,94 @@ class const_span final
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
-    using const_ptr =  typename traits::const_ptr;
-    using const_iterator =  typename traits::const_iterator;
+    using ptr =  typename traits::const_ptr;
+    using iterator =  typename traits::const_iterator_type;
     using size_type =  typename traits::size_type;
-    using difference_type =  typename traits::difference_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
     template<typename T,
              std::enable_if_t<yy_traits::is_container_v<T>
                               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
-    constexpr explicit const_span(const T & container):
-      m_begin(container.begin()),
-      m_end(container.end())
+    constexpr explicit const_span(const T & container) noexcept:
+      m_begin(container.data()),
+      m_end(container.data() + container.size())
     {
     }
 
-    constexpr explicit const_span(const_ptr p_begin,
-                                  const_ptr p_end):
+    constexpr explicit const_span(ptr p_begin,
+                                  ptr p_end) noexcept:
       m_begin(p_begin),
       m_end(p_end)
     {
     }
 
-    constexpr explicit const_span(const_iterator p_begin,
+    constexpr explicit const_span(ptr p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin),
       m_end(p_begin + p_size)
     {
     }
 
+    constexpr explicit const_span(iterator p_begin,
+                                  iterator p_end) noexcept:
+      m_begin(p_begin.ptr()),
+      m_end(p_end.ptr())
+    {
+    }
+
+    constexpr explicit const_span(iterator p_begin,
+                                  const size_type p_size) noexcept:
+      m_begin(p_begin.ptr()),
+      m_end(p_begin.ptr() + p_size)
+    {
+    }
+
+    constexpr explicit const_span(typename traits::iterator_type p_begin,
+                                  typename traits::iterator_type p_end) noexcept:
+      m_begin(p_begin.ptr()),
+      m_end(p_end.ptr())
+    {
+    }
+
+    constexpr explicit const_span(typename traits::iterator_type p_begin,
+                                  const size_type p_size) noexcept:
+      m_begin(p_begin.ptr()),
+      m_end(p_begin.ptr() + p_size)
+    {
+    }
+
     constexpr explicit const_span(span<value_type> span) noexcept:
-      m_begin(span.begin()),
-      m_end(span.end())
+      m_begin(span.m_begin),
+      m_end(span.m_end)
     {
     }
 
     constexpr const_span() noexcept = default;
     constexpr const_span(const const_span &) noexcept = default;
-    constexpr const_span(const_span &&) noexcept = default;
+    constexpr const_span(const_span && other) noexcept
+    {
+      m_begin = other.m_begin;
+      other.m_begin = nullptr;
+      m_end = other.m_end;
+      other.m_end = nullptr;
+    }
+
     constexpr ~const_span() noexcept = default;
 
     constexpr const_span & operator=(const const_span &) noexcept = default;
-    constexpr const_span & operator=(const_span &&) noexcept = default;
+    constexpr const_span & operator=(const_span && other) noexcept
+    {
+      if(this != &other)
+      {
+        m_begin = other.m_begin;
+        other.m_begin = nullptr;
+        m_end = other.m_end;
+        other.m_end = nullptr;
+      }
+
+      return *this;
+    }
 
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
@@ -377,15 +842,15 @@ class const_span final
     }
 
     [[nodiscard]]
-    constexpr const_iterator begin() const noexcept
+    constexpr iterator begin() const noexcept
     {
-      return m_begin;
+      return iterator{m_begin};
     }
 
     [[nodiscard]]
-    constexpr const_iterator end() const noexcept
+    constexpr iterator end() const noexcept
     {
-      return m_end;
+      return iterator{m_end};
     }
 
     constexpr const_span & inc_begin() noexcept
@@ -421,7 +886,7 @@ class const_span final
     }
 
     [[nodiscard]]
-    constexpr const_ptr data() const noexcept
+    constexpr ptr data() const noexcept
     {
       return m_begin;
     }
@@ -553,8 +1018,8 @@ class const_span final
     }
 
   private:
-    mutable const_ptr m_begin{};
-    mutable const_ptr m_end{};
+    mutable ptr m_begin{};
+    mutable ptr m_end{};
 };
 
 
