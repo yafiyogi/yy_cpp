@@ -71,7 +71,7 @@ class const_lookup final
 template<typename Key,
          typename Value,
          std::size_t N>
-constexpr auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
+consteval auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
 {
   return make_lookup_detail::const_lookup{std::forward<std::tuple<Key, Value>[N]>(arr)};
 }
