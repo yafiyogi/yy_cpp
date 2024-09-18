@@ -35,7 +35,6 @@
 
 #include "yy_clear_action.h"
 #include "yy_find_util.h"
-#include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -56,7 +55,8 @@ struct traits_type final
     using iterator = value_vector::iterator;
     using const_iterator = value_vector::const_iterator;
     using const_value_ptr = value_vector::const_value_ptr;
-    using size_type = std::size_t;
+    using size_type = value_vector::size_type;
+    using ssize_type = value_vector::ssize_type;
 };
 
 } // namespace flat_set_detail
@@ -69,6 +69,7 @@ class flat_set final
   public:
     using traits = flat_set_detail::traits_type<Value, ValueClearAction>;
     using size_type = typename traits::size_type;
+    using ssize_type = typename traits::ssize_type;
     using value_type = typename traits::value_type;
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
@@ -77,7 +78,6 @@ class flat_set final
     using const_value_ptr = typename traits::const_value_ptr;
     using iterator = typename traits::iterator;
     using const_iterator = typename traits::const_iterator;
-    using difference_type = std::ptrdiff_t;
 
     template<typename InputValueType>
     constexpr flat_set(std::initializer_list<InputValueType> init)
@@ -107,7 +107,9 @@ class flat_set final
     [[nodiscard]]
     constexpr pos_end_type lower_bound_pos(const ValueParamType & p_value) const noexcept
     {
-      return do_lower_bound(m_values, p_value);
+      return lower_bound_iter_pos(m_values.begin(),
+                                  m_values.end(),
+                                  p_value);
     }
 
     template<typename ValueParamType,
@@ -116,7 +118,9 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) noexcept
     {
-      auto [pos, is_end] = do_lower_bound(m_values, p_value);
+      auto [pos, is_end] = lower_bound_iter_pos(m_values.begin(),
+                                                m_values.end(),
+                                                p_value);
 
       if(!is_end)
       {
@@ -132,7 +136,9 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) const noexcept
     {
-      auto [pos, is_end] = do_lower_bound(m_values, p_value);
+      auto [pos, is_end] = lower_bound_iter_pos(m_values.begin(),
+                                                m_values.end(),
+                                                p_value);
 
       if(!is_end)
       {
@@ -152,7 +158,9 @@ class flat_set final
     [[nodiscard]]
     constexpr value_pos_type find(const ValueParamType & p_value) noexcept
     {
-      auto [pos, found] = do_find(m_values, m_values, p_value);
+      auto [pos, found] = find_iter_pos(m_values.begin(),
+                                        m_values.end(),
+                                        p_value);
 
       if(found)
       {
@@ -172,7 +180,9 @@ class flat_set final
     [[nodiscard]]
     constexpr const_value_pos_type find(const ValueParamType & p_value) const noexcept
     {
-      auto [pos, found] = do_find(m_values, p_value);
+      auto [pos, found] = find_iter_pos(m_values.begin(),
+                                        m_values.end(),
+                                        p_value);
 
       if(found)
       {
@@ -182,7 +192,7 @@ class flat_set final
       return const_value_pos_type{nullptr, pos};
     }
 
-    using pos_found_type = find_util_detail::pos_found_type;
+    using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
 
     template<typename ValueParamType,
              typename Visitor>
@@ -190,14 +200,16 @@ class flat_set final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) noexcept
     {
-      auto [pos, found] = do_find(m_values, p_value);
+      auto pos_found{find_iter_pos(m_values.begin(),
+                                   m_values.end(),
+                                   p_value)};
 
-      if(found)
+      if(pos_found.found)
       {
-        visitor(value(pos), pos);
+        visitor(value(pos_found.pos), pos_found.pos);
       }
 
-      return pos_found_type{pos, found};
+      return pos_found;
     }
 
     template<typename ValueParamType,
@@ -206,21 +218,16 @@ class flat_set final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) const noexcept
     {
-      auto [pos, found] = do_find(m_values, p_value);
+      auto pos_found{find_iter_pos(m_values.begin(),
+                                   m_values.end(),
+                                   p_value)};
 
-      if(found)
+      if(pos_found.found)
       {
-        visitor(value(pos), pos);
+        visitor(value(pos_found.pos), pos_found.pos);
       }
 
-      return pos_found_type{pos, found};
-    }
-
-    template<typename ValueParamType>
-    [[nodiscard]]
-    constexpr pos_found_type find_pos(const ValueParamType & p_value) const noexcept
-    {
-      return do_find(m_values, p_value);
+      return pos_found;
     }
 
     [[nodiscard]]
@@ -243,7 +250,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      value_ptr value = add_empty(p_pos);
+      auto value{add_empty(p_pos)};
 
       *value = std::forward<InputValueType>(p_value);
 
@@ -254,7 +261,7 @@ class flat_set final
     constexpr iterator emplace(iterator p_pos,
                                Args && ...args)
     {
-      value_ptr value = add_empty(p_pos);
+      auto value{add_empty(p_pos)};
 
       *value = value_type{std::forward<Args>(args)...};
 
@@ -263,7 +270,7 @@ class flat_set final
 
     struct iter_inserted_type final
     {
-        iterator iter = nullptr;
+        iterator iter{};
         bool inserted = false;
     };
 
@@ -274,7 +281,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = do_find_raw(m_values, p_value);
+      auto [iter, found] = find_iter(m_values.begin(), m_values.end(), p_value);
 
       if(!found)
       {
@@ -292,7 +299,8 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = do_find_raw(m_values, p_value);
+      auto [iter, found] = find_iter(m_values.begin(), m_values.end(), p_value);
+
       if(!found)
       {
         iter = add_empty(iter);
@@ -344,56 +352,13 @@ class flat_set final
     [[nodiscard]]
     constexpr bool operator<(const flat_set & other) const noexcept
     {
-      if(empty())
-      {
-        return !other.empty();
-      }
-
-      if(!empty() && other.empty())
-      {
-        return false;
-      }
-
-      const auto max = std::min(size(), other.size());
-      for(size_type idx = 0; idx < max; ++idx)
-      {
-        if(m_values[idx] < other.m_values[idx])
-        {
-          return true;
-        }
-
-        if(!(m_values[idx] == other.m_values[idx]))
-        {
-          return false;
-        }
-      }
-
-      return size() < other.size();
+      return m_values < other.m_values;
     }
 
     [[nodiscard]]
     constexpr bool operator==(const flat_set & other) const noexcept
     {
-      if(empty())
-      {
-        return other.empty();
-      }
-
-      if(!empty() && other.empty())
-      {
-        return false;
-      }
-
-      const auto max = std::min(size(), other.size());
-      for(size_type idx = 0; idx < max; ++idx)
-      {
-        if(!(m_values[idx] == other.m_values[idx]))
-        {
-          return false;
-        }
-      }
-
-      return size() == other.size();
+      return m_values == other.m_values;
     }
 
     template<typename Visitor>
@@ -416,7 +381,7 @@ class flat_set final
 
   private:
     [[nodiscard]]
-    constexpr value_ptr add_empty(value_ptr p_pos)
+    constexpr iterator add_empty(iterator p_pos)
     {
       auto [value_pos, value_added] = m_values.add_empty(p_pos);
       if(!value_added)

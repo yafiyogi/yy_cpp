@@ -64,6 +64,7 @@ struct trie_node_traits final
     using root_node_ptr = std::shared_ptr<node_type>;
     using node_edge = trie_node_edge<LabelElemType, value_type>;
     using edges_type = yy_quad::simple_vector<node_edge>;
+    using edges_iterator = edges_type::iterator;
     using size_type = typename edges_type::size_type;
     using edge_traits = find_util_detail::traits_type<node_edge>;
     using edge_ptr = typename edge_traits::key_ptr;
@@ -75,10 +76,10 @@ template<typename LabelElemType,
 struct found_value final
 {
     using traits = trie_node_traits<LabelElemType, ValueType>;
-    using edge_ptr = typename traits::edge_ptr;
+    using edges_iterator = typename traits::edges_iterator;
     using size_type = typename traits::size_type;
 
-    edge_ptr iter{};
+    edges_iterator iter{};
     size_type common{};
     size_type remaining{};
 };
@@ -168,6 +169,7 @@ class trie_node
     using node_edge = typename traits::node_edge;
     using value_type = typename traits::value_type;
     using edges_type = typename traits::edges_type;
+    using edges_iterator = typename traits::edges_iterator;
     using edge_ptr = typename traits::edge_ptr;
     using size_type = typename traits::size_type;
     using found_value_type = typename traits::found_value_type;
@@ -183,21 +185,18 @@ class trie_node
     constexpr void add_edge(label_type && label,
                             node_ptr && node)
     {
-      auto begin = m_edges.data();
-      auto end = begin + m_edges.size();
-      auto [iter, is_end] = yy_data::do_lower_bound_raw(begin , end, label[0]);
+      auto iter = std::lower_bound(m_edges.begin(), m_edges.end(), label[0]);
 
       add_edge(iter,
                std::forward<label_type>(label),
                std::forward<node_ptr>(node));
     }
 
-    constexpr void add_edge(edge_ptr iter,
+    constexpr void add_edge(edges_iterator iter,
                             label_type && label,
                             node_ptr && node)
     {
-      auto pos = iter - m_edges.data();
-      m_edges.emplace(m_edges.begin() + pos, std::move(label), std::move(node));
+      m_edges.emplace(iter, std::move(label), std::move(node));
     }
 
     template<typename InputLabelType>
@@ -207,22 +206,22 @@ class trie_node
       static_assert(yy_traits::is_span_v<InputLabelType>,
                     "trie_node::find(): InputLabelType is not a yy_quad::span<>");
 
-      auto edges_begin = m_edges.data();
-      auto edges_end = edges_begin + m_edges.size();
-      auto edge_iter = std::lower_bound(edges_begin,
-                                        edges_end,
-                                        label_target[0]);
+      auto edges_end{m_edges.end()};
+      auto edge_iter{std::lower_bound(m_edges.begin(),
+                                      edges_end,
+                                      label_target[0])};
 
       if(edges_end != edge_iter)
       {
-        auto label_edge = yy_quad::make_const_span(edge_iter->m_label);
+        auto label_edge{yy_quad::make_const_span(edge_iter->m_label)};
 
         auto [target_first, edge_first] = std::mismatch(label_target.begin(),
                                                         label_target.end(),
                                                         label_edge.begin(),
                                                         label_edge.end());
 
-        const auto common_size = static_cast<size_type>(std::distance(label_target.begin(), target_first));
+        const auto common_size = static_cast<size_type>(std::distance(label_target.begin(),
+                                                                      target_first));
 
         return found_value_type{edge_iter,
                                 common_size,

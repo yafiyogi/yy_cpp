@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "yy_find_iter_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -131,9 +132,9 @@ constexpr inline auto do_lower_bound_raw(KeyType * p_begin,
   using traits = find_util_detail::traits_type<KeyType>;
   using iter_end_type = typename traits::iter_end_type;
 
-  auto iter{std::lower_bound(p_begin, p_end, p_key)};
+  auto [iter, is_end] = lower_bound_iter(p_begin, p_end, p_key);
 
-  return iter_end_type{iter, iter == p_end};
+  return iter_end_type{iter, is_end};
 }
 
 template<typename KeyType,
@@ -146,9 +147,9 @@ constexpr inline auto do_lower_bound_raw(const KeyType * p_begin,
   using traits = find_util_detail::traits_type<KeyType>;
   using const_iter_end_type = typename traits::const_iter_end_type;
 
-  auto iter{std::lower_bound(p_begin, p_end, p_key)};
+  auto [iter, is_end] = lower_bound_iter(p_begin, p_end, p_key);
 
-  return const_iter_end_type{iter, iter == p_end};
+  return const_iter_end_type{iter, is_end};
 }
 
 template<typename KeyStore,
@@ -274,11 +275,9 @@ constexpr inline auto do_find_raw(KeyStore & p_keys,
   using key_ptr = typename traits::key_ptr;
   using iter_found_type = typename traits::iter_found_type;
 
-  key_ptr begin = p_keys.data();
-  key_ptr end = begin + p_keys.size();
-  auto [key_iter, is_end] = do_lower_bound_raw(begin, end, p_key);
-
-  bool found = !is_end && (*key_iter == p_key);
+  key_ptr l_begin{p_keys.data()};
+  key_ptr l_end{l_begin + p_keys.size()};
+  auto [key_iter, found] = find_iter(l_begin, l_end, p_key);
 
   return iter_found_type{key_iter, found};
 }
@@ -293,11 +292,9 @@ constexpr inline auto do_find_raw(const KeyStore & p_keys,
   using const_key_ptr = typename traits::const_key_ptr;
   using const_iter_found_type = typename traits::const_iter_found_type;
 
-  const_key_ptr begin = p_keys.data();
-  const_key_ptr end = begin + p_keys.size();
-  auto [key_iter, is_end] = do_lower_bound_raw(begin, end, p_key);
-
-  bool found = !is_end && (*key_iter == p_key);
+  const_key_ptr l_begin{p_keys.data()};
+  const_key_ptr l_end{l_begin + p_keys.size()};
+  auto [key_iter, found] = find_iter(l_begin, l_end, p_key);
 
   return const_iter_found_type{key_iter, found};
 }
@@ -310,7 +307,7 @@ constexpr inline auto do_find(const KeyStore & p_keys,
 {
   auto [key_iter, found] = do_find_raw(p_keys, p_key);
 
-  return find_util_detail::pos_found_type{static_cast<find_util_detail::size_type>(key_iter - p_keys.data()), found};
+  return find_util_detail::pos_found_type{static_cast<KeyStore::size_type>(key_iter - p_keys.data()), found};
 }
 
 

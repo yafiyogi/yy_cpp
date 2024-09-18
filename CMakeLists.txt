@@ -70,6 +70,7 @@ target_sources(yy_cpp
       yy_clear_action.h
       yy_compare_util.h
       yy_fast_atoi.h
+      yy_find_iter_util.h
       yy_find_util.h
       yy_flat_map.h
       yy_flat_radix_trie.h
@@ -106,6 +107,7 @@ target_sources(yy_cpp
       yy_utility.h
       yy_variant_util.h
       yy_vector.h
+      yy_vector_iter.h
       yy_vector_traits.h
       yy_vector_util.h )
 

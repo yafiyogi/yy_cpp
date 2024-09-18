@@ -48,6 +48,73 @@ class TestSimpleVector:
     }
 };
 
+TEST_F(TestSimpleVector, IteratorArithmatic)
+{
+
+  using vec_type = yy_quad::simple_vector<int>;
+  using iterator = vec_type::iterator;
+
+  iterator iter_1{nullptr, 0};
+
+  EXPECT_EQ(iter_1.offset(), 0);
+  ++iter_1;
+  EXPECT_EQ(iter_1.offset(), 1);
+
+  auto iter_2 = iter_1++;
+  EXPECT_EQ(iter_1.offset(), 2);
+  EXPECT_EQ(iter_2.offset(), 1);
+
+  auto iter_3 = iter_1 + 1;
+  EXPECT_EQ(iter_1.offset(), 2);
+  EXPECT_EQ(iter_3.offset(), 3);
+
+
+  --iter_1;
+  EXPECT_EQ(iter_1.offset(), 1);
+
+  auto iter_4 = iter_1--;
+  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_4.offset(), 1);
+
+  auto iter_5 = iter_1 - 1;
+  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_5.offset(), -1);
+
+}
+
+TEST_F(TestSimpleVector, ConstIteratorArithmatic)
+{
+
+  using vec_type = yy_quad::simple_vector<int>;
+  using iterator = vec_type::const_iterator;
+
+  iterator iter_1{nullptr, 0};
+
+  EXPECT_EQ(iter_1.offset(), 0);
+  ++iter_1;
+  EXPECT_EQ(iter_1.offset(), 1);
+
+  auto iter_2 = iter_1++;
+  EXPECT_EQ(iter_1.offset(), 2);
+  EXPECT_EQ(iter_2.offset(), 1);
+
+  auto iter_3 = iter_1 + 1;
+  EXPECT_EQ(iter_1.offset(), 2);
+  EXPECT_EQ(iter_3.offset(), 3);
+
+
+  --iter_1;
+  EXPECT_EQ(iter_1.offset(), 1);
+
+  auto iter_4 = iter_1--;
+  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_4.offset(), 1);
+
+  auto iter_5 = iter_1 - 1;
+  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_5.offset(), -1);
+
+}
 
 TEST_F(TestSimpleVector, DefaltConstructor)
 {
@@ -214,7 +281,7 @@ TEST_F(TestSimpleVector, TestCopyConstruct)
 
   for(std::size_t idx = 0; idx < vec_2.size(); ++idx)
   {
-    ASSERT_EQ(vec_1[idx], vec_2[idx]);
+    EXPECT_EQ(vec_1[idx], vec_2[idx]);
   }
 }
 
