@@ -53,14 +53,14 @@ class const_iterator;
 template<typename ValueType>
 struct span_traits final
 {
-    using value_type = yy_traits::remove_cvr_t<ValueType>;
+    using value_type = ValueType;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using ptr = std::add_pointer_t<value_type>;
     using const_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
-    using iterator_type = iterator<ValueType>;
-    using const_iterator_type = const_iterator<ValueType>;
+    using iterator_type = iterator<value_type>;
+    using const_iterator_type = const_iterator<value_type>;
     using size_type = std::size_t;
     using ssize_type = std::ptrdiff_t;
 };
@@ -94,6 +94,8 @@ class iterator
       other.m_ptr = nullptr;
     }
 
+    constexpr ~iterator() noexcept = default;
+
     constexpr iterator & operator=(const iterator &) noexcept = default;
     constexpr iterator & operator=(iterator && other) noexcept
     {
@@ -112,7 +114,7 @@ class iterator
       return *this;
     }
 
-    constexpr iterator & operator++(int) noexcept
+    constexpr iterator operator++(int) noexcept
     {
       iterator tmp{*this};
 
@@ -121,9 +123,7 @@ class iterator
       return tmp;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
-    constexpr iterator & operator+=(IntType p_offset) noexcept
+    constexpr iterator & operator+=(ssize_type p_offset) noexcept
     {
       m_ptr += p_offset;
 
@@ -137,16 +137,23 @@ class iterator
       return *this;
     }
 
-    friend constexpr ssize_type operator+(const iterator & a,
-                                          const iterator & b) noexcept
+    constexpr ssize_type operator+(const iterator & other) noexcept
     {
-      return a.m_ptr + b.m_ptr;
+      return m_ptr + other.m_ptr;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
     friend constexpr iterator operator+(const iterator & p_iter,
-                                        IntType p_offset) noexcept
+                                        ssize_type p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    friend constexpr iterator operator+(const iterator & p_iter,
+                                        int p_offset) noexcept
     {
       iterator rv{p_iter};
 
@@ -172,22 +179,13 @@ class iterator
       return *this;
     }
 
-    constexpr iterator & operator--(int) noexcept
+    constexpr iterator operator--(int) noexcept
     {
       iterator tmp{*this};
 
       --m_ptr;
 
       return tmp;
-    }
-
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
-    constexpr iterator & operator-=(IntType p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
     }
 
     constexpr iterator & operator-=(ssize_type p_offset) noexcept
@@ -197,16 +195,30 @@ class iterator
       return *this;
     }
 
-    friend constexpr ssize_type operator-(const iterator & a,
-                                          const iterator & b) noexcept
+    constexpr iterator & operator-=(size_type p_offset) noexcept
     {
-      return a.m_ptr - b.m_ptr;
+      m_ptr -= p_offset;
+
+      return *this;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr ssize_type operator-(const iterator & other) noexcept
+    {
+      return m_ptr - other.m_ptr;
+    }
+
     friend constexpr iterator operator-(const iterator & p_iter,
-                                        IntType p_offset) noexcept
+                                        ssize_type p_offset) noexcept
+    {
+      iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    friend constexpr iterator operator-(const iterator & p_iter,
+                                        int p_offset) noexcept
     {
       iterator rv{p_iter};
 
@@ -301,6 +313,8 @@ class const_iterator
       other.m_ptr = nullptr;
     }
 
+    constexpr ~const_iterator() noexcept = default;
+
     constexpr const_iterator & operator=(const const_iterator &) noexcept = default;
     constexpr const_iterator & operator=(const_iterator && other) noexcept
     {
@@ -319,7 +333,7 @@ class const_iterator
       return *this;
     }
 
-    constexpr const_iterator & operator++(int) noexcept
+    constexpr const_iterator operator++(int) noexcept
     {
       const_iterator tmp{*this};
 
@@ -328,9 +342,7 @@ class const_iterator
       return tmp;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
-    constexpr const_iterator & operator+=(IntType p_offset) noexcept
+    constexpr const_iterator & operator+=(ssize_type p_offset) noexcept
     {
       m_ptr += p_offset;
 
@@ -344,16 +356,23 @@ class const_iterator
       return *this;
     }
 
-    friend constexpr ssize_type operator+(const const_iterator & a,
-                                          const const_iterator & b) noexcept
+    constexpr ssize_type operator+(const const_iterator & other) noexcept
     {
-      return a.m_ptr + b.m_ptr;
+      return m_ptr + other.m_ptr;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
     friend constexpr const_iterator operator+(const const_iterator & p_iter,
-                                              IntType p_offset) noexcept
+                                              ssize_type p_offset) noexcept
+    {
+      const_iterator rv{p_iter};
+
+      rv += p_offset;
+
+      return rv;
+    }
+
+    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+                                              int p_offset) noexcept
     {
       const_iterator rv{p_iter};
 
@@ -379,22 +398,13 @@ class const_iterator
       return *this;
     }
 
-    constexpr const_iterator & operator--(int) noexcept
+    constexpr const_iterator operator--(int) noexcept
     {
       const_iterator tmp{*this};
 
       --m_ptr;
 
       return tmp;
-    }
-
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
-    constexpr const_iterator & operator-=(IntType p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
     }
 
     constexpr const_iterator & operator-=(ssize_type p_offset) noexcept
@@ -404,16 +414,30 @@ class const_iterator
       return *this;
     }
 
-    friend constexpr ssize_type operator-(const const_iterator & a,
-                                          const const_iterator & b) noexcept
+    constexpr const_iterator & operator-=(size_type p_offset) noexcept
     {
-      return a.m_ptr - b.m_ptr;
+      m_ptr -= p_offset;
+
+      return *this;
     }
 
-    template<typename IntType,
-             std::enable_if_t<std::is_integral_v<IntType>>>
+    constexpr ssize_type operator-(const const_iterator & other) noexcept
+    {
+      return m_ptr - other.m_ptr;
+    }
+
     friend constexpr const_iterator operator-(const const_iterator & p_iter,
-                                              IntType p_offset) noexcept
+                                              ssize_type p_offset) noexcept
+    {
+      const_iterator rv{p_iter};
+
+      rv -= p_offset;
+
+      return rv;
+    }
+
+    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+                                              int p_offset) noexcept
     {
       const_iterator rv{p_iter};
 
