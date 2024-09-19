@@ -331,6 +331,7 @@ class Automaton final
   public:
     using traits = TrieTraitsType;
     using tokenizer_type = typename traits::tokenizer_type;
+    using token_type = typename traits::token_type;
 
     using label_const_l_value_ref = typename traits::label_l_value_ref;
     using label_span_type = typename tokenizer_type::label_span_type;
@@ -407,7 +408,7 @@ class Automaton final
 
       while(!tokenizer.empty())
       {
-        if(auto label_part{tokenizer.scan()};
+        if(token_type label_part{tokenizer.scan()};
            !node->find_edge(next_node_do, label_part))
         {
           m_state = nullptr;
