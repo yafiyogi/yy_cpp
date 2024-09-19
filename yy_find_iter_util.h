@@ -96,11 +96,13 @@ constexpr auto find_iter(const Iterator & p_begin,
                          const Iterator & p_end,
                          KeyType && p_key) noexcept
 {
+  using iter_found_type = find_iter_util_detail::iter_found_type<Iterator>;
+
   auto [iter, is_end] = lower_bound_iter(p_begin, p_end, p_key);
 
   bool found = !is_end && (*iter == p_key);
 
-  return find_iter_util_detail::iter_found_type{iter, found};
+  return iter_found_type{iter, found};
 }
 
 template<typename Iterator,
@@ -110,11 +112,13 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
                              KeyType && p_key) noexcept
 {
   using size_type = Iterator::size_type;
+  using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
+
   auto [iter, found] = find_iter(p_begin, p_end, p_key);
 
   auto pos = static_cast<size_type>(iter - p_begin);
 
-  return find_iter_util_detail::pos_found_type{pos, found};
+  return pos_found_type{pos, found};
 }
 
 } // namespace yafiyogi::yy_data
