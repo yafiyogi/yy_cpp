@@ -59,6 +59,8 @@ struct vector_traits final
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_ptr = std::add_pointer_t<value_type>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
+    using reference = std::add_lvalue_reference_t<value_type>;
+    using const_reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
     using size_type = std::size_t;
     using ssize_type = std::ptrdiff_t;
 
@@ -83,8 +85,10 @@ class vector
     using ssize_type = typename traits::ssize_type;
     using iterator = vector_detail::iterator<vector>;
     using const_iterator = vector_detail::const_iterator<vector>;
+    using reference = typename traits::reference;
+    using const_reference = typename traits::const_reference;
 
-    struct return_value final
+    struct insert_result final
     {
         iterator iter{};
         bool inserted{};
@@ -126,6 +130,7 @@ class vector
     constexpr vector(const vector & other)
     {
       static_assert(std::is_copy_constructible_v<value_type>, "T must be copy constructable.");
+
       copy(other);
     }
 
@@ -230,13 +235,13 @@ class vector
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return iterator{this, m_size - m_offset};
+      return iterator{this, size()};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return const_iterator{this, m_size - m_offset};
+      return const_iterator{this, size()};
     }
 
     [[nodiscard]]
@@ -331,63 +336,10 @@ class vector
       return 0 == size();
     }
 
-    constexpr return_value emplace(iterator pos,
-                                   value_type && value)
-    {
-      return_value rv{add_empty(pos)};
-
-      if(rv.inserted)
-      {
-        *rv.iter = std::move(value);
-      }
-
-      return rv;
-    }
-
-    template<typename ...Args>
-    constexpr return_value emplace(iterator pos,
-                                   Args && ...args)
-    {
-      return_value rv{add_empty(pos)};
-
-      if(rv.inserted)
-      {
-        *rv.iter = value_type{std::forward<Args>(args)...};
-      }
-
-      return rv;
-    }
-
-    constexpr void emplace_back(value_type && value)
-    {
-      emplace(end(), std::move(value));
-    }
-
-    template<typename ...Args>
-    constexpr void emplace_back(Args && ...args)
-    {
-      emplace(end(), std::forward<Args>(args)...);
-    }
-
-    constexpr void push_back(const value_type & value)
-    {
-      auto [iter, inserted] = add_empty(end());
-
-      if(inserted)
-      {
-        *iter = value;
-      }
-    }
-
-    constexpr void push_back(value_type && value)
-    {
-      emplace(end(), std::move(value));
-    }
-
     [[nodiscard]]
-    constexpr return_value add_empty(iterator pos)
+    constexpr insert_result add_empty(iterator pos)
     {
-      return_value rv{end(), false};
+      insert_result result{end(), false};
 
       auto [distance, valid] = distance_valid(pos, m_size + 1);
 
@@ -406,12 +358,84 @@ class vector
           std::move_backward(pos, end(), end() + 1);
         }
 
-        rv.iter = begin() + distance;
-        rv.inserted = true;
+        result.iter = begin() + distance;
+        result.inserted = true;
         ++m_size;
       }
 
-      return rv;
+      return result;
+    }
+
+    constexpr insert_result emplace(iterator pos,
+                                   const value_type & value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = value;
+      }
+
+      return result;
+    }
+
+    constexpr insert_result emplace(iterator pos,
+                                   value_type && value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = std::move(value);
+      }
+
+      return result;
+    }
+
+    template<typename ...Args>
+    constexpr insert_result emplace(iterator pos,
+                                   Args && ...args)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return result;
+    }
+
+    constexpr reference emplace_back(const value_type & value)
+    {
+      auto [iter, inserted] = emplace(end(), value);
+
+      return *iter;
+    }
+
+    constexpr reference emplace_back(value_type && value)
+    {
+      auto [iter, inserted] = emplace(end(), std::move(value));
+
+      return *iter;
+    }
+
+    template<typename ...Args>
+    constexpr reference emplace_back(Args && ...args)
+    {
+      auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
+
+      return *iter;
+    }
+
+    constexpr reference push_back(const value_type & value)
+    {
+      return emplace(end(), value);
+    }
+
+    constexpr  reference push_back(value_type && value)
+    {
+      return emplace(end(), std::move(value));
     }
 
     constexpr void reserve(size_type new_capacity)
@@ -586,6 +610,11 @@ class vector
       copy(other, action);
     }
 
+    void assign(vector && other)
+    {
+      move(std::move(other));
+    }
+
     void assign(yy_quad::const_span<value_type> other,
                 ClearAction action = default_action)
     {
@@ -593,6 +622,7 @@ class vector
       auto other_size = other.size();
       auto this_data = data();
       auto this_size = size();
+
       if(((other_data < this_data)
           || (other_data > (this_data + this_size)))
          && (((other_data + other_size) < this_data)
@@ -605,11 +635,6 @@ class vector
         std::copy(other.begin(), other.end(), begin());
         m_size = other_size;
       }
-    }
-
-    void assign(vector && other)
-    {
-      move(std::move(other));
     }
 
     void append(const yy_quad::const_span<value_type> & other)
@@ -766,8 +791,10 @@ class simple_vector
     using ssize_type = typename traits::ssize_type;
     using iterator = vector_detail::iterator<simple_vector>;
     using const_iterator = vector_detail::const_iterator<simple_vector>;
+    using reference = typename traits::reference;
+    using const_reference = typename traits::const_reference;
 
-    struct return_value final
+    struct insert_result final
     {
         iterator iter{};
         bool inserted{};
@@ -786,7 +813,7 @@ class simple_vector
     {
       reserve(p_il.size());
 
-      std::move(p_il.begin(), p_il.end(), data());
+      std::move(p_il.begin(), p_il.end(), begin());
 
       m_size = p_il.size();
     }
@@ -799,7 +826,7 @@ class simple_vector
 
       reserve(l_size);
 
-      std::copy(p_begin, p_end, data());
+      std::copy(p_begin, p_end, begin());
 
       m_size = l_size;
     }
@@ -809,6 +836,7 @@ class simple_vector
     constexpr simple_vector(const simple_vector & other)
     {
       static_assert(std::is_copy_constructible_v<value_type>, "T must be copy constructable.");
+
       copy(other);
     }
 
@@ -905,25 +933,25 @@ class simple_vector
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return iterator{this, m_size};
+      return iterator{this, size()};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return const_iterator{this, m_size};
+      return const_iterator{this, size()};
     }
 
     [[nodiscard]]
     constexpr value_type & operator[](size_type pos) noexcept
     {
-      return *(data() + pos);
+      return *(begin() + static_cast<ssize_type>(pos));
     }
 
     [[nodiscard]]
     constexpr const value_type & operator[](size_type pos) const noexcept
     {
-      return *(data() + pos);
+      return *(begin() + static_cast<ssize_type>(pos));
     }
 
     [[nodiscard]]
@@ -1000,63 +1028,10 @@ class simple_vector
       return 0 == size();
     }
 
-    constexpr return_value emplace(iterator pos,
-                                   value_type && value)
-    {
-      return_value rv{add_empty(pos)};
-
-      if(rv.inserted)
-      {
-        *rv.iter = std::move(value);
-      }
-
-      return rv;
-    }
-
-    template<typename ...Args>
-    constexpr return_value emplace(iterator pos,
-                                   Args && ...args)
-    {
-      return_value rv{add_empty(pos)};
-
-      if(rv.inserted)
-      {
-        *rv.iter = value_type{std::forward<Args>(args)...};
-      }
-
-      return rv;
-    }
-
-    constexpr void emplace_back(value_type && value)
-    {
-      emplace(end(), std::move(value));
-    }
-
-    template<typename ...Args>
-    constexpr void emplace_back(Args && ...args)
-    {
-      emplace(end(), std::forward<Args>(args)...);
-    }
-
-    constexpr void push_back(const value_type & value)
-    {
-      auto [iter, inserted] = add_empty(end());
-
-      if(inserted)
-      {
-        *iter = value;
-      }
-    }
-
-    constexpr void push_back(value_type && value)
-    {
-      emplace(end(), std::move(value));
-    }
-
     [[nodiscard]]
-    constexpr return_value add_empty(iterator pos)
+    constexpr insert_result add_empty(iterator pos)
     {
-      return_value rv{end(), false};
+      insert_result result{end(), false};
 
       auto [distance, valid] = distance_valid(pos, m_size + 1);
 
@@ -1075,12 +1050,84 @@ class simple_vector
           std::move_backward(pos, end(), end() + 1);
         }
 
-        rv.iter = begin() + distance;
-        rv.inserted = true;
+        result.iter = begin() + distance;
+        result.inserted = true;
         ++m_size;
       }
 
-      return rv;
+      return result;
+    }
+
+    constexpr insert_result emplace(iterator pos,
+                                   const value_type & value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = value;
+      }
+
+      return result;
+    }
+
+    constexpr insert_result emplace(iterator pos,
+                                   value_type && value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = std::move(value);
+      }
+
+      return result;
+    }
+
+    template<typename ...Args>
+    constexpr insert_result emplace(iterator pos,
+                                   Args && ...args)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        *result.iter = value_type{std::forward<Args>(args)...};
+      }
+
+      return result;
+    }
+
+    constexpr reference emplace_back(const value_type & value)
+    {
+      auto [iter, inserted] = emplace(end(), value);
+
+      return *iter;
+    }
+
+    constexpr reference  emplace_back(value_type && value)
+    {
+      auto [iter, inserted] = emplace(end(), std::move(value));
+
+      return *iter;
+    }
+
+    template<typename ...Args>
+    constexpr reference emplace_back(Args && ...args)
+    {
+      auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
+
+      return *iter;
+    }
+
+    constexpr void push_back(const value_type & value)
+    {
+      emplace(end(), value);
+    }
+
+    constexpr void push_back(value_type && value)
+    {
+      emplace(end(), std::move(value));
     }
 
     constexpr void reserve(size_type new_capacity)
@@ -1211,6 +1258,11 @@ class simple_vector
       copy(other, action);
     }
 
+    void assign(simple_vector && other)
+    {
+      move(std::move(other));
+    }
+
     void assign(yy_quad::const_span<value_type> other,
                 ClearAction action = default_action)
     {
@@ -1225,11 +1277,6 @@ class simple_vector
         std::copy(other.begin(), other.end(), begin());
         m_size = other.size();
       }
-    }
-
-    void assign(simple_vector && other)
-    {
-      move(std::move(other));
     }
 
     void append(yy_quad::const_span<value_type> other)
@@ -1292,11 +1339,10 @@ class simple_vector
     constexpr distance_valid_type distance_valid(const iterator pos,
                                                  size_type max) noexcept
     {
-      const ssize_type distance = pos.offset();
+      const ssize_type distance = pos.offset() - begin().offset();
 
       return distance_valid_type{distance,
                                  (distance >= 0) && (static_cast<size_type>(distance) < max)};
-
     }
 
     constexpr void clear(size_type start,
@@ -1304,7 +1350,7 @@ class simple_vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto range{yy_util::make_range(begin() + static_cast<ssize_type>(start), end())};
+        for(auto range{yy_util::make_range(begin() + start, end())};
             auto & element : range)
         {
           element = value_type{};
