@@ -149,17 +149,15 @@ class tokenizer<char>
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      token_type::iterator source_begin{m_source.begin()};
       token_type::iterator source_end{m_source.end()};
-      token_type::iterator token_end{source_end};
+      token_type::iterator token_end{char_traits::find(m_source.data(), m_source.size(), m_delim)};
 
-      if(token_type::iterator pos{char_traits::find(source_begin.ptr(), m_source.size(), m_delim)};
-         not_found != pos)
+      if(not_found == token_end)
       {
-        token_end = pos;
+        token_end = source_end;
       }
 
-      m_token = token_type{source_begin, token_end};
+      m_token = token_type{m_source.begin(), token_end};
       m_source = token_type{token_end, source_end};
       m_source.inc_begin();
 
