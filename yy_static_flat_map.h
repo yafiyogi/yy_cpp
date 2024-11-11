@@ -170,7 +170,7 @@ class static_flat_map final
     {
         key_ptr key = nullptr;
         value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename KeyParamType>
@@ -191,7 +191,7 @@ class static_flat_map final
     {
         const_key_ptr key = nullptr;
         const_value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename KeyParamType>
@@ -309,7 +309,7 @@ class static_flat_map final
 
     struct pos_result_type final
     {
-        size_type pos{};
+        size_type pos = 0;
         EmplaceResult result = EmplaceResult::Full;
     };
 
@@ -566,7 +566,7 @@ class static_flat_map final
 
     key_vector m_keys{};
     value_vector m_values{};
-    size_type m_size{};
+    size_type m_size = 0;
     static constexpr const size_type m_capacity = traits::capacity;
 };
 

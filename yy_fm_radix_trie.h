@@ -88,9 +88,9 @@ struct edge_found final
 
     label_type * edge_label = nullptr;
     node_ptr * edge_node = nullptr;
-    size_type edge_pos{};
-    size_type common{};
-    size_type remaining{};
+    size_type edge_pos = 0;
+    size_type common = 0;
+    size_type remaining =  0;
 };
 
 template<typename LabelElemType,
@@ -102,8 +102,8 @@ struct edge_part_found final
     using node_type = typename traits::node_type;
 
     node_type * edge_node = nullptr;
-    size_type common{};
-    size_type remaining{};
+    size_type common = 0;
+    size_type remaining = 0;
 };
 
 template<typename LabelElemType,

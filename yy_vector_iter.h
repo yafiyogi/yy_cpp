@@ -264,7 +264,7 @@ class iterator
 
   private:
     std::add_pointer_t<vector_type> m_vec{};
-    ssize_type m_offset{};
+    ssize_type m_offset = 0;
 };
 
 template<typename VectorType>
@@ -481,7 +481,7 @@ class const_iterator
 
   private:
     std::add_pointer_t<std::add_const_t<vector_type>> m_vec{};
-    ssize_type m_offset{};
+    ssize_type m_offset = 0;
 };
 
 } // namespace yafiyogi::yy_quad::vector_detail

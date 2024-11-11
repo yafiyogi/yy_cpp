@@ -91,7 +91,7 @@ class vector
     struct insert_result final
     {
         iterator iter{};
-        bool inserted{};
+        bool inserted = false;
     };
 
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
@@ -367,7 +367,7 @@ class vector
     }
 
     constexpr insert_result emplace(iterator pos,
-                                   const value_type & value)
+                                    const value_type & value)
     {
       insert_result result{add_empty(pos)};
 
@@ -380,7 +380,7 @@ class vector
     }
 
     constexpr insert_result emplace(iterator pos,
-                                   value_type && value)
+                                    value_type && value)
     {
       insert_result result{add_empty(pos)};
 
@@ -394,7 +394,7 @@ class vector
 
     template<typename ...Args>
     constexpr insert_result emplace(iterator pos,
-                                   Args && ...args)
+                                    Args && ...args)
     {
       insert_result result{add_empty(pos)};
 
@@ -714,7 +714,7 @@ class vector
 
     struct distance_valid_type final
     {
-        ssize_type distance{};
+        ssize_type distance = 0;
         bool valid = false;
     };
 
@@ -770,9 +770,9 @@ class vector
     using vector_ptr = std::unique_ptr<vector_type>;
 
     vector_ptr m_data{};
-    size_type m_size{};
-    size_type m_offset{};
-    size_type m_capacity{};
+    size_type m_size = 0;
+    size_type m_offset = 0;
+    size_type m_capacity = 0;
 };
 
 template<typename T,
@@ -797,7 +797,7 @@ class simple_vector
     struct insert_result final
     {
         iterator iter{};
-        bool inserted{};
+        bool inserted = false;
     };
 
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
@@ -1059,7 +1059,7 @@ class simple_vector
     }
 
     constexpr insert_result emplace(iterator pos,
-                                   const value_type & value)
+                                    const value_type & value)
     {
       insert_result result{add_empty(pos)};
 
@@ -1072,7 +1072,7 @@ class simple_vector
     }
 
     constexpr insert_result emplace(iterator pos,
-                                   value_type && value)
+                                    value_type && value)
     {
       insert_result result{add_empty(pos)};
 
@@ -1086,7 +1086,7 @@ class simple_vector
 
     template<typename ...Args>
     constexpr insert_result emplace(iterator pos,
-                                   Args && ...args)
+                                    Args && ...args)
     {
       insert_result result{add_empty(pos)};
 
@@ -1331,7 +1331,7 @@ class simple_vector
 
     struct distance_valid_type final
     {
-        ssize_type distance{};
+        ssize_type distance = 0;
         bool valid = false;
     };
 
@@ -1392,8 +1392,8 @@ class simple_vector
     using vector_ptr = std::unique_ptr<vector_type>;
 
     vector_ptr m_data{};
-    size_type m_size{};
-    size_type m_capacity{};
+    size_type m_size = 0;
+    size_type m_capacity = 0;
 };
 
 } // namespace yy_quad

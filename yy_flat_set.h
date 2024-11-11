@@ -151,7 +151,7 @@ class flat_set final
     struct value_pos_type final
     {
         value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename ValueParamType>
@@ -173,7 +173,7 @@ class flat_set final
     struct const_value_pos_type final
     {
         const_value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename ValueParamType>

@@ -80,8 +80,8 @@ struct found_value final
     using size_type = typename traits::size_type;
 
     edges_iterator iter{};
-    size_type common{};
-    size_type remaining{};
+    size_type common = 0;
+    size_type remaining = 0;
 };
 
 template<typename LabelElemType,

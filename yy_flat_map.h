@@ -164,7 +164,7 @@ class flat_map final
     {
         key_ptr key = nullptr;
         value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename KeyParamType>
@@ -185,7 +185,7 @@ class flat_map final
     {
         const_key_ptr key = nullptr;
         const_value_ptr value = nullptr;
-        size_type pos{};
+        size_type pos = 0;
     };
 
     template<typename KeyParamType>
@@ -269,7 +269,7 @@ class flat_map final
 
     struct pos_inserted_type final
     {
-        size_type pos{};
+        size_type pos = 0;
         bool inserted = false;
     };
 

@@ -757,8 +757,8 @@ class span final
     }
 
   private:
-    ptr m_begin{};
-    ptr m_end{};
+    ptr m_begin = nullptr;
+    ptr m_end = nullptr;
 };
 
 template<typename ValueType>
@@ -1042,8 +1042,8 @@ class const_span final
     }
 
   private:
-    mutable ptr m_begin{};
-    mutable ptr m_end{};
+    mutable ptr m_begin = 0;
+    mutable ptr m_end = 0;
 };
 
 

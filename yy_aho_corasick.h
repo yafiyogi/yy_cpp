@@ -111,7 +111,7 @@ struct trie_node_edge final
     }
 
     label_type m_label = label_type{};
-    node_ptr m_node{};
+    node_ptr m_node = 0;
 };
 
 template<typename LabelType,

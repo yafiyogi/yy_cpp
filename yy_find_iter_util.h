@@ -39,7 +39,7 @@ struct iter_end_type final
 template<typename SizeType>
 struct pos_end_type final
 {
-    SizeType pos{};
+    SizeType pos = 0;
     bool is_end = false;
 };
 
@@ -53,7 +53,7 @@ struct iter_found_type final
 template<typename SizeType>
 struct pos_found_type final
 {
-    SizeType pos{};
+    SizeType pos = 0;
     bool found = false;
 };
 

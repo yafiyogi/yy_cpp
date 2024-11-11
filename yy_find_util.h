@@ -110,13 +110,13 @@ struct const_iter_found_t final
 
 struct pos_end_type final
 {
-    size_type pos{};
+    size_type pos = 0;
     bool is_end = false;
 };
 
 struct pos_found_type final
 {
-    size_type pos{};
+    size_type pos = 0;
     bool found = false;
 };
 

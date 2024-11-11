@@ -643,7 +643,7 @@ class static_vector
 
     struct distance_valid_type final
     {
-        size_type distance{};
+        size_type distance = 0;
         bool valid = false;
     };
 
@@ -674,8 +674,8 @@ class static_vector
     }
 
     vector_type m_data;
-    size_type m_size{};
-    size_type m_offset{};
+    size_type m_size = 0;
+    size_type m_offset = 0;
     static constexpr const size_type m_capacity = traits::vector_capacity;
 };
 
@@ -1258,7 +1258,7 @@ class static_simple_vector
 
     struct distance_valid_type final
     {
-        ssize_type distance{};
+        ssize_type distance = 0;
         bool valid = false;
     };
 
@@ -1287,8 +1287,8 @@ class static_simple_vector
       m_size = 0;
     }
 
-    vector_type m_data;
-    size_type m_size{};
+        vector_type m_data{};
+    size_type m_size = 0;
     static constexpr const size_type m_capacity = traits::vector_capacity;
 };
 

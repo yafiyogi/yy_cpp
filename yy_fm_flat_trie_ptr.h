@@ -89,7 +89,7 @@ class trie_node_idx final
     using edges_type = typename traits::edges_type;
     using size_type = typename traits::size_type;
 
-    static constexpr node_idx_type root_idx{};
+    static constexpr node_idx_type root_idx = 0;
     static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
     static constexpr value_idx_type no_data = std::numeric_limits<value_idx_type>::max();
 
@@ -280,7 +280,7 @@ class trie_node_ptr final
     }
 
   private:
-    value_ptr m_data{};
+    value_ptr m_data = nullptr;
     edges_type m_edges{};
 };
 
