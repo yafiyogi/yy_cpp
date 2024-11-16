@@ -718,6 +718,26 @@ class span final
       return span{m_begin + pos, len};
     }
 
+    constexpr size_type find_pos(value_type p_value) const noexcept
+    {
+      auto begin_pos = begin();
+      auto end_pos = end();
+      auto found = std::find(begin_pos, end_pos, p_value);
+
+      if(found == end_pos)
+      {
+        return npos;
+      }
+
+      return static_cast<size_type>(found - begin_pos);
+    }
+
+    [[nodiscard]]
+    constexpr bool operator<(const span & other) const noexcept
+    {
+      return yy_util::less_than(*this, other);
+    }
+
     template<typename type>
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
@@ -735,6 +755,12 @@ class span final
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
       return yy_util::less_than(a, b);
+    }
+
+    [[nodiscard]]
+    constexpr bool operator==(const span & other) const noexcept
+    {
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
@@ -977,6 +1003,26 @@ class const_span final
       return const_span{m_begin + pos, len};
     }
 
+    constexpr size_type find_pos(value_type p_value) const noexcept
+    {
+      auto begin_pos = begin();
+      auto end_pos = end();
+      auto found = std::find(begin_pos, end_pos, p_value);
+
+      if(found == end_pos)
+      {
+        return npos;
+      }
+
+      return static_cast<size_type>(found - begin_pos);
+    }
+
+    [[nodiscard]]
+    constexpr bool operator<(const const_span & other) const noexcept
+    {
+      return yy_util::less_than(*this, other);
+    }
+
     template<typename type>
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
@@ -994,6 +1040,12 @@ class const_span final
       static_assert(yy_traits::is_container_v<type>, "Type must be a container.");
 
       return yy_util::less_than(a, b);
+    }
+
+    [[nodiscard]]
+    constexpr bool operator==(const const_span & other) const noexcept
+    {
+      return yy_util::equal(*this, other);
     }
 
     template<typename type>
