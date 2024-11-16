@@ -71,15 +71,30 @@ class tokenizer
     constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
 
     [[nodiscard]]
+    static constexpr token_type scan(const token_type p_source, value_type p_delim) noexcept
+    {
+      const auto source_begin{p_source.begin()};
+      const auto source_end{p_source.end()};
+      auto token_end{std::find(source_begin, source_end, p_delim)};
+
+      if(source_end == token_end)
+      {
+        token_end = source_end;
+      }
+
+      return token_type{source_begin, token_end};
+    }
+
+    [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      auto source_begin{m_source.begin()};
       auto source_end{m_source.end()};
-      auto token_end{std::find(source_begin, source_end, m_delim)};
 
-      m_token = token_type{source_begin, token_end};
-      m_source = token_type{token_end, source_end};
+      m_token = scan(m_source, m_delim);
+      m_source = token_type{m_token.end(), source_end};
       m_source.inc_begin();
+
+      return token();
 
       return token();
     }
@@ -147,18 +162,26 @@ class tokenizer<char>
     constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
 
     [[nodiscard]]
-    constexpr token_type scan() noexcept
+    static constexpr token_type scan(const token_type p_source, value_type p_delim) noexcept
     {
-      token_type::iterator source_end{m_source.end()};
-      token_type::iterator token_end{char_traits::find(m_source.data(), m_source.size(), m_delim)};
+      token_type::iterator source_end{p_source.end()};
+      token_type::iterator token_end{char_traits::find(p_source.data(), p_source.size(), p_delim)};
 
       if(not_found == token_end)
       {
         token_end = source_end;
       }
 
-      m_token = token_type{m_source.begin(), token_end};
-      m_source = token_type{token_end, source_end};
+      return token_type{p_source.begin(), token_end};
+    }
+
+    [[nodiscard]]
+    constexpr token_type scan() noexcept
+    {
+      token_type::iterator source_end{m_source.end()};
+
+      m_token = scan(m_source, m_delim);
+      m_source = token_type{m_token.end(), source_end};
       m_source.inc_begin();
 
       return token();
