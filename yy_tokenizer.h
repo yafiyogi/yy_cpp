@@ -95,8 +95,6 @@ class tokenizer
       m_source.inc_begin();
 
       return token();
-
-      return token();
     }
 
     [[nodiscard]]
