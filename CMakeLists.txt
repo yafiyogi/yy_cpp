@@ -29,7 +29,7 @@
 
 cmake_minimum_required(VERSION 3.24)
 
-project(yy_cpp LANGUAGES CXX VERSION 0.0.1)
+project(yy_cpp_proj LANGUAGES CXX VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS)
 set(YY_ROOT "${PROJECT_SOURCE_DIR}/..")
@@ -59,7 +59,7 @@ target_sources(yy_cpp
     yy_locale.cpp
     yy_string_case.cpp
     yy_string_util.cpp
-  PUBLIC FILE_SET HEADERS
+  PRIVATE FILE_SET HEADERS
     FILES
       yy_aho_corasick.h
       yy_arg_traits.h
@@ -111,12 +111,14 @@ target_sources(yy_cpp
       yy_vector_traits.h
       yy_vector_util.h )
 
-install(TARGETS yy_cpp
-  EXPORT yy_cppTargets
-  FILE_SET HEADERS DESTINATION include/yy_cpp)
+#install(FILES $<TARGET_FILE_NAME:yy_cpp> DESTINATION lib)
 
+get_target_property(yy_headers yy_cpp HEADER_SET)
+install(FILES ${yy_headers} DESTINATION include/yy_cpp)
+
+install(TARGETS yy_cpp EXPORT yy_cppTargets)
 install(EXPORT yy_cppTargets
-  FILE yy_cppTargets.cmake
+  #FILE yy_cppTargets.cmake
   NAMESPACE yy_cpp::
   DESTINATION lib/cmake/yy_cpp)
 
@@ -126,7 +128,7 @@ write_basic_package_version_file("yy_cppConfigVersion.cmake"
   COMPATIBILITY AnyNewerVersion)
 
 install(FILES "yy_cppConfig.cmake" "${CMAKE_CURRENT_BINARY_DIR}/yy_cppConfigVersion.cmake"
-    DESTINATION lib/cmake/yy_cpp)
+  DESTINATION lib/cmake/yy_cpp)
 
 add_subdirectory(unit_tests)
 add_subdirectory(examples)
