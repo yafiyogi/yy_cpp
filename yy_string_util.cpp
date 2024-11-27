@@ -24,8 +24,6 @@
 
 */
 
-#include <string>
-
 #include "yy_string_util.h"
 
 namespace yafiyogi::yy_util {
