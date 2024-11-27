@@ -46,12 +46,12 @@ inline std::string_view trim_left(std::string_view str) noexcept
 
 inline std::string_view trim_right(std::string_view str) noexcept
 {
-  return trim_left(str, white_space);
+  return trim_right(str, white_space);
 }
 
 inline std::string_view trim(std::string_view str) noexcept
 {
-  return trim_left(str, white_space);
+  return trim(str, white_space);
 }
 
 } // namespace yafiyogi::yy_util
