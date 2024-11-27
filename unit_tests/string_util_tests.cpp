@@ -50,6 +50,10 @@ TEST_F(TestStringUtil, TrimLeft)
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij", "/"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij///", "/"), "abc/efg/hij///");
   EXPECT_EQ(yy_util::trim_left("///abc/efg/hij///", "/"), "abc/efg/hij///");
+
+  EXPECT_EQ(yy_util::trim_left("abc/efg/hij"), "abc/efg/hij");
+  EXPECT_EQ(yy_util::trim_left("abc/efg/hij   ", "/"), "abc/efg/hij   ");
+  EXPECT_EQ(yy_util::trim_left("   abc/efg/hij   "), "abc/efg/hij   ");
 }
 
 TEST_F(TestStringUtil, TrimRight)
@@ -57,6 +61,10 @@ TEST_F(TestStringUtil, TrimRight)
   EXPECT_EQ(yy_util::trim_right("abc/efg/hij", "/"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim_right("///abc/efg/hij", "/"), "///abc/efg/hij");
   EXPECT_EQ(yy_util::trim_right("///abc/efg/hij///", "/"), "///abc/efg/hij");
+
+  EXPECT_EQ(yy_util::trim_right("abc/efg/hij"), "abc/efg/hij");
+  EXPECT_EQ(yy_util::trim_right("   abc/efg/hij"), "   abc/efg/hij");
+  EXPECT_EQ(yy_util::trim_right("   abc/efg/hij   "), "   abc/efg/hij");
 }
 
 TEST_F(TestStringUtil, Trim)
@@ -65,6 +73,11 @@ TEST_F(TestStringUtil, Trim)
   EXPECT_EQ(yy_util::trim("abc/efg/hij///", "/"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim("///abc/efg/hij", "/"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim("///abc/efg/hij///", "/"), "abc/efg/hij");
+
+  EXPECT_EQ(yy_util::trim("abc/efg/hij"), "abc/efg/hij");
+  EXPECT_EQ(yy_util::trim("abc/efg/hij   "), "abc/efg/hij");
+  EXPECT_EQ(yy_util::trim("   abc/efg/hij"), "abc/efg/hij");
+  EXPECT_EQ(yy_util::trim("   abc/efg/hij   "), "abc/efg/hij");
 }
 
 } // namespace yafiyogi::yy_cpp::tests
