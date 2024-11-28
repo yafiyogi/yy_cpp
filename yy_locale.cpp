@@ -44,7 +44,6 @@
 #pragma GCC diagnostic pop
 #endif
 
-
 namespace yafiyogi::yy_locale {
 
 using namespace std::string_view_literals;
