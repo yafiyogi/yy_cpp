@@ -333,7 +333,7 @@ class vector
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return 0 == size();
+      return size_type{0} == size();
     }
 
     [[nodiscard]]
@@ -347,15 +347,19 @@ class vector
       {
         if(m_size == m_capacity)
         {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), distance);
+          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
           // Can't use the parameter 'pos' after this point!
         }
         else
         {
 #if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #endif
           std::move_backward(pos, end(), end() + 1);
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
         }
 
         result.iter = begin() + distance;
@@ -408,6 +412,12 @@ class vector
 
     constexpr reference emplace_back(const value_type & value)
     {
+      if((m_offset != 0) && (m_size == m_capacity))
+      {
+        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_offset = 0;
+      }
+
       auto [iter, inserted] = emplace(end(), value);
 
       return *iter;
@@ -415,6 +425,12 @@ class vector
 
     constexpr reference emplace_back(value_type && value)
     {
+      if((m_offset != 0) && (m_size == m_capacity))
+      {
+        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_offset = 0;
+      }
+
       auto [iter, inserted] = emplace(end(), std::move(value));
 
       return *iter;
@@ -423,6 +439,12 @@ class vector
     template<typename ...Args>
     constexpr reference emplace_back(Args && ...args)
     {
+      if((m_offset != 0) && (m_size == m_capacity))
+      {
+        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_offset = 0;
+      }
+
       auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
 
       return *iter;
@@ -440,7 +462,7 @@ class vector
 
     constexpr void reserve(size_type new_capacity)
     {
-      reserve_and_move(new_capacity, static_cast<ssize_type>(m_size));
+      reserve_and_move(new_capacity, m_size);
     }
 
     constexpr bool erase(iterator pos,
@@ -591,7 +613,7 @@ class vector
 
         clear(start_of_clear, clear_action);
 
-        reserve_and_move(other.size(), static_cast<ssize_type>(m_size));
+        reserve_and_move(other.size(), m_size);
 
         m_size = other.size();
         m_offset = 0;
@@ -745,7 +767,7 @@ class vector
     }
 
     constexpr void reserve_and_move(size_type new_capacity,
-                                    ssize_type pos)
+                                    size_type pos) noexcept
     {
       if(new_capacity > m_capacity)
       {
@@ -769,7 +791,7 @@ class vector
     using vector_type = value_type[];
     using vector_ptr = std::unique_ptr<vector_type>;
 
-    vector_ptr m_data{};
+    vector_ptr m_data = nullptr;
     size_type m_size = 0;
     size_type m_offset = 0;
     size_type m_capacity = 0;
@@ -1025,7 +1047,7 @@ class simple_vector
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return 0 == size();
+      return size_type{0} == size();
     }
 
     [[nodiscard]]
@@ -1039,15 +1061,19 @@ class simple_vector
       {
         if(m_size == m_capacity)
         {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), distance);
+          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
           // Can't use the parameter 'pos' after this point!
         }
         else
         {
 #if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #endif
           std::move_backward(pos, end(), end() + 1);
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
         }
 
         result.iter = begin() + distance;
@@ -1132,7 +1158,7 @@ class simple_vector
 
     constexpr void reserve(size_type new_capacity)
     {
-      reserve_and_move(new_capacity, static_cast<ssize_type>(m_size));
+      reserve_and_move(new_capacity, m_size);
     }
 
     constexpr bool erase(iterator pos) noexcept
@@ -1147,9 +1173,13 @@ class simple_vector
           erased = true;
 
 #if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #endif
           std::move(pos + 1, end(), pos);
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
           --m_size;
         }
       }
@@ -1240,7 +1270,7 @@ class simple_vector
 
         clear(start_of_clear, clear_action);
 
-        reserve_and_move(other.size(), static_cast<ssize_type>(m_size));
+        reserve_and_move(other.size(), m_size);
 
         m_size = other.size();
 
@@ -1362,7 +1392,7 @@ class simple_vector
     }
 
     constexpr void reserve_and_move(size_type new_capacity,
-                                    ssize_type pos)
+                                    size_type pos) noexcept
     {
       if(new_capacity > m_capacity)
       {
@@ -1371,16 +1401,24 @@ class simple_vector
         if((m_size > 0) && m_data)
         {
 #if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #endif
           std::move(begin(), begin() + pos, new_data.get());
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
           if(static_cast<size_type>(pos) != m_size)
           {
 #if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
 #endif
             std::move(begin() + pos, end(), new_data.get() + pos + 1);
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
           }
         }
         m_data = std::move(new_data);
@@ -1391,7 +1429,7 @@ class simple_vector
     using vector_type = value_type[];
     using vector_ptr = std::unique_ptr<vector_type>;
 
-    vector_ptr m_data{};
+    vector_ptr m_data = nullptr;
     size_type m_size = 0;
     size_type m_capacity = 0;
 };
