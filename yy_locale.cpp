@@ -34,7 +34,16 @@
 #include <string_view>
 
 #include "boost/locale/generator.hpp"
+
+#if defined(__GNUC__) && ! defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnrvo"
+
 #include "spdlog/spdlog.h"
+
+#pragma GCC diagnostic pop
+#endif
+
 
 namespace yafiyogi::yy_locale {
 
