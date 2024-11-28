@@ -24,11 +24,10 @@
 
 */
 
-#include "fmt/format.h"
 #include <string>
 #include <type_traits>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "yy_ref_traits.h"
 #include "yy_span.h"

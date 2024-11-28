@@ -25,10 +25,11 @@
 */
 
 #include <algorithm>
-#include "fmt/format.h"
+
+#include "gtest/gtest.h"
+
 #include "yy_binary_search.h"
 
-#include <gtest/gtest.h>
 
 namespace yafiyogi::yy_cpp::tests {
 

@@ -24,8 +24,6 @@
 
 */
 
-#include <string>
-#include "fmt/format.h"
 #include "gtest/gtest.h"
 
 #include "yy_flat_set.h"

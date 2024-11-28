@@ -24,10 +24,9 @@
 
 */
 
-#include "fmt/format.h"
 #include <type_traits>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "yy_variant_util.h"
 

@@ -24,9 +24,7 @@
 
 */
 
-#include "fmt/format.h"
-
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "yy_bit_twiddling.h"
 

@@ -25,9 +25,10 @@
 */
 
 #include <string>
+
 #include <vector>
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 #include "yy_vector_util.h"
 
