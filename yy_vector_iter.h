@@ -37,7 +37,7 @@ class iterator
     using ssize_type = vector_type::ssize_type;
 
     using iterator_category = std::random_access_iterator_tag;
-    using difference_type = vector_type::ssize_type;
+    using difference_type = ssize_type;
     using value_type = vector_type::value_type;
     using pointer = std::add_pointer_t<value_type>;
     using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
@@ -53,25 +53,25 @@ class iterator
 
     constexpr iterator() noexcept = default;
     constexpr iterator(const iterator &) noexcept = default;
-    constexpr iterator(iterator && other) noexcept:
-      m_vec(other.m_vec),
-      m_offset(other.m_offset)
+    constexpr iterator(iterator && p_other) noexcept:
+      m_vec(p_other.m_vec),
+      m_offset(p_other.m_offset)
     {
-      other.m_vec = nullptr;
-      other.m_offset = 0;
+      p_other.m_vec = nullptr;
+      p_other.m_offset = 0;
     }
 
     constexpr ~iterator() noexcept = default;
 
     constexpr iterator & operator=(const iterator &) noexcept = default;
-    constexpr iterator & operator=(iterator && other) noexcept
+    constexpr iterator & operator=(iterator && p_other) noexcept
     {
-      if(&other != this)
+      if(&p_other != this)
       {
-        m_vec = other.m_vec;
-        other.m_vec = nullptr;
-        m_offset = other.m_offset;
-        other.m_offset = 0;
+        m_vec = p_other.m_vec;
+        p_other.m_vec = nullptr;
+        m_offset = p_other.m_offset;
+        p_other.m_offset = 0;
       }
 
       return *this;
@@ -112,34 +112,28 @@ class iterator
       return m_offset + p_other.m_offset;
     }
 
-    friend constexpr iterator operator+(const iterator & p_iter,
+    friend constexpr iterator operator+(iterator p_iter,
                                         ssize_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset += p_offset;
 
-      rv.m_offset += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator operator+(const iterator & p_iter,
+    friend constexpr iterator operator+(iterator p_iter,
                                         int p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset += static_cast<ssize_type>(p_offset);
 
-      rv.m_offset += static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator operator+(const iterator & p_iter,
+    friend constexpr iterator operator+(iterator p_iter,
                                         size_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset += static_cast<ssize_type>(p_offset);
 
-      rv.m_offset += static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
     constexpr iterator & operator--() noexcept
@@ -177,34 +171,28 @@ class iterator
       return m_offset - p_other.m_offset;
     }
 
-    friend constexpr iterator operator-(const iterator & p_iter,
+    friend constexpr iterator operator-(iterator p_iter,
                                         ssize_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset -= p_offset;
 
-      rv.m_offset -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator operator-(const iterator & p_iter,
+    friend constexpr iterator operator-(iterator p_iter,
                                         int p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset -= static_cast<ssize_type>(p_offset);
 
-      rv.m_offset -= static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator operator-(const iterator & p_iter,
+    friend constexpr iterator operator-(iterator p_iter,
                                         size_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset -= static_cast<ssize_type>(p_offset);
 
-      rv.m_offset -= static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
     constexpr bool operator==(const iterator & other) const noexcept
@@ -263,7 +251,7 @@ class iterator
     }
 
   private:
-    std::add_pointer_t<vector_type> m_vec{};
+    std::add_pointer_t<vector_type> m_vec = nullptr;
     ssize_type m_offset = 0;
 };
 
@@ -290,12 +278,12 @@ class const_iterator
 
     constexpr const_iterator() noexcept = default;
     constexpr const_iterator(const const_iterator &) noexcept = default;
-    constexpr const_iterator(const_iterator && other) noexcept:
-      m_vec(other.m_vec),
-      m_offset(other.m_offset)
+    constexpr const_iterator(const_iterator && p_other) noexcept:
+      m_vec(p_other.m_vec),
+      m_offset(p_other.m_offset)
     {
-      other.m_vec = nullptr;
-      other.m_offset = 0;
+      p_other.m_vec = nullptr;
+      p_other.m_offset = 0;
     }
 
     constexpr ~const_iterator() noexcept = default;
@@ -349,34 +337,28 @@ class const_iterator
       return m_offset + p_other.m_offset;
     }
 
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+    friend constexpr const_iterator operator+(const_iterator p_iter,
                                               ssize_type p_offset) noexcept
     {
-      const_iterator rv{p_iter};
+      p_iter.m_offset += p_offset;
 
-      rv.m_offset += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+    friend constexpr const_iterator operator+(const_iterator p_iter,
                                               int p_offset) noexcept
     {
-      const_iterator rv{p_iter};
+      p_iter.m_offset += static_cast<ssize_type>(p_offset);
 
-      rv.m_offset += static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
+    friend constexpr const_iterator operator+(const_iterator p_iter,
                                               size_type p_offset) noexcept
     {
-      const_iterator rv{p_iter};
+      p_iter.m_offset += static_cast<ssize_type>(p_offset);
 
-      rv.m_offset += static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
     constexpr const_iterator & operator--() noexcept
@@ -414,34 +396,28 @@ class const_iterator
       return m_offset - p_other.m_offset;
     }
 
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+    friend constexpr const_iterator operator-(const_iterator p_iter,
                                               ssize_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      p_iter.m_offset -= static_cast<ssize_type>(p_offset);
 
-      rv.m_offset -= static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+    friend constexpr const_iterator operator-(const_iterator p_iter,
                                               int p_offset) noexcept
     {
-      const_iterator rv{p_iter};
+      p_iter.m_offset -= static_cast<ssize_type>(p_offset);
 
-      rv.m_offset -= static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
+    friend constexpr const_iterator operator-(const_iterator p_iter,
                                               size_type p_offset) noexcept
     {
-      const_iterator rv{p_iter};
+      p_iter.m_offset -= static_cast<ssize_type>(p_offset);
 
-      rv.m_offset -= static_cast<ssize_type>(p_offset);
-
-      return rv;
+      return p_iter;
     }
 
     constexpr bool operator==(const const_iterator & other) const noexcept
@@ -480,7 +456,7 @@ class const_iterator
     }
 
   private:
-    std::add_pointer_t<std::add_const_t<vector_type>> m_vec{};
+    std::add_pointer_t<std::add_const_t<vector_type>> m_vec = nullptr;
     ssize_type m_offset = 0;
 };
 
