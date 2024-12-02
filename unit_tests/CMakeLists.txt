@@ -63,6 +63,8 @@ add_executable(test_yy_cpp
   fm_flat_trie_ptr_word_tests.cpp
 )
 
+add_dependencies(test_yy_cpp yy_cpp)
+
 target_include_directories(test_yy_cpp
   PRIVATE
     ${PROJECT_SOURCE_DIR}/..
@@ -94,5 +96,5 @@ add_custom_target(test
 add_dependencies(test test_yy_cpp)
 
 add_cmake_coverage(yy_cpp test)
-add_cmake_asan(test_yy_cpp)
-add_cmake_lsan(test_yy_cpp)
+add_cmake_asan(yy_cpp test_yy_cpp)
+add_cmake_lsan(yy_cpp test_yy_cpp)

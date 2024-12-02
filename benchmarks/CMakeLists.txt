@@ -50,6 +50,8 @@ add_executable(benchmark_yy_cpp
 
   bench_yy_cpp.cpp )
 
+add_dependencies(benchmark_yy_cpp yy_cpp)
+
 target_include_directories(benchmark_yy_cpp
   PRIVATE
     ${PROJECT_SOURCE_DIR}/.. )
