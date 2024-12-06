@@ -49,8 +49,31 @@ class const_lookup final
       }
     }
 
+    constexpr explicit const_lookup(Value p_default_value,
+                                    std::tuple<Key, Value> (&& arr)[Capacity]) noexcept:
+      m_default_value(std::move(p_default_value))
+    {
+      for(std::size_t idx = 0; idx < Capacity; ++idx)
+      {
+        m_lookup.emplace(std::move(std::get<0>(arr[idx])), std::move(std::get<1>(arr[idx])));
+      }
+    }
+
     [[nodiscard]]
-    constexpr Value lookup(Key key, Value value = Value{}) const noexcept
+    constexpr Value lookup(Key key) const noexcept
+    {
+      auto value{m_default_value};
+
+      auto do_lookup = [&value](const auto visitor_value, auto /*pos*/) {
+        value = *visitor_value;
+      };
+
+      std::ignore = m_lookup.find_value(do_lookup, key);
+
+      return value;
+    }
+
+    constexpr Value lookup(Key key, Value value) const noexcept
     {
       auto do_lookup = [&value](const auto visitor_value, auto /*pos*/) {
         value = *visitor_value;
@@ -62,6 +85,7 @@ class const_lookup final
     }
 
   private:
+    Value m_default_value{};
     yy_data::static_flat_map<Key, Value, Capacity> m_lookup{};
 };
 
@@ -74,6 +98,14 @@ template<typename Key,
 consteval auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
 {
   return make_lookup_detail::const_lookup{std::forward<std::tuple<Key, Value>[N]>(arr)};
+}
+
+template<typename Key,
+         typename Value,
+         std::size_t N>
+consteval auto make_lookup(Value default_value, std::tuple<Key, Value> (&& arr)[N])
+{
+  return make_lookup_detail::const_lookup{default_value, std::forward<std::tuple<Key, Value>[N]>(arr)};
 }
 
 } // namespace yafiyogi::yy_data
