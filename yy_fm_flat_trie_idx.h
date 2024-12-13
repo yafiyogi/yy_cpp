@@ -316,7 +316,6 @@ class Automaton final
 
       while(!tokenizer.empty())
       {
-
         if(const auto label_part{tokenizer.scan()};
            !get_node(node_idx)->find_edge(next_node_do, label_part).found)
         {
