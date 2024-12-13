@@ -415,6 +415,7 @@ class vector
       if((m_offset != 0) && (m_size == m_capacity))
       {
         std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_size -= m_offset;
         m_offset = 0;
       }
 
@@ -428,6 +429,7 @@ class vector
       if((m_offset != 0) && (m_size == m_capacity))
       {
         std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_size -= m_offset;
         m_offset = 0;
       }
 
@@ -442,6 +444,7 @@ class vector
       if((m_offset != 0) && (m_size == m_capacity))
       {
         std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
+        m_size -= m_offset;
         m_offset = 0;
       }
 
