@@ -985,4 +985,115 @@ TEST_F(TestVector, TestBack)
   ASSERT_EQ(888, vec.back());
 }
 
+TEST_F(TestVector, TestFullPopFrontAddBack)
+{
+  yy_quad::vector<int> vec;
+  vec.reserve(4);
+
+  auto raw_data = vec.data();
+
+  vec.emplace_back(668);
+  vec.emplace_back(777);
+  vec.emplace_back(888);
+  vec.emplace_back(999);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  vec.pop_front();
+
+  ASSERT_EQ(3, vec.size());
+  ASSERT_EQ(1, vec.offset());
+
+  ASSERT_EQ(777, vec[0]);
+  ASSERT_EQ(888, vec[1]);
+  ASSERT_EQ(999, vec[2]);
+
+  vec.emplace_back(555);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(777, vec[0]);
+  ASSERT_EQ(888, vec[1]);
+  ASSERT_EQ(999, vec[2]);
+  ASSERT_EQ(555, vec[3]);
+
+  ASSERT_EQ(raw_data, vec.data());
+}
+
+TEST_F(TestVector, TestFullPopFrontAddFront)
+{
+  yy_quad::vector<int> vec;
+  vec.reserve(4);
+
+  auto raw_data = vec.data();
+
+  vec.emplace_back(668);
+  vec.emplace_back(777);
+  vec.emplace_back(888);
+  vec.emplace_back(999);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  vec.pop_front();
+
+  ASSERT_EQ(3, vec.size());
+  ASSERT_EQ(1, vec.offset());
+
+  ASSERT_EQ(777, vec[0]);
+  ASSERT_EQ(888, vec[1]);
+  ASSERT_EQ(999, vec[2]);
+
+  vec.emplace(vec.begin(), 555);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(555, vec[0]);
+  ASSERT_EQ(777, vec[1]);
+  ASSERT_EQ(888, vec[2]);
+  ASSERT_EQ(999, vec[3]);
+
+  ASSERT_EQ(raw_data, vec.data());
+}
+
+TEST_F(TestVector, TestFullPopFrontAddMid)
+{
+  yy_quad::vector<int> vec;
+  vec.reserve(4);
+
+  auto raw_data = vec.data();
+
+  vec.emplace_back(668);
+  vec.emplace_back(777);
+  vec.emplace_back(888);
+  vec.emplace_back(999);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  vec.pop_front();
+
+  ASSERT_EQ(3, vec.size());
+  ASSERT_EQ(1, vec.offset());
+
+  ASSERT_EQ(777, vec[0]);
+  ASSERT_EQ(888, vec[1]);
+  ASSERT_EQ(999, vec[2]);
+
+  vec.emplace(vec.begin() + 2, 555);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(777, vec[0]);
+  ASSERT_EQ(888, vec[1]);
+  ASSERT_EQ(555, vec[2]);
+  ASSERT_EQ(999, vec[3]);
+
+  ASSERT_EQ(raw_data, vec.data());
+}
+
 } // namespace yafiyogi::yy_cpp::tests

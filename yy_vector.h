@@ -339,35 +339,45 @@ class vector
     [[nodiscard]]
     constexpr insert_result add_empty(iterator pos)
     {
-      insert_result result{end(), false};
-
       auto [distance, valid] = distance_valid(pos, m_size + 1);
 
-      if(valid)
+      if(!valid)
       {
-        if(m_size == m_capacity)
+        return insert_result{end(), false};
+      }
+
+      if(m_size == m_capacity)
+      {
+        if(m_offset != 0)
         {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
-          // Can't use the parameter 'pos' after this point!
+          std::move(begin(), begin() + distance, raw_data());
+          if(static_cast<size_type>(distance) != m_size)
+          {
+            std::move(begin() + distance, end(), raw_data() + distance + 1);
+          }
+          m_size -= m_offset;
+          m_offset = 0;
         }
         else
         {
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
-#endif
-          std::move_backward(pos, end(), end() + 1);
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
         }
-
-        result.iter = begin() + distance;
-        result.inserted = true;
-        ++m_size;
+      }
+      else
+      {
+#if defined(__GNUC__) && ! defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+#endif
+        std::move_backward(pos, end(), end() + 1);
+#if defined(__GNUC__) && ! defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
       }
 
-      return result;
+      ++m_size;
+
+      return insert_result{begin() + distance, true};
     }
 
     constexpr insert_result emplace(iterator pos,
@@ -412,13 +422,6 @@ class vector
 
     constexpr reference emplace_back(const value_type & value)
     {
-      if((m_offset != 0) && (m_size == m_capacity))
-      {
-        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
-        m_size -= m_offset;
-        m_offset = 0;
-      }
-
       auto [iter, inserted] = emplace(end(), value);
 
       return *iter;
@@ -426,13 +429,6 @@ class vector
 
     constexpr reference emplace_back(value_type && value)
     {
-      if((m_offset != 0) && (m_size == m_capacity))
-      {
-        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
-        m_size -= m_offset;
-        m_offset = 0;
-      }
-
       auto [iter, inserted] = emplace(end(), std::move(value));
 
       return *iter;
@@ -441,13 +437,6 @@ class vector
     template<typename ...Args>
     constexpr reference emplace_back(Args && ...args)
     {
-      if((m_offset != 0) && (m_size == m_capacity))
-      {
-        std::move(raw_data() + m_offset, raw_data() + m_size, raw_data());
-        m_size -= m_offset;
-        m_offset = 0;
-      }
-
       auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
 
       return *iter;
