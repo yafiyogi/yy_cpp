@@ -28,6 +28,10 @@ cmake_minimum_required(VERSION 3.24)
 
 project(benchmark_yy_cpp LANGUAGES CXX)
 
+find_package(benchmark REQUIRED)
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
+
 add_executable(benchmark_yy_cpp
   bench_trie.cpp
   bench_radix_trie.cpp
@@ -54,11 +58,7 @@ add_dependencies(benchmark_yy_cpp yy_cpp)
 
 target_include_directories(benchmark_yy_cpp
   PRIVATE
-    ${PROJECT_SOURCE_DIR}/.. )
-
-find_package(benchmark REQUIRED)
-find_package(fmt REQUIRED)
-find_package(spdlog REQUIRED)
+    ${PROJECT_SOURCE_DIR}/..)
 
 target_compile_options(yy_cpp
   PRIVATE
@@ -67,8 +67,8 @@ target_compile_options(yy_cpp
 
 target_link_directories(benchmark_yy_cpp
   PRIVATE
-  "${YY_THIRD_PARTY_LIBRARY}/lib"
-   /opt/local/lib)
+    "${YY_THIRD_PARTY_LIBRARY}/lib"
+    /opt/local/lib)
 
 target_link_libraries(benchmark_yy_cpp
   yy_cpp

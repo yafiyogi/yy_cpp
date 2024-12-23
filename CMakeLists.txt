@@ -45,14 +45,14 @@ find_package(fmt REQUIRED)
 
 add_library(yy_cpp STATIC)
 
-target_include_directories(yy_cpp
-  PRIVATE
-    "${YY_THIRD_PARTY_LIBRARY}/include" )
-
 target_compile_options(yy_cpp
   PRIVATE
   "-DSPDLOG_COMPILED_LIB"
   "-DSPDLOG_FMT_EXTERNAL")
+
+target_include_directories(yy_cpp
+  SYSTEM PRIVATE
+    "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_sources(yy_cpp
   PRIVATE
