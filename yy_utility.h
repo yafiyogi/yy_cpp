@@ -108,6 +108,13 @@ constexpr auto make_range(Iterator && begin, Iterator && end) noexcept
   return Range<Iterator>{std::forward<Iterator>(begin), std::forward<Iterator>(end)};
 }
 
+template<typename T,
+         std::size_t N>
+constexpr auto make_range(T (&& array)[N]) noexcept
+{
+  return Range<T *>{&array[0], &array[N]};
+}
+
 template<typename T>
 struct ArraySize
 {
