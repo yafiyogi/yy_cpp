@@ -36,6 +36,8 @@ find_package(yy_test REQUIRED)
 add_executable(test_yy_cpp
   binary_search_tests.cpp
   bit_twiddling_tests.cpp
+  compare_util_tests.cpp
+  fast_atoi_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
   string_util_tests.cpp
