@@ -30,7 +30,6 @@
 
 #include "yy_binary_search.h"
 
-
 namespace yafiyogi::yy_cpp::tests {
 
 class TestBinarySearch:
