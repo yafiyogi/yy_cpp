@@ -51,6 +51,7 @@ add_executable(benchmark_yy_cpp
 
   bench_trie_lookup.cpp
   bench_bit_twiddling.cpp
+  bench_compare_util.cpp
 
   bench_yy_cpp.cpp )
 
