@@ -37,7 +37,7 @@
 
 namespace yafiyogi::yy_util {
 
-enum class FastFloatRV:uint8_t { Ok, Overflow, NoValue};
+enum class FastFloatRV:uint8_t { Ok, NoValue};
 
 namespace fast_atoi_detail {
 
@@ -48,18 +48,24 @@ struct val_valid_type final
 
     value_type value{};
     FastFloatRV state = FastFloatRV::NoValue;
+
+    friend
+    constexpr bool operator==(const val_valid_type a, const val_valid_type b) noexcept
+    {
+      return (a.state == b.state) && (a.value == b.value);
+    }
 };
 
 } // namespace fast_atoi_detail
 
 template<typename I>
-struct fast_atoi
+struct fast_atoi final
 {
     using val_valid_type = fast_atoi_detail::val_valid_type<I>;
+    using value_type = val_valid_type::value_type;
 
-    static constexpr val_valid_type convert(yy_quad::const_span<char> p_str)
+    static constexpr val_valid_type convert(yy_quad::const_span<char> p_str) noexcept
     {
-      using value_type = val_valid_type::value_type;
       using digits_type = Digits<value_type>;
 
       static_assert(std::is_integral_v<value_type>, "fast_atoi() only works with integer types!");
@@ -168,7 +174,7 @@ struct fast_atoi
       return val_valid_type{val, state};
     }
 
-    static constexpr val_valid_type convert(std::string_view p_str)
+    static constexpr val_valid_type convert(std::string_view p_str) noexcept
     {
       return convert(yy_quad::make_const_span(p_str));
     }
