@@ -29,12 +29,16 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "yy_type_traits.h"
+
 namespace yafiyogi::yy_util {
 
 template<typename A,
          typename B,
-         typename Enable = void>
-bool equal(A && a, B && b)
+         std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
+                                         typename yy_traits::remove_cvr_t<B>::value_type>
+                          && !std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>, bool> = true>
+constexpr bool equal(A && a, B && b) noexcept
 {
   const auto a_size{a.size()};
   const auto a_begin{a.data()};
@@ -45,9 +49,9 @@ bool equal(A && a, B && b)
 
 template<typename A,
          typename B,
-         std::enable_if_t<std::is_same_v<char, typename A::value_type>
-                          && std::is_same_v<char, typename B::value_type>, bool> = true>
-bool equal(A && a, B && b)
+         std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
+                          && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>, bool> = true>
+constexpr bool equal(A && a, B && b) noexcept
 {
   const auto a_size{a.size()};
 
@@ -57,8 +61,10 @@ bool equal(A && a, B && b)
 
 template<typename A,
          typename B,
-         typename Enable = void>
-bool less_than(A && a, B && b)
+         std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
+                                         typename yy_traits::remove_cvr_t<B>::value_type>
+                          && !std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>, bool> = true>
+constexpr bool less_than(A && a, B && b) noexcept
 {
   const auto a_size{a.size()};
   const auto a_begin{a.data()};
@@ -71,9 +77,9 @@ bool less_than(A && a, B && b)
 
 template<typename A,
          typename B,
-         std::enable_if_t<std::is_same_v<char, typename A::value_type>
-                          && std::is_same_v<char, typename B::value_type>, bool> = true>
-bool less_than(A && a, B && b)
+         std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
+                          && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>, bool> = true>
+constexpr bool less_than(A && a, B && b) noexcept
 {
   const auto a_size{a.size()};
   const auto b_size{b.size()};
