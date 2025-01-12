@@ -28,10 +28,15 @@ cmake_minimum_required(VERSION 3.24)
 
 project(test_yy_cpp LANGUAGES CXX)
 
+include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
+
+find_package(Boost CONFIG 1.84.0 REQUIRED COMPONENTS locale)
 find_package(fmt REQUIRED)
 find_package(GTest REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yy_test REQUIRED)
+
+pkg_check_modules(icu IMPORTED_TARGET icu-i18n icu-io icu-uc REQUIRED)
 
 add_executable(test_yy_cpp
   binary_search_tests.cpp

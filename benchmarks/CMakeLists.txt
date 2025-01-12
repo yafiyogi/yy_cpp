@@ -28,9 +28,14 @@ cmake_minimum_required(VERSION 3.24)
 
 project(benchmark_yy_cpp LANGUAGES CXX)
 
+include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
+
+find_package(Boost CONFIG 1.84.0 REQUIRED COMPONENTS locale)
 find_package(benchmark REQUIRED)
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
+
+pkg_check_modules(icu IMPORTED_TARGET icu-i18n icu-io icu-uc REQUIRED)
 
 add_executable(benchmark_yy_cpp
   bench_trie.cpp
