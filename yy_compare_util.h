@@ -32,62 +32,84 @@
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_util {
+namespace compare_util_detail {
 
 template<typename A,
          typename B,
-         std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
-                                         typename yy_traits::remove_cvr_t<B>::value_type>
-                          && !std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>, bool> = true>
+         typename Enable = void>
+struct Compare final
+{
+    using a_type = yy_traits::remove_cvr_t<A>;
+    using b_type = yy_traits::remove_cvr_t<B>;
+
+    static_assert(std::is_same_v<typename a_type::value_type, typename b_type::value_type>,
+                  "Must be comparing the same value_type!");
+
+    static constexpr bool equal(const a_type & a, const b_type & b) noexcept
+    {
+      const auto a_size{a.size()};
+      const auto a_begin{a.data()};
+
+      return (a_size == b.size())
+        && std::equal(a_begin, a_begin + a_size, b.data());
+    }
+
+    static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
+    {
+      const auto a_size{a.size()};
+      const auto a_begin{a.data()};
+      const auto b_size{b.size()};
+      const auto b_begin{b.data()};
+
+      return std::lexicographical_compare(a_begin, a_begin + a_size,
+                                          b_begin, b_begin + b_size);
+    }
+};
+
+template<typename A,
+         typename B>
+struct Compare<A, B,
+               std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
+                                && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>>> final
+{
+    using a_type = yy_traits::remove_cvr_t<A>;
+    using b_type = yy_traits::remove_cvr_t<B>;
+
+    static constexpr bool equal(const a_type & a, const b_type & b) noexcept
+    {
+      const auto a_size{a.size()};
+
+      return (a_size == b.size())
+        && (0 == std::char_traits<char>::compare(a.data(), b.data(), a_size));
+    }
+
+    static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
+    {
+      const auto a_size{a.size()};
+      const auto b_size{b.size()};
+      const auto size{std::min(a_size, b_size)};
+
+      auto comp{std::char_traits<char>::compare(a.data(), b.data(), size)};
+
+      return (comp < 0) || ((0 == comp) && (a_size < b_size));
+    }
+};
+
+} // namespace compare_util_detail
+
+template<typename A,
+         typename B>
 constexpr bool equal(A && a, B && b) noexcept
 {
-  const auto a_size{a.size()};
-  const auto a_begin{a.data()};
-
-  return (a_size == b.size())
-    && std::equal(a_begin, a_begin + a_size, b.data());
+  return compare_util_detail::Compare<A, B>::equal(a, b);
 }
 
 template<typename A,
-         typename B,
-         std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
-                          && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>, bool> = true>
-constexpr bool equal(A && a, B && b) noexcept
-{
-  const auto a_size{a.size()};
-
-  return (a_size == b.size())
-    && (0 == std::char_traits<char>::compare(a.data(), b.data(), a_size));
-}
-
-template<typename A,
-         typename B,
-         std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
-                                         typename yy_traits::remove_cvr_t<B>::value_type>
-                          && !std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>, bool> = true>
+         typename B>
 constexpr bool less_than(A && a, B && b) noexcept
 {
-  const auto a_size{a.size()};
-  const auto a_begin{a.data()};
-  const auto b_size{b.size()};
-  const auto b_begin{b.data()};
-
-  return std::lexicographical_compare(a_begin, a_begin + a_size,
-                                      b_begin, b_begin + b_size);
+  return compare_util_detail::Compare<A, B>::less_than(a, b);
 }
 
-template<typename A,
-         typename B,
-         std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
-                          && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>, bool> = true>
-constexpr bool less_than(A && a, B && b) noexcept
-{
-  const auto a_size{a.size()};
-  const auto b_size{b.size()};
-  const auto size{std::min(a_size, b_size)};
-
-  auto comp{std::char_traits<char>::compare(a.data(), b.data(), size)};
-
-  return (comp < 0) || ((0 == comp) && (a_size < b_size));
-}
 
 } // namespace yafiyogi::yy_util
