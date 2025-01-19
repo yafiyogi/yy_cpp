@@ -501,11 +501,11 @@ class span final
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
-    using ptr =  typename traits::ptr;
-    using iterator =  typename traits::iterator_type;
-    using const_ptr =  typename traits:: const_ptr;
-    using const_iterator =  typename traits::const_iterator_type;
-    using size_type =  typename traits::size_type;
+    using ptr = typename traits::ptr;
+    using iterator = typename traits::iterator_type;
+    using const_ptr = typename traits:: const_ptr;
+    using const_iterator = typename traits::const_iterator_type;
+    using size_type = typename traits::size_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
@@ -796,9 +796,9 @@ class const_span final
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
-    using ptr =  typename traits::const_ptr;
-    using iterator =  typename traits::const_iterator_type;
-    using size_type =  typename traits::size_type;
+    using ptr = typename traits::const_ptr;
+    using iterator = typename traits::const_iterator_type;
+    using size_type = typename traits::size_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
