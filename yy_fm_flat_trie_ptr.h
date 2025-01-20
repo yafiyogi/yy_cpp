@@ -130,7 +130,7 @@ class trie_node_idx final
     }
 
     template<typename Visitor>
-    constexpr void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor) noexcept
     {
       m_edges.visit(std::forward<Visitor>(visitor));
     }
@@ -246,7 +246,7 @@ class trie_node_ptr final
     }
 
     template<typename Visitor>
-    constexpr void visit(Visitor && visitor)
+    constexpr void visit(Visitor && visitor) noexcept
     {
       m_edges.visit(std::forward<Visitor>(visitor));
     }
@@ -361,7 +361,7 @@ class Automaton final
 
     template<typename InputSpanType>
     [[nodiscard]]
-    constexpr bool find(InputSpanType && label)
+    constexpr bool find(InputSpanType && label) noexcept
     {
       return find_span(yy_quad::make_const_span(label));
     }
@@ -384,7 +384,7 @@ class Automaton final
     }
 
     template<typename Visitor>
-    constexpr void visit(Visitor && visitor) const
+    constexpr void visit(Visitor && visitor) const noexcept
     {
       if(has_payload())
       {
