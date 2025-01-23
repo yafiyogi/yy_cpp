@@ -231,12 +231,6 @@ class trie_node_ptr final
       std::ignore = m_edges.emplace(m_edges.size(), std::move(label), node);
     }
 
-    constexpr void add_edge(label_const_l_value_ref label,
-                            node_ptr node)
-    {
-      std::ignore = m_edges.emplace(m_edges.size(), label, node);
-    }
-
     struct found_edge_type final
     {
         node_ptr edge_node = nullptr;
