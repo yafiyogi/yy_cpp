@@ -50,7 +50,7 @@ TEST_F(TestFastAtoi, fast_atoi_ok)
   using fast_atoi = yafiyogi::yy_util::fast_atoi<size_t>;
   using rv_t = fast_atoi::val_valid_type;
 
-  EXPECT_EQ((rv_t{12345678901234567890UL, yafiyogi::yy_util::FastFloatRV::Ok}), fast_atoi::convert(std::string_view{"12345678901234567890"}));
+  EXPECT_EQ((rv_t{12345678901234567890UL, yafiyogi::yy_util::FastFloat::Ok}), fast_atoi::convert(std::string_view{"12345678901234567890"}));
 }
 
 TEST_F(TestFastAtoi, fast_atoi_no_value)
@@ -58,7 +58,7 @@ TEST_F(TestFastAtoi, fast_atoi_no_value)
   using fast_atoi = yafiyogi::yy_util::fast_atoi<int>;
   using rv_t = fast_atoi::val_valid_type;
 
-  EXPECT_EQ((rv_t{0, yafiyogi::yy_util::FastFloatRV::NoValue}), fast_atoi::convert(std::string_view{"12345678901234567890"}));
+  EXPECT_EQ((rv_t{0, yafiyogi::yy_util::FastFloat::NoValue}), fast_atoi::convert(std::string_view{"12345678901234567890"}));
 }
 
 TEST_F(TestFastAtoi, fast_atoi_overflow)
@@ -66,7 +66,15 @@ TEST_F(TestFastAtoi, fast_atoi_overflow)
   using fast_atoi = yafiyogi::yy_util::fast_atoi<size_t>;
   using rv_t = fast_atoi::val_valid_type;
 
-  EXPECT_EQ((rv_t{0, yafiyogi::yy_util::FastFloatRV::NoValue}), fast_atoi::convert(std::string_view{"123456789012345678901"}));
+  EXPECT_EQ((rv_t{0, yafiyogi::yy_util::FastFloat::NoValue}), fast_atoi::convert(std::string_view{"123456789012345678901"}));
+}
+
+TEST_F(TestFastAtoi, fast_atoi_no_input)
+{
+  using fast_atoi = yafiyogi::yy_util::fast_atoi<size_t>;
+  using rv_t = fast_atoi::val_valid_type;
+
+  EXPECT_EQ((rv_t{0, yafiyogi::yy_util::FastFloat::NoValue}), fast_atoi::convert(std::string_view{""}));
 }
 
 } // namespace yafiyogi::yy_cpp::tests
