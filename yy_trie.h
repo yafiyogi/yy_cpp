@@ -53,6 +53,7 @@ struct trie_node_traits final
 {
     using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
+    using label_const_l_value_ref = typename yy_traits::ref_traits<label_type>::const_l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using node_type = trie_node<label_type, value_type>;
@@ -73,10 +74,11 @@ struct trie_node_edge final
     using traits = trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_ptr = typename traits::node_ptr;
 
-    constexpr explicit trie_node_edge(label_l_value_ref p_label,
+    constexpr explicit trie_node_edge(label_const_l_value_ref p_label,
                                       node_ptr p_node) noexcept:
       m_label(p_label),
       m_node(std::move(p_node))
@@ -125,7 +127,7 @@ struct trie_node_edge final
 
 template<typename LabelType,
          typename ValueType>
-constexpr bool operator==(const typename trie_node_edge<LabelType, ValueType>::label_l_value_ref lhs,
+constexpr bool operator==(typename trie_node_edge<LabelType, ValueType>::label_const_l_value_ref lhs,
                           const trie_node_edge<LabelType, ValueType> & rhs) noexcept
 {
   return lhs == rhs.m_label;
@@ -133,7 +135,7 @@ constexpr bool operator==(const typename trie_node_edge<LabelType, ValueType>::l
 
 template<typename LabelType,
          typename ValueType>
-constexpr bool operator<(const typename trie_node_edge<LabelType, ValueType>::label_l_value_ref lhs,
+constexpr bool operator<(typename trie_node_edge<LabelType, ValueType>::label_const_l_value_ref lhs,
                          const trie_node_edge<LabelType, ValueType> & rhs) noexcept
 {
   return lhs < rhs.m_label;
@@ -147,6 +149,7 @@ class trie_node
     using traits = trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_ptr = typename traits::node_ptr;
     using node_edge = typename traits::node_edge;
@@ -172,7 +175,7 @@ class trie_node
     }
 
     [[nodiscard]]
-    constexpr found_value_type find_edge(const label_l_value_ref label) noexcept
+    constexpr found_value_type find_edge(label_const_l_value_ref label) noexcept
     {
       return yy_data::do_find_raw(m_edges, label);
     }
@@ -271,6 +274,7 @@ class Automaton final
     using traits = trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
@@ -337,7 +341,7 @@ class Automaton final
 
       auto node = m_state;
 
-      for(const label_l_value_ref label_part : label)
+      for(label_const_l_value_ref label_part : label)
       {
         auto [edge_iter, found] = node->find_edge(label_part);
 
@@ -371,6 +375,7 @@ class trie final
     using traits = typename trie_detail::trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
@@ -442,7 +447,7 @@ class trie final
       node_type * node{m_root.get()};
 
       for(auto label_range{yy_util::make_range(label.begin(), std::prev(label.end()))};
-          const label_l_value_ref label_part: label_range)
+          label_const_l_value_ref label_part: label_range)
       {
         auto [edge_iter, found] = node->find_edge(label_part);
 

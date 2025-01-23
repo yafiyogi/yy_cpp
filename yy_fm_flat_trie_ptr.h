@@ -79,6 +79,7 @@ class trie_node_idx final
     using traits = trie_node_idx_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
 
     using value_type = typename traits::value_type;
@@ -230,6 +231,12 @@ class trie_node_ptr final
       std::ignore = m_edges.emplace(m_edges.size(), std::move(label), node);
     }
 
+    constexpr void add_edge(label_const_l_value_ref label,
+                            node_ptr node)
+    {
+      std::ignore = m_edges.emplace(m_edges.size(), label, node);
+    }
+
     struct found_edge_type final
     {
         node_ptr edge_node = nullptr;
@@ -333,7 +340,7 @@ class Automaton final
     using tokenizer_type = typename traits::tokenizer_type;
     using token_type = typename traits::token_type;
 
-    using label_const_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_span_type = typename tokenizer_type::label_span_type;
 
     using node_ptr = typename traits::ptr_node_ptr;
@@ -446,8 +453,8 @@ class fm_flat_trie_ptr final
     using tokenizer_type = typename trie_traits::tokenizer_type;
 
     using label_l_value_ref = typename trie_traits::label_l_value_ref;
-    using label_r_value_ref = typename trie_traits::label_r_value_ref;
     using label_const_l_value_ref = typename trie_traits::label_const_l_value_ref;
+    using label_r_value_ref = typename trie_traits::label_r_value_ref;
     using label_span_type = tokenizer_type::label_span_type;
 
     using value_ptr = typename trie_traits::value_ptr;
@@ -512,7 +519,7 @@ class fm_flat_trie_ptr final
         // Transform edges.
         ptr_node.reserve(idx_node.edges());
 
-        idx_node.visit([ptr_nodes_begin, &ptr_node](label_type & label, node_idx_type node_idx) {
+        idx_node.visit([ptr_nodes_begin, &ptr_node](label_l_value_ref label, node_idx_type node_idx) {
           // BUG! leave 'std::move(label)' as it causes performance reduction.
           ptr_node.add_edge(std::move(label), ptr_nodes_begin + node_idx);
         });

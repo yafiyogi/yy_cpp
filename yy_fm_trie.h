@@ -50,6 +50,7 @@ struct trie_node_traits final
 {
     using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
+    using label_const_l_value_ref = typename yy_traits::ref_traits<label_type>::const_l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using node_type = trie_node<label_type, value_type>;
@@ -67,6 +68,7 @@ class trie_node
     using traits = trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_ptr = typename traits::node_ptr;
     using value_type = typename traits::value_type;
@@ -91,13 +93,13 @@ class trie_node
     template<typename Visitor>
     [[nodiscard]]
     constexpr auto find_edge(Visitor && visitor,
-                             const label_l_value_ref label) noexcept
+                             label_const_l_value_ref label) noexcept
     {
       return m_edges.find_value(std::forward<Visitor>(visitor), label);
     }
 
     [[nodiscard]]
-    constexpr auto find_edge_pos(const label_type & label) const noexcept
+    constexpr auto find_edge_pos(label_const_l_value_ref label) const noexcept
     {
       return m_edges.find_pos(label);
     }
@@ -193,6 +195,7 @@ class Automaton final
     using traits = trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
@@ -259,7 +262,7 @@ class Automaton final
 
       auto node = m_state;
 
-      for(const label_l_value_ref label_part : label)
+      for(label_const_l_value_ref label_part : label)
       {
         if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, label_part).found)
         {
@@ -289,6 +292,7 @@ class fm_trie final
     using traits = typename fm_trie_detail::trie_node_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
@@ -378,7 +382,7 @@ class fm_trie final
         label.inc_begin();
       }
 
-      for(label_l_value_ref label_part : label)
+      for(label_const_l_value_ref label_part : label)
       {
         auto edge_pos = node->find_edge_pos(label_part).pos;
 

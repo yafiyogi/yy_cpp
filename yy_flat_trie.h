@@ -52,8 +52,11 @@ struct trie_node_traits final
 {
     using label_type = yy_traits::remove_cvr_t<LabelType>;
     using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
+    using label_const_l_value_ref = typename yy_traits::ref_traits<label_type>::const_l_value_ref;
     using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
     using node_type = trie_node<label_type>;
+    using node_ptr = std::add_pointer_t<node_type>;
+    using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
     using node_idx_type = std::size_t;
     using data_idx_type = std::size_t;
     using node_edge = trie_node_edge<label_type>;
@@ -73,8 +76,11 @@ struct trie_traits final
     using traits = trie_node_traits<LabelType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using data_idx_type = typename traits::data_idx_type;
     using node_edge = typename traits::node_edge;
@@ -227,8 +233,11 @@ class Automaton final
     using traits = trie_traits<LabelType, ValueType>;
     using label_type = typename traits::label_type;
     using label_l_value_ref = typename traits::label_l_value_ref;
+    using label_const_l_value_ref = typename traits::label_const_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using data_idx_type = typename traits::data_idx_type;
     using node_edge = typename traits::node_edge;
@@ -290,27 +299,27 @@ class Automaton final
 
   private:
     [[nodiscard]]
-    constexpr node_type * get_node(const node_idx_type idx) noexcept
+    constexpr node_ptr get_node(const node_idx_type idx) noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    constexpr const node_type * get_node(const node_idx_type idx) const noexcept
+    constexpr const_node_ptr get_node(const node_idx_type idx) const noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    static constexpr node_type * get_node(node_type * raw_nodes,
-                                          const node_idx_type idx) noexcept
+    static constexpr node_ptr get_node(node_ptr raw_nodes,
+                                       const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    static constexpr const node_type * get_node(const node_type * raw_nodes,
-                                                const node_idx_type idx) noexcept
+    static constexpr const_node_ptr get_node(const_node_ptr raw_nodes,
+                                             const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -351,9 +360,9 @@ class Automaton final
       reset();
 
       auto node_idx = m_state;
-      auto raw_nodes = m_nodes->data();
+      node_ptr raw_nodes = m_nodes->data();
 
-      for(const label_l_value_ref label_part : label)
+      for(label_const_l_value_ref label_part : label)
       {
         auto [edge_iter, found] = get_node(raw_nodes, node_idx)->find(label_part);
 
@@ -389,6 +398,8 @@ class flat_trie final
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using data_idx_type = typename traits::data_idx_type;
     using node_edge = typename traits::node_edge;
@@ -438,14 +449,14 @@ class flat_trie final
 
   private:
     [[nodiscard]]
-    constexpr node_type * get_node(const node_idx_type idx) noexcept
+    constexpr node_ptr get_node(const node_idx_type idx) noexcept
     {
       return get_node(m_nodes->data(), idx);
     }
 
     [[nodiscard]]
-    static constexpr node_type * get_node(node_type * raw_nodes,
-                                          const node_idx_type idx) noexcept
+    static constexpr node_ptr get_node(node_ptr raw_nodes,
+                                       const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -476,7 +487,7 @@ class flat_trie final
       return data_idx;
     }
 
-    constexpr node_idx_type add_node(node_type * node,
+    constexpr node_idx_type add_node(node_ptr node,
                                      edge_ptr edge_iter,
                                      const label_type & label,
                                      const data_idx_type data_idx)
