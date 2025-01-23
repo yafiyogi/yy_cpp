@@ -50,6 +50,7 @@ TEST_F(TestStringUtil, TrimLeft)
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij", "/"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij///", "/"), "abc/efg/hij///");
   EXPECT_EQ(yy_util::trim_left("///abc/efg/hij///", "/"), "abc/efg/hij///");
+  EXPECT_EQ(yy_util::trim_left("///", "/"), "");
 
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij"), "abc/efg/hij");
   EXPECT_EQ(yy_util::trim_left("abc/efg/hij   ", "/"), "abc/efg/hij   ");
