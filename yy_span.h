@@ -53,7 +53,7 @@ class const_iterator;
 template<typename ValueType>
 struct span_traits final
 {
-    using value_type = ValueType;
+    using value_type = yy_traits::remove_cvr_t<ValueType>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
