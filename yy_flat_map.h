@@ -30,15 +30,14 @@
 
 #include <algorithm>
 #include <initializer_list>
-#include <type_traits>
 #include <tuple>
+#include <type_traits>
 
 #include "yy_assert.h"
 #include "yy_clear_action.h"
 #include "yy_find_iter_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
-#include "yy_utility.h"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
