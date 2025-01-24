@@ -177,7 +177,7 @@ class static_flat_map final
     [[nodiscard]]
     constexpr key_value_pos_type find(const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      auto [pos, found] = find_iter_pos(m_keys.begin(), m_keys.end(), p_key);
 
       if(found)
       {
@@ -198,7 +198,7 @@ class static_flat_map final
     [[nodiscard]]
     constexpr const_key_value_pos_type find(const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = do_find(m_keys, p_key);
+      auto [pos, found] = find_iter_pos(m_keys.begin(), m_keys.end(), p_key);
 
       if(found)
       {
@@ -216,24 +216,7 @@ class static_flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      pos_found_type pos_found{};
-
-      if constexpr(Capacity > 16)
-      {
-        pos_found = do_find(m_keys, p_key);
-      }
-      else
-      {
-        key_ptr begin = m_keys.data();
-        key_ptr end = begin + m_keys.size();
-
-        key_ptr iter = std::find_if(begin, end, [&p_key](const auto & key) -> bool {
-          return p_key == key;
-        });
-
-        pos_found.found = iter != end;
-        pos_found.pos = static_cast<size_type>(iter - begin);
-      }
+      pos_found_type pos_found{find_iter_pos(m_keys.begin(), m_keys.end(), p_key)};
 
       if(pos_found.found)
       {
@@ -249,24 +232,7 @@ class static_flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      pos_found_type pos_found{};
-
-      if constexpr(Capacity > 16)
-      {
-        pos_found = do_find(m_keys, p_key);
-      }
-      else
-      {
-        const_key_ptr begin = m_keys.data();
-        const_key_ptr end = begin + m_keys.size();
-
-        const_key_ptr iter = std::find_if(begin, end, [&p_key](const auto & key) -> bool {
-          return p_key == key;
-        });
-
-        pos_found.found = iter != end;
-        pos_found.pos = static_cast<size_type>(iter - begin);
-      }
+      pos_found_type pos_found{find_iter_pos(m_keys.begin(), m_keys.end(), p_key)};
 
       if(pos_found.found)
       {
