@@ -45,6 +45,7 @@ add_executable(test_yy_cpp
   fast_atoi_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
+  span_tests.cpp
   string_case_tests.cpp
   string_util_tests.cpp
   tokenizer_tests.cpp
@@ -54,6 +55,7 @@ add_executable(test_yy_cpp
   simple_vector_tests.cpp
 
   flat_map_tests.cpp
+  static_flat_map_tests.cpp
   flat_set_tests.cpp
 
   trie_tests.cpp
