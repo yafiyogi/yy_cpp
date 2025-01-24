@@ -691,7 +691,7 @@ class span final
     }
 
     [[nodiscard]]
-    constexpr span subspan(const size_type pos,
+    constexpr span subspan(size_type pos,
                            size_type len = npos) const noexcept
     {
       const size_type l_size = size();
@@ -712,6 +712,7 @@ class span final
       }
       else
       {
+        pos = 0;
         len = 0;
       }
 
@@ -976,7 +977,7 @@ class const_span final
     }
 
     [[nodiscard]]
-    constexpr const_span subspan(const size_type pos,
+    constexpr const_span subspan(size_type pos,
                                  size_type len = npos) const noexcept
     {
       const size_type l_size = size();
@@ -997,6 +998,7 @@ class const_span final
       }
       else
       {
+        pos = 0;
         len = 0;
       }
 
@@ -1142,36 +1144,30 @@ struct span_traits_helper<T,
 };
 
 template<typename T,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_std_string_v<T>
-                          || yy_traits::is_array_v<T>, bool> = true>
+         std::enable_if_t<!std::is_const_v<T> &&
+                          (yy_traits::is_vector_v<T>
+                           || yy_traits::is_std_string_v<T>
+                           || yy_traits::is_array_v<T>), bool> = true>
 constexpr auto make_span(T & container)
 {
   return typename span_traits_helper<T>::span_type{container.data(), container.size()};
 }
 
 template<typename T,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_std_string_v<T>
-                          || yy_traits::is_array_v<T>, bool> = true>
-constexpr auto make_span(const T & container)
-{
-  return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
-}
-
-template<typename T,
          std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
 constexpr auto make_span(T container)
 {
-  return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
+  static_assert(true, "Can't create a 'span<>' from std::string_view!");
+  // return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
 constexpr auto make_span(T p_str)
 {
-  std::string_view str{p_str};
-  return make_span(str);
+  static_assert(true, "Can't create a 'span<>' from 'char *' or 'char[]'!");
+  // std::string_view str{p_str};
+  // return make_span(str);
 }
 
 template<typename T,
