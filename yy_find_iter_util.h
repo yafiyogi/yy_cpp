@@ -113,12 +113,31 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
 {
   using size_type = Iterator::size_type;
   using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
+  using iter_found_type = find_iter_util_detail::iter_found_type<Iterator>;
 
-  auto [iter, found] = find_iter(p_begin, p_end, p_key);
+  iter_found_type iter_found;
 
-  auto pos = static_cast<size_type>(iter - p_begin);
+  if(auto size = p_end - p_begin;
+     size > 16)
+  {
+    iter_found = find_iter(p_begin, p_end, p_key);
+  }
+  else
+  {
+    bool is_equal = false;
+    auto found{std::find_if(p_begin, p_end, [&p_key, &is_equal](const auto & value){
+      bool less_than = value < p_key;
+      is_equal = !less_than && (p_key == value);
 
-  return pos_found_type{pos, found};
+      return !less_than || is_equal;
+    })};
+
+    iter_found = iter_found_type{found, is_equal};
+  }
+
+  auto pos = static_cast<size_type>(iter_found.iter - p_begin);
+
+  return pos_found_type{pos, iter_found.found};
 }
 
 } // namespace yafiyogi::yy_data
