@@ -30,7 +30,7 @@
 
 namespace yafiyogi::yy_cpp::tests {
 
-class TestSetMap:
+class TestFlatSet:
       public testing::Test
 {
   public:
@@ -44,7 +44,7 @@ class TestSetMap:
 };
 
 
-TEST_F(TestSetMap, LessThanSimple)
+TEST_F(TestFlatSet, LessThanSimple)
 {
   {
   yy_data::flat_set<int> vec_1{};
@@ -99,7 +99,7 @@ TEST_F(TestSetMap, LessThanSimple)
   }
 }
 
-TEST_F(TestSetMap, EqualToMultiple)
+TEST_F(TestFlatSet, EqualToMultiple)
 {
   {
     yy_data::flat_set<int> vec_1{};
@@ -156,7 +156,7 @@ TEST_F(TestSetMap, EqualToMultiple)
   }
 }
 
-TEST_F(TestSetMap, EqualToSimple)
+TEST_F(TestFlatSet, EqualToSimple)
 {
   {
   yy_data::flat_set<int> vec_1{};
@@ -211,7 +211,7 @@ TEST_F(TestSetMap, EqualToSimple)
   }
 }
 
-TEST_F(TestSetMap, LessThanMultiple)
+TEST_F(TestFlatSet, LessThanMultiple)
 {
   {
     yy_data::flat_set<int> vec_1{};
@@ -272,6 +272,140 @@ TEST_F(TestSetMap, LessThanMultiple)
     vec_2.emplace(2);
 
     EXPECT_FALSE(vec_1 < vec_2);
+  }
+}
+
+TEST_F(TestFlatSet, find)
+{
+  yy_data::flat_set<int> vec{};
+
+  vec.emplace(1);
+  vec.emplace(2);
+  vec.emplace(3);
+
+  {
+    auto [value, pos] = vec.find(2);
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(2, *value);
+    EXPECT_EQ(1, pos);
+  }
+
+  {
+    auto [value, pos] = vec.find(0);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(0, pos);
+  }
+
+  {
+    auto [value, pos] = vec.find(4);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(3, pos);
+  }
+}
+
+TEST_F(TestFlatSet, const_find)
+{
+  yy_data::flat_set<int> vec{};
+  const yy_data::flat_set<int> & const_vec = vec;
+
+  vec.emplace(1);
+  vec.emplace(2);
+  vec.emplace(3);
+
+  {
+    auto [value, pos] = const_vec.find(2);
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(2, *value);
+    EXPECT_EQ(1, pos);
+  }
+
+  {
+    auto [value, pos] = const_vec.find(0);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(0, pos);
+  }
+
+  {
+    auto [value, pos] = const_vec.find(10);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(3, pos);
+  }
+}
+
+TEST_F(TestFlatSet, find_value)
+{
+  yy_data::flat_set<int> vec{};
+
+  vec.emplace(1);
+  vec.emplace(2);
+  vec.emplace(3);
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * value, auto pos) {
+      ASSERT_NE(nullptr, value);
+      EXPECT_EQ(2, *value);
+      EXPECT_EQ(1, pos);
+    }, 2);
+
+    EXPECT_EQ(1, found_pos);
+    EXPECT_TRUE(found);
+  }
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 0);
+
+    EXPECT_EQ(0, found_pos);
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 10);
+
+    EXPECT_EQ(3, found_pos);
+    EXPECT_FALSE(found);
+  }
+}
+
+TEST_F(TestFlatSet, const_find_value)
+{
+  yy_data::flat_set<int> vec{};
+  const yy_data::flat_set<int> & const_vec = vec;
+
+  vec.emplace(1);
+  vec.emplace(2);
+  vec.emplace(3);
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * value, auto pos) {
+      ASSERT_NE(nullptr, value);
+      EXPECT_EQ(2, *value);
+      EXPECT_EQ(1, pos);
+    }, 2);
+
+    EXPECT_EQ(1, found_pos);
+    EXPECT_TRUE(found);
+  }
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 0);
+
+    EXPECT_EQ(0, found_pos);
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 10);
+
+    EXPECT_EQ(3, found_pos);
+    EXPECT_FALSE(found);
   }
 }
 
