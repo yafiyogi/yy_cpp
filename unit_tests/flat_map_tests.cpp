@@ -47,8 +47,8 @@ class TestFlatMap:
 TEST_F(TestFlatMap, LessThanSimple)
 {
   {
-  yy_data::flat_map<int, int> vec_1{};
-  yy_data::flat_map<int, int> vec_2{};
+    yy_data::flat_map<int, int> vec_1{};
+    yy_data::flat_map<int, int> vec_2{};
 
     EXPECT_FALSE(vec_1 < vec_2);
   }
@@ -185,8 +185,8 @@ TEST_F(TestFlatMap, EqualToMultiple)
 TEST_F(TestFlatMap, EqualToSimple)
 {
   {
-  yy_data::flat_map<int, int> vec_1{};
-  yy_data::flat_map<int, int> vec_2{};
+    yy_data::flat_map<int, int> vec_1{};
+    yy_data::flat_map<int, int> vec_2{};
 
     EXPECT_TRUE(vec_1 == vec_2);
   }
@@ -324,6 +324,148 @@ TEST_F(TestFlatMap, LessThanMultiple)
     vec_2.emplace(3, 3);
 
     EXPECT_TRUE(vec_1 < vec_2);
+  }
+}
+
+TEST_F(TestFlatMap, find)
+{
+  yy_data::flat_map<int, int> vec{};
+
+  vec.emplace(1, 1);
+  vec.emplace(2, 2);
+  vec.emplace(3, 3);
+
+  {
+    auto [key, value, pos] = vec.find(2);
+    ASSERT_NE(nullptr, key);
+    EXPECT_EQ(2, *key);
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(2, *value);
+    EXPECT_EQ(1, pos);
+  }
+
+  {
+    auto [key, value, pos] = vec.find(0);
+    ASSERT_EQ(nullptr, key);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(0, pos);
+  }
+
+  {
+    auto [key, value, pos] = vec.find(4);
+    ASSERT_EQ(nullptr, key);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(3, pos);
+  }
+}
+
+TEST_F(TestFlatMap, const_find)
+{
+  yy_data::flat_map<int, int> vec{};
+  const yy_data::flat_map<int, int> & const_vec = vec;
+
+  vec.emplace(1, 1);
+  vec.emplace(2, 2);
+  vec.emplace(3, 3);
+
+  {
+    auto [key, value, pos] = const_vec.find(2);
+    ASSERT_NE(nullptr, key);
+    EXPECT_EQ(2, *key);
+    ASSERT_NE(nullptr, value);
+    EXPECT_EQ(2, *value);
+    EXPECT_EQ(1, pos);
+  }
+
+  {
+    auto [key, value, pos] = const_vec.find(0);
+    ASSERT_EQ(nullptr, key);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(0, pos);
+  }
+
+  {
+    auto [key, value, pos] = const_vec.find(10);
+    ASSERT_EQ(nullptr, key);
+    ASSERT_EQ(nullptr, value);
+    EXPECT_EQ(3, pos);
+  }
+}
+
+TEST_F(TestFlatMap, find_value)
+{
+  yy_data::flat_map<int, int> vec{};
+
+  vec.emplace(1, 1);
+  vec.emplace(2, 2);
+  vec.emplace(3, 3);
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * value, auto pos) {
+      ASSERT_NE(nullptr, value);
+      EXPECT_EQ(2, *value);
+      EXPECT_EQ(1, pos);
+    }, 2);
+
+    EXPECT_EQ(1, found_pos);
+    EXPECT_TRUE(found);
+  }
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 0);
+
+    EXPECT_EQ(0, found_pos);
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 10);
+
+    EXPECT_EQ(3, found_pos);
+    EXPECT_FALSE(found);
+  }
+}
+
+TEST_F(TestFlatMap, const_find_value)
+{
+  yy_data::flat_map<int, int> vec{};
+  const yy_data::flat_map<int, int> & const_vec = vec;
+
+  vec.emplace(1, 1);
+  vec.emplace(2, 2);
+  vec.emplace(3, 3);
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * value, auto pos) {
+      ASSERT_NE(nullptr, value);
+      EXPECT_EQ(2, *value);
+      EXPECT_EQ(1, pos);
+    }, 2);
+
+    EXPECT_EQ(1, found_pos);
+    EXPECT_TRUE(found);
+  }
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 0);
+
+    EXPECT_EQ(0, found_pos);
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+      EXPECT_FALSE(true);
+    }, 10);
+
+    EXPECT_EQ(3, found_pos);
+    EXPECT_FALSE(found);
   }
 }
 
