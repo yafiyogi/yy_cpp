@@ -56,23 +56,23 @@ TEST_F(TestRadixTrie, TrieNodeGetBeforeAdd)
   // No child nodes added.
   radix_trie_node node{};
 
-  EXPECT_EQ(0, node.find(yy_quad::make_span("a")).common);
-  EXPECT_EQ(0, node.find(yy_quad::make_span("b")).common);
+  EXPECT_EQ(0, node.find(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(0, node.find(yy_quad::make_const_span("b")).common);
 }
 
 TEST_F(TestRadixTrie, TrieNodeGetAfterAdd)
 {
   // Add 'ab' node, but not 'b' node.
-  auto source_a = yy_quad::make_span("ab");
+  auto source_a = yy_quad::make_const_span("ab");
   radix_trie_node node{};
   node.add_edge(node_edge::label_type{source_a.begin(), source_a.end()},
                 std::make_unique<radix_trie_node>());
 
-  EXPECT_NE(0, node.find(yy_quad::make_span("ab")).common);
-  EXPECT_NE(0, node.find(yy_quad::make_span("a")).common);
-  EXPECT_EQ(1, node.find(yy_quad::make_span("a")).common);
-  EXPECT_EQ(1, node.find(yy_quad::make_span("a")).remaining);
-  EXPECT_EQ(0, node.find(yy_quad::make_span("b")).common);
+  EXPECT_NE(0, node.find(yy_quad::make_const_span("ab")).common);
+  EXPECT_NE(0, node.find(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(1, node.find(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(1, node.find(yy_quad::make_const_span("a")).remaining);
+  EXPECT_EQ(0, node.find(yy_quad::make_const_span("b")).common);
 }
 
 TEST_F(TestRadixTrie, TestNodeChildOrder)
@@ -82,10 +82,10 @@ TEST_F(TestRadixTrie, TestNodeChildOrder)
   radix_trie_node node{};
   const char * result = "abcd";
 
-  auto source_a = yy_quad::make_span("a");
-  auto source_b = yy_quad::make_span("b");
-  auto source_c = yy_quad::make_span("c");
-  auto source_d = yy_quad::make_span("d");
+  auto source_a = yy_quad::make_const_span("a");
+  auto source_b = yy_quad::make_const_span("b");
+  auto source_c = yy_quad::make_const_span("c");
+  auto source_d = yy_quad::make_const_span("d");
 
 
   node.add_edge(node_edge::label_type{source_b.begin(), source_b.end()}, std::make_unique<radix_trie_node>());

@@ -55,23 +55,23 @@ TEST_F(TestFMRadixTrie, TrieNodeGetBeforeAdd)
   // No child nodes added.
   trie_node node{};
 
-  EXPECT_EQ(0, node.find_edge(yy_quad::make_span("a")).common);
-  EXPECT_EQ(0, node.find_edge(yy_quad::make_span("b")).common);
+  EXPECT_EQ(0, node.find_edge(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(0, node.find_edge(yy_quad::make_const_span("b")).common);
 }
 
 TEST_F(TestFMRadixTrie, TrieNodeGetAfterAdd)
 {
   // Add 'ab' node, but not 'b' node.
-  auto source_a = yy_quad::make_span("ab");
+  auto source_a = yy_quad::make_const_span("ab");
   trie_node node{};
   node.add_edge(trie_node::label_type{source_a.begin(), source_a.end()},
                 std::make_unique<trie_node>());
 
-  EXPECT_NE(0, node.find_edge(yy_quad::make_span("ab")).common);
-  EXPECT_NE(0, node.find_edge(yy_quad::make_span("a")).common);
-  EXPECT_EQ(1, node.find_edge(yy_quad::make_span("a")).common);
-  EXPECT_EQ(1, node.find_edge(yy_quad::make_span("a")).remaining);
-  EXPECT_EQ(0, node.find_edge(yy_quad::make_span("b")).common);
+  EXPECT_NE(0, node.find_edge(yy_quad::make_const_span("ab")).common);
+  EXPECT_NE(0, node.find_edge(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(1, node.find_edge(yy_quad::make_const_span("a")).common);
+  EXPECT_EQ(1, node.find_edge(yy_quad::make_const_span("a")).remaining);
+  EXPECT_EQ(0, node.find_edge(yy_quad::make_const_span("b")).common);
 }
 
 TEST_F(TestFMRadixTrie, TestNodeChildOrder)
@@ -81,10 +81,10 @@ TEST_F(TestFMRadixTrie, TestNodeChildOrder)
   trie_node node{};
   const char * result = "abcd";
 
-  auto source_a = yy_quad::make_span("a");
-  auto source_b = yy_quad::make_span("b");
-  auto source_c = yy_quad::make_span("c");
-  auto source_d = yy_quad::make_span("d");
+  auto source_a = yy_quad::make_const_span("a");
+  auto source_b = yy_quad::make_const_span("b");
+  auto source_c = yy_quad::make_const_span("c");
+  auto source_d = yy_quad::make_const_span("d");
 
 
   node.add_edge(trie_node::label_type{source_b.begin(), source_b.end()}, std::make_unique<trie_node>());
