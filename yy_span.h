@@ -71,7 +71,7 @@ class iterator
   public:
     using traits = span_traits<ValueType>;
 
-    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = std::random_access_iterator_tag;
     using difference_type = typename traits::ssize_type;
     using value_type = typename traits::value_type;
     using pointer = typename traits::ptr;
@@ -137,7 +137,7 @@ class iterator
       return *this;
     }
 
-    constexpr ssize_type operator+(const iterator & other) noexcept
+    constexpr ssize_type operator+(const iterator & other) const noexcept
     {
       return m_ptr + other.m_ptr;
     }
@@ -202,7 +202,7 @@ class iterator
       return *this;
     }
 
-    constexpr ssize_type operator-(const iterator & other) noexcept
+    constexpr ssize_type operator-(const iterator & other) const noexcept
     {
       return m_ptr - other.m_ptr;
     }
@@ -292,7 +292,7 @@ class const_iterator
   public:
     using traits = span_traits<ValueType>;
 
-    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = std::random_access_iterator_tag;
     using difference_type = typename traits::ssize_type;
     using value_type = typename traits::value_type;
     using pointer = typename traits::const_ptr;
@@ -356,7 +356,7 @@ class const_iterator
       return *this;
     }
 
-    constexpr ssize_type operator+(const const_iterator & other) noexcept
+    constexpr ssize_type operator+(const const_iterator & other) const noexcept
     {
       return m_ptr + other.m_ptr;
     }
@@ -421,7 +421,7 @@ class const_iterator
       return *this;
     }
 
-    constexpr ssize_type operator-(const const_iterator & other) noexcept
+    constexpr ssize_type operator-(const const_iterator & other) const noexcept
     {
       return m_ptr - other.m_ptr;
     }

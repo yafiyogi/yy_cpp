@@ -107,7 +107,7 @@ class iterator
       return *this;
     }
 
-    constexpr ssize_type operator+(const iterator & p_other) noexcept
+    constexpr ssize_type operator+(const iterator & p_other) const noexcept
     {
       return m_offset + p_other.m_offset;
     }
@@ -166,7 +166,7 @@ class iterator
       return *this;
     }
 
-    constexpr ssize_type operator-(const iterator & p_other) noexcept
+    constexpr ssize_type operator-(const iterator & p_other) const noexcept
     {
       return m_offset - p_other.m_offset;
     }
@@ -332,7 +332,7 @@ class const_iterator
       return *this;
     }
 
-    constexpr ssize_type operator+(const const_iterator & p_other) noexcept
+    constexpr ssize_type operator+(const const_iterator & p_other) const noexcept
     {
       return m_offset + p_other.m_offset;
     }
@@ -391,7 +391,7 @@ class const_iterator
       return *this;
     }
 
-    constexpr ssize_type operator-(const const_iterator & p_other) noexcept
+    constexpr ssize_type operator-(const const_iterator & p_other) const noexcept
     {
       return m_offset - p_other.m_offset;
     }
