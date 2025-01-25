@@ -57,6 +57,8 @@ struct pos_found_type final
     bool found = false;
 };
 
+static constexpr std::size_t SizeThreshold = 16;
+
 } // namespace find_iter_util_detail
 
 template<typename Iterator,
@@ -109,7 +111,8 @@ template<typename Iterator,
          typename KeyType>
 constexpr auto find_iter_pos(const Iterator & p_begin,
                              const Iterator & p_end,
-                             KeyType && p_key) noexcept
+                             const KeyType & p_key,
+                             std::size_t size_threshold = find_iter_util_detail::SizeThreshold) noexcept
 {
   using size_type = Iterator::size_type;
   using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
@@ -117,8 +120,8 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
 
   iter_found_type iter_found;
 
-  if(auto size = p_end - p_begin;
-     size > 16)
+  if(auto size = static_cast<std::size_t>(p_end - p_begin);
+     size > size_threshold)
   {
     iter_found = find_iter(p_begin, p_end, p_key);
   }
