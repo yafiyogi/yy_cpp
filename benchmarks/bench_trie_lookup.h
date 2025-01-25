@@ -29,6 +29,7 @@
 #include <string_view>
 #include <string>
 #include <map>
+#include <limits>
 #include <unordered_map>
 
 #include "benchmark/benchmark.h"
@@ -44,6 +45,8 @@
 
 #include "yy_fm_flat_trie_idx.h"
 #include "yy_fm_flat_trie_ptr.h"
+
+#include "yy_flat_map.h"
 
 
 using Trie = yafiyogi::yy_data::trie<char, int>;
@@ -69,6 +72,11 @@ using FMFlatTriePtrWord = yafiyogi::yy_data::fm_flat_trie_ptr<std::string, int,
                                                               yafiyogi::yy_data::fm_flat_trie_ptr_detail::Automaton,
                                                               tokenizer_type_word>;
 
+using FlatMap = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep>;
+using FlatMapSingle = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_iter_pos_size_threshold_cache_line_size * 1) / sizeof(int)) + 1>;
+using FlatMapDouble = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_iter_pos_size_threshold_cache_line_size * 2) / sizeof(int)) + 1>;
+using FlatMapBinary = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, std::numeric_limits<std::size_t>::min()>;
+using FlatMapLinear = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, std::numeric_limits<std::size_t>::max()>;
 using Map = std::map<std::string, int>;
 using UOMap = std::unordered_map<std::string, int>;
 
@@ -100,6 +108,11 @@ struct TrieLookup:
     static FMFlatTriePtr::automaton_type fm_flat_trie_ptr;
     static FMFlatTriePtrWord::automaton_type fm_flat_trie_ptr_word;
 
+    static FlatMap flat_map;
+    static FlatMapSingle flat_map_single;
+    static FlatMapDouble flat_map_double;
+    static FlatMapBinary flat_map_binary;
+    static FlatMapLinear flat_map_linear;
     static Map map;
     static UOMap uo_map;
 };

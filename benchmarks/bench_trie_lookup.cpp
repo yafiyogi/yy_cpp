@@ -494,6 +494,11 @@ FMFlatTriePtrWord::automaton_type TrieLookup::fm_flat_trie_ptr_word;
 
 
 Map TrieLookup::map;
+FlatMap TrieLookup::flat_map;
+FlatMapSingle TrieLookup::flat_map_single;
+FlatMapDouble TrieLookup::flat_map_double;
+FlatMapBinary TrieLookup::flat_map_binary;
+FlatMapLinear TrieLookup::flat_map_linear;
 UOMap TrieLookup::uo_map;
 
 TrieLookup::TrieLookup()
@@ -533,6 +538,11 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
       fm_flat_trie_ptr_word_builder.add(topic, count);
 
       map.emplace(topic, count);
+      flat_map.emplace(std::string{topic}, count);
+      flat_map_single.emplace(std::string{topic}, count);
+      flat_map_double.emplace(std::string{topic}, count);
+      flat_map_binary.emplace(std::string{topic}, count);
+      flat_map_linear.emplace(std::string{topic}, count);
       uo_map.emplace(topic, count);
     }
 

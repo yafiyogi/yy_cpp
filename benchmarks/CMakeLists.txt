@@ -52,6 +52,11 @@ add_executable(benchmark_yy_cpp
   bench_fm_flat_trie_ptr.cpp
   bench_fm_flat_trie_ptr_word.cpp
   bench_map.cpp
+  bench_flat_map.cpp
+  bench_flat_map_single.cpp
+  bench_flat_map_double.cpp
+  bench_flat_map_binary.cpp
+  bench_flat_map_linear.cpp
   bench_uo_map.cpp
 
   bench_trie_lookup.cpp
