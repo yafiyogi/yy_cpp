@@ -50,9 +50,11 @@ add_executable(test_yy_cpp
   string_util_tests.cpp
   tokenizer_tests.cpp
   variant_tests.cpp
-  vector_util_tests.cpp
   vector_tests.cpp
+  vector_iter_tests.cpp
   simple_vector_tests.cpp
+  simple_vector_iter_tests.cpp
+  vector_util_tests.cpp
 
   flat_map_tests.cpp
   static_flat_map_tests.cpp
