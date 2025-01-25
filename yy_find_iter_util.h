@@ -129,7 +129,7 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
       bool less_than = value < p_key;
       is_equal = !less_than && (p_key == value);
 
-      return !less_than || is_equal;
+      return !less_than;
     })};
 
     iter_found = iter_found_type{found, is_equal};
