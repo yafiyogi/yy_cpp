@@ -107,6 +107,8 @@ constexpr auto find_iter(const Iterator & p_begin,
   return iter_found_type{iter, found};
 }
 
+static constexpr std::size_t find_iter_pos_size_threshold_cache_line_size = 64;
+
 template<typename Iterator,
          typename KeyType>
 constexpr auto find_iter_pos(const Iterator & p_begin,

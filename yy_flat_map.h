@@ -71,7 +71,7 @@ template<typename Key,
          typename Value,
          ClearAction KeyClearAction = default_clear_action_v<Key>,
          ClearAction ValueClearAction = default_clear_action_v<Value>,
-         std::size_t SearchSizeThreshold = (64 / sizeof(Key)) + 1>
+         std::size_t SearchSizeThreshold = ((yy_data::find_iter_pos_size_threshold_cache_line_size * 2) / sizeof(Key)) + 1>
 class flat_map final
 {
   public:
