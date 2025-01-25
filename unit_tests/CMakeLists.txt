@@ -46,6 +46,7 @@ add_executable(test_yy_cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
   span_tests.cpp
+  span_iter_tests.cpp
   string_case_tests.cpp
   string_util_tests.cpp
   tokenizer_tests.cpp
