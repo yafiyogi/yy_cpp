@@ -40,7 +40,7 @@ namespace variant_detail {
 template<typename V,
          typename T,
          std::size_t N>
-struct check_variant_for_type
+struct check_variant_for_type final
 {
     using variant_type = std::variant_alternative_t<N - 1, V>;
     using raw_type = std::remove_pointer_t<yy_traits::remove_cvr_t<variant_type>>;
@@ -52,7 +52,7 @@ struct check_variant_for_type
 
 template<typename V,
          typename T>
-struct check_variant_for_type<V, T, 0>
+struct check_variant_for_type<V, T, 0> final
 {
     static constexpr bool has_type = false;
 };
