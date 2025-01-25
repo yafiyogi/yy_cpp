@@ -45,12 +45,6 @@ namespace yafiyogi::yy_quad {
 namespace span_detail {
 
 template<typename ValueType>
-class iterator;
-
-template<typename ValueType>
-class const_iterator;
-
-template<typename ValueType>
 struct span_traits final
 {
     using value_type = yy_traits::remove_cvr_t<ValueType>;
@@ -59,17 +53,15 @@ struct span_traits final
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using ptr = std::add_pointer_t<value_type>;
     using const_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
-    using iterator_type = iterator<value_type>;
-    using const_iterator_type = const_iterator<value_type>;
     using size_type = std::size_t;
     using ssize_type = std::ptrdiff_t;
 };
 
-template<typename ValueType>
-class iterator
+template<typename Traits>
+class iterator final
 {
   public:
-    using traits = span_traits<ValueType>;
+    using traits = Traits;
 
     using iterator_category = std::random_access_iterator_tag;
     using difference_type = typename traits::ssize_type;
@@ -135,11 +127,6 @@ class iterator
       m_ptr += p_offset;
 
       return *this;
-    }
-
-    constexpr ssize_type operator+(const iterator & other) const noexcept
-    {
-      return m_ptr + other.m_ptr;
     }
 
     friend constexpr iterator operator+(const iterator & p_iter,
@@ -286,11 +273,11 @@ class iterator
     pointer m_ptr;
 };
 
-template<typename ValueType>
-class const_iterator
+template<typename Traits>
+class const_iterator final
 {
   public:
-    using traits = span_traits<ValueType>;
+    using traits = Traits;
 
     using iterator_category = std::random_access_iterator_tag;
     using difference_type = typename traits::ssize_type;
@@ -354,11 +341,6 @@ class const_iterator
       m_ptr += p_offset;
 
       return *this;
-    }
-
-    constexpr ssize_type operator+(const const_iterator & other) const noexcept
-    {
-      return m_ptr + other.m_ptr;
     }
 
     friend constexpr const_iterator operator+(const const_iterator & p_iter,
@@ -502,9 +484,9 @@ class span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::ptr;
-    using iterator = typename traits::iterator_type;
-    using const_ptr = typename traits:: const_ptr;
-    using const_iterator = typename traits::const_iterator_type;
+    using iterator = span_detail::iterator<traits>;
+    using const_ptr = typename traits::const_ptr;
+    using const_iterator = span_detail::const_iterator<traits>;
     using size_type = typename traits::size_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
@@ -798,7 +780,7 @@ class const_span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::const_ptr;
-    using iterator = typename traits::const_iterator_type;
+    using iterator = span_detail::const_iterator<traits>;
     using size_type = typename traits::size_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
@@ -840,14 +822,14 @@ class const_span final
     {
     }
 
-    constexpr explicit const_span(typename traits::iterator_type p_begin,
-                                  typename traits::iterator_type p_end) noexcept:
+    constexpr explicit const_span(span_detail::iterator<traits> p_begin,
+                                  span_detail::iterator<traits> p_end) noexcept:
       m_begin(p_begin.ptr()),
       m_end(p_end.ptr())
     {
     }
 
-    constexpr explicit const_span(typename traits::iterator_type p_begin,
+    constexpr explicit const_span(span_detail::iterator<traits> p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin.ptr()),
       m_end(p_begin.ptr() + p_size)
