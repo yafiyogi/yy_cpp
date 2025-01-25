@@ -29,7 +29,7 @@
 namespace yafiyogi::yy_quad::vector_detail {
 
 template<typename VectorType>
-class iterator
+class iterator final
 {
   public:
     using vector_type = VectorType;
@@ -105,11 +105,6 @@ class iterator
       m_offset += static_cast<ssize_type>(p_offset);
 
       return *this;
-    }
-
-    constexpr ssize_type operator+(const iterator & p_other) const noexcept
-    {
-      return m_offset + p_other.m_offset;
     }
 
     friend constexpr iterator operator+(iterator p_iter,
@@ -256,7 +251,7 @@ class iterator
 };
 
 template<typename VectorType>
-class const_iterator
+class const_iterator final
 {
   public:
     using vector_type = VectorType;
@@ -330,11 +325,6 @@ class const_iterator
       m_offset += static_cast<ssize_type>(p_offset);
 
       return *this;
-    }
-
-    constexpr ssize_type operator+(const const_iterator & p_other) const noexcept
-    {
-      return m_offset + p_other.m_offset;
     }
 
     friend constexpr const_iterator operator+(const_iterator p_iter,
