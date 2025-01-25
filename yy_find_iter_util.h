@@ -124,13 +124,11 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
   }
   else
   {
-    bool is_equal = false;
-    auto found{std::find_if(p_begin, p_end, [&p_key, &is_equal](const auto & value){
-      bool less_than = value < p_key;
-      is_equal = !less_than && (p_key == value);
-
-      return !less_than;
+    auto found{std::find_if(p_begin, p_end, [&p_key](const auto & value){
+      return !(value < p_key);
     })};
+
+    bool is_equal = (found != p_end) && (p_key == *found);
 
     iter_found = iter_found_type{found, is_equal};
   }
