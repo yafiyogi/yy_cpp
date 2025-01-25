@@ -41,7 +41,7 @@ struct DigitsHelper final
 };
 
 template<>
-struct DigitsHelper<0>
+struct DigitsHelper<0> final
 {
     static constexpr const uint64_t digits = 0;
 };

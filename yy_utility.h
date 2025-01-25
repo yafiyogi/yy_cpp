@@ -116,19 +116,19 @@ constexpr auto make_range(T (&& array)[N]) noexcept
 }
 
 template<typename T>
-struct ArraySize
+struct ArraySize final
 {
     static constexpr std::size_t size = 0;
 };
 
 template<typename T, std::size_t Size>
-struct ArraySize<T[Size]>
+struct ArraySize<T[Size]> final
 {
     static constexpr std::size_t size = Size;
 };
 
 template<typename T, std::size_t Size>
-struct ArraySize<std::array<T, Size>>
+struct ArraySize<std::array<T, Size>> final
 {
     static constexpr std::size_t size = Size;
 };
