@@ -100,6 +100,13 @@ class iterator final
       return *this;
     }
 
+    constexpr iterator & operator+=(int p_offset) noexcept
+    {
+      m_offset += p_offset;
+
+      return *this;
+    }
+
     constexpr iterator & operator+=(size_type p_offset) noexcept
     {
       m_offset += static_cast<ssize_type>(p_offset);
@@ -148,6 +155,13 @@ class iterator final
     }
 
     constexpr iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_offset -= p_offset;
+
+      return *this;
+    }
+
+    constexpr iterator & operator-=(int p_offset) noexcept
     {
       m_offset -= p_offset;
 
@@ -320,6 +334,13 @@ class const_iterator final
       return *this;
     }
 
+    constexpr const_iterator & operator+=(int p_offset) noexcept
+    {
+      m_offset += static_cast<ssize_type>(p_offset);
+
+      return *this;
+    }
+
     constexpr const_iterator & operator+=(size_type p_offset) noexcept
     {
       m_offset += static_cast<ssize_type>(p_offset);
@@ -368,6 +389,13 @@ class const_iterator final
     }
 
     constexpr const_iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_offset -= static_cast<ssize_type>(p_offset);
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator-=(int p_offset) noexcept
     {
       m_offset -= static_cast<ssize_type>(p_offset);
 
