@@ -122,6 +122,13 @@ class iterator final
       return *this;
     }
 
+    constexpr iterator & operator+=(int p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
     constexpr iterator & operator+=(size_type p_offset) noexcept
     {
       m_ptr += p_offset;
@@ -176,6 +183,13 @@ class iterator final
     }
 
     constexpr iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    constexpr iterator & operator-=(int p_offset) noexcept
     {
       m_ptr -= p_offset;
 
@@ -336,6 +350,13 @@ class const_iterator final
       return *this;
     }
 
+    constexpr const_iterator & operator+=(int p_offset) noexcept
+    {
+      m_ptr += p_offset;
+
+      return *this;
+    }
+
     constexpr const_iterator & operator+=(size_type p_offset) noexcept
     {
       m_ptr += p_offset;
@@ -366,7 +387,7 @@ class const_iterator final
     friend constexpr const_iterator operator+(const const_iterator & p_iter,
                                               size_type p_offset) noexcept
     {
-      iterator rv{p_iter};
+      const_iterator rv{p_iter};
 
       rv += p_offset;
 
@@ -390,6 +411,13 @@ class const_iterator final
     }
 
     constexpr const_iterator & operator-=(ssize_type p_offset) noexcept
+    {
+      m_ptr -= p_offset;
+
+      return *this;
+    }
+
+    constexpr const_iterator & operator-=(int p_offset) noexcept
     {
       m_ptr -= p_offset;
 
@@ -488,6 +516,7 @@ class span final
     using const_ptr = typename traits::const_ptr;
     using const_iterator = span_detail::const_iterator<traits>;
     using size_type = typename traits::size_type;
+    using ssize_type = typename traits::ssize_type;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
