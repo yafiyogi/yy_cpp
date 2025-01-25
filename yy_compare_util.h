@@ -99,14 +99,14 @@ struct Compare<A, B,
 
 template<typename A,
          typename B>
-constexpr bool equal(A && a, B && b) noexcept
+constexpr bool equal(const A & a, const B & b) noexcept
 {
   return compare_util_detail::Compare<A, B>::equal(a, b);
 }
 
 template<typename A,
          typename B>
-constexpr bool less_than(A && a, B && b) noexcept
+constexpr bool less_than(const A & a, const B & b) noexcept
 {
   return compare_util_detail::Compare<A, B>::less_than(a, b);
 }
