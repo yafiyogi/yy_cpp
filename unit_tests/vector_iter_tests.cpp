@@ -71,7 +71,7 @@ TEST_F(TestVectorIter, begin_inc)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(vec.begin(), vec.end());
@@ -97,7 +97,7 @@ TEST_F(TestVectorIter, end_dec)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(vec.begin(), vec.end());
@@ -123,7 +123,7 @@ TEST_F(TestVectorIter, offset_plus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(vec.begin(), vec.end());
@@ -172,7 +172,7 @@ TEST_F(TestVectorIter, offset_minus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(vec.begin(), vec.end());
@@ -221,7 +221,7 @@ TEST_F(TestVectorIter, distance)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(vec.begin(), vec.end());
@@ -252,7 +252,7 @@ TEST_F(TestVectorIter, const_begin_inc)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(const_vec.begin(), const_vec.end());
@@ -279,7 +279,7 @@ TEST_F(TestVectorIter, const_end_dec)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(const_vec.begin(), const_vec.end());
@@ -306,7 +306,7 @@ TEST_F(TestVectorIter, const_offset_plus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(const_vec.begin(), const_vec.end());
@@ -356,7 +356,7 @@ TEST_F(TestVectorIter, const_offset_minus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(const_vec.begin(), const_vec.end());
@@ -406,7 +406,7 @@ TEST_F(TestVectorIter, const_distance)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
+  EXPECT_EQ(2, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   EXPECT_NE(const_vec.begin(), const_vec.end());

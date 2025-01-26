@@ -60,7 +60,6 @@ TEST_F(TestSpanIter, begin_end_default)
 
   ASSERT_EQ(nullptr, vec.data());
   EXPECT_EQ(0, vec.size());
-  EXPECT_EQ(0, vec.capacity());
   EXPECT_TRUE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -74,7 +73,6 @@ TEST_F(TestSpanIter, begin_inc)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -101,7 +99,6 @@ TEST_F(TestSpanIter, end_dec)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -128,7 +125,6 @@ TEST_F(TestSpanIter, offset_plus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -178,7 +174,6 @@ TEST_F(TestSpanIter, offset_minus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -228,7 +223,6 @@ TEST_F(TestSpanIter, distance)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto span = yy_quad::make_span(vec);
@@ -245,7 +239,6 @@ TEST_F(TestSpanIter, const_begin_end_default)
 
   ASSERT_EQ(nullptr, vec.data());
   EXPECT_EQ(0, vec.size());
-  EXPECT_EQ(0, vec.capacity());
   EXPECT_TRUE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
@@ -259,7 +252,6 @@ TEST_F(TestSpanIter, const_begin_inc)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
@@ -286,7 +278,6 @@ TEST_F(TestSpanIter, const_end_dec)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
@@ -313,7 +304,6 @@ TEST_F(TestSpanIter, const_offset_plus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
@@ -363,7 +353,6 @@ TEST_F(TestSpanIter, const_offset_minus)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
@@ -413,7 +402,6 @@ TEST_F(TestSpanIter, const_distance)
   vec.emplace_back(1);
   ASSERT_NE(nullptr, vec.data());
   EXPECT_EQ(1, vec.size());
-  EXPECT_EQ(1, vec.capacity());
   EXPECT_FALSE(vec.empty());
 
   auto const_span = yy_quad::make_const_span(vec);
