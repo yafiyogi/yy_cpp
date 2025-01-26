@@ -38,6 +38,10 @@ class TestSimpleVector:
       public testing::Test
 {
   public:
+    using simple_vector = yy_quad::vector<int>;
+    using iterator = simple_vector::iterator;
+    using size_type = simple_vector::size_type;
+
     void SetUp() override
     {
       yy_test::TestCount::reset();
@@ -46,14 +50,20 @@ class TestSimpleVector:
     void TearDown() override
     {
     }
+
+    size_type calc_capacity(size_type capacity, size_type size)
+    {
+      if(capacity < size)
+      {
+        capacity = size * 2;
+      }
+
+      return capacity;
+    }
 };
 
 TEST_F(TestSimpleVector, IteratorArithmatic)
 {
-
-  using vec_type = yy_quad::simple_vector<int>;
-  using iterator = vec_type::iterator;
-
   iterator iter_1{nullptr, 0};
 
   EXPECT_EQ(iter_1.offset(), 0);
@@ -84,10 +94,6 @@ TEST_F(TestSimpleVector, IteratorArithmatic)
 
 TEST_F(TestSimpleVector, ConstIteratorArithmatic)
 {
-
-  using vec_type = yy_quad::simple_vector<int>;
-  using iterator = vec_type::const_iterator;
-
   iterator iter_1{nullptr, 0};
 
   EXPECT_EQ(iter_1.offset(), 0);
@@ -118,7 +124,7 @@ TEST_F(TestSimpleVector, ConstIteratorArithmatic)
 
 TEST_F(TestSimpleVector, DefaltConstructor)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
 
   ASSERT_EQ(nullptr, vec.data());
   EXPECT_EQ(0, vec.size());
@@ -128,12 +134,17 @@ TEST_F(TestSimpleVector, DefaltConstructor)
 
 TEST_F(TestSimpleVector, TestEmplaceBackNoCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
-  for(int ii = 0; ii < 65; ++ii)
+  simple_vector vec{};
+  size_type capacity = 0;
+
+  for(size_type ii = 0; ii < 65; ++ii)
   {
     vec.emplace_back(ii + 7);
+
+    capacity = calc_capacity(capacity, ii + 1);
+
     ASSERT_EQ(ii + 1, vec.size());
-    ASSERT_EQ(yy_bit_twiddling::round_up_pow2(vec.size()), vec.capacity());
+    ASSERT_EQ(capacity, vec.capacity());
 
     for(size_t jj = 0; jj < vec.size(); ++jj)
     {
@@ -144,7 +155,7 @@ TEST_F(TestSimpleVector, TestEmplaceBackNoCapacity)
 
 TEST_F(TestSimpleVector, TestEmplaceBackPlentyCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
   vec.reserve(100);
 
   for(int ii = 0; ii < 65; ++ii)
@@ -162,7 +173,7 @@ TEST_F(TestSimpleVector, TestEmplaceBackPlentyCapacity)
 
 TEST_F(TestSimpleVector, TestEmplaceNoCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
 
   vec.emplace_back(1);
   vec.emplace_back(3);
@@ -172,7 +183,7 @@ TEST_F(TestSimpleVector, TestEmplaceNoCapacity)
   ASSERT_TRUE(rv.inserted);
   ASSERT_EQ(2, *rv.iter);
   ASSERT_EQ(3, vec.size());
-  ASSERT_EQ(4, vec.capacity());
+  ASSERT_EQ(6, vec.capacity());
 
   EXPECT_EQ(1, vec[0]);
   EXPECT_EQ(2, vec[1]);
@@ -181,7 +192,7 @@ TEST_F(TestSimpleVector, TestEmplaceNoCapacity)
 
 TEST_F(TestSimpleVector, TestEmplacePentyCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
   vec.reserve(100);
 
   vec.emplace_back(1);
@@ -200,7 +211,7 @@ TEST_F(TestSimpleVector, TestEmplacePentyCapacity)
 
 TEST_F(TestSimpleVector, TestEmplaceAtBeginningNoCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
 
   ASSERT_TRUE(vec.emplace(vec.begin(), 3).inserted);
   ASSERT_EQ(3, vec[0]);
@@ -210,12 +221,12 @@ TEST_F(TestSimpleVector, TestEmplaceAtBeginningNoCapacity)
   ASSERT_EQ(1, vec[0]);
 
   ASSERT_EQ(3, vec.size());
-  ASSERT_EQ(4, vec.capacity());
+  ASSERT_EQ(6, vec.capacity());
 }
 
 TEST_F(TestSimpleVector, TestEmplaceAtBeginningPlentyCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
   vec.reserve(100);
 
   ASSERT_TRUE(vec.emplace(vec.begin(), 3).inserted);
@@ -231,7 +242,7 @@ TEST_F(TestSimpleVector, TestEmplaceAtBeginningPlentyCapacity)
 
 TEST_F(TestSimpleVector, TestEmplaceAtEndNoCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
 
   ASSERT_TRUE(vec.emplace(vec.end(), 3).inserted);
   ASSERT_EQ(3, vec.back());
@@ -241,12 +252,12 @@ TEST_F(TestSimpleVector, TestEmplaceAtEndNoCapacity)
   ASSERT_EQ(1, vec.back());
 
   ASSERT_EQ(3, vec.size());
-  ASSERT_EQ(4, vec.capacity());
+  ASSERT_EQ(6, vec.capacity());
 }
 
 TEST_F(TestSimpleVector, TestEmplaceAtEndPlentyCapacity)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
 
   vec.reserve(100);
   ASSERT_TRUE(vec.emplace(vec.end(), 3).inserted);
@@ -262,7 +273,7 @@ TEST_F(TestSimpleVector, TestEmplaceAtEndPlentyCapacity)
 
 TEST_F(TestSimpleVector, TestCopyConstruct)
 {
-  yy_quad::simple_vector<int> vec_1{};
+  simple_vector vec_1{};
 
   vec_1.reserve(100);
   vec_1.emplace_back(1);
@@ -272,7 +283,7 @@ TEST_F(TestSimpleVector, TestCopyConstruct)
   ASSERT_EQ(3, vec_1.size());
   ASSERT_EQ(100, vec_1.capacity());
 
-  yy_quad::simple_vector<int> vec_2{vec_1};
+  simple_vector vec_2{vec_1};
 
   ASSERT_EQ(3, vec_2.size());
   ASSERT_EQ(3, vec_2.capacity());
@@ -343,20 +354,20 @@ TEST_F(TestSimpleVector, TestEraseLast)
 
 TEST_F(TestSimpleVector, TestEraseEnd)
 {
-  yy_quad::simple_vector<int> vec{};
+  simple_vector vec{};
   vec.emplace_back(668);
   vec.emplace_back(777);
   vec.emplace_back(888);
 
   ASSERT_EQ(3, vec.size());
-  ASSERT_EQ(4, vec.capacity());
+  ASSERT_EQ(6, vec.capacity());
 
   auto end = vec.end();
 
   EXPECT_FALSE(vec.erase(vec.end()));
 
   ASSERT_EQ(3, vec.size());
-  ASSERT_EQ(4, vec.capacity());
+  ASSERT_EQ(6, vec.capacity());
 
   ASSERT_EQ(end, vec.end());
 }
@@ -838,7 +849,7 @@ TEST_F(TestSimpleVector, TestCopyLargerActionKeep)
 
 TEST_F(TestSimpleVector, TestFront)
 {
-  yy_quad::simple_vector<int> vec;
+  simple_vector vec;
   vec.reserve(4);
   vec.emplace_back(668);
   vec.emplace_back(777);
@@ -856,7 +867,7 @@ TEST_F(TestSimpleVector, TestFront)
 
 TEST_F(TestSimpleVector, TestBack)
 {
-  yy_quad::simple_vector<int> vec;
+  simple_vector vec;
   vec.reserve(4);
   vec.emplace_back(668);
   vec.emplace_back(777);
