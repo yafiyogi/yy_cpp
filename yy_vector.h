@@ -360,7 +360,9 @@ class vector
         }
         else
         {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
+          // In search of the perfect dynamic array growth factor: https://youtu.be/GZPqDvG615k?si=-UBeW34k9mIj3Njv
+          reserve_and_move((m_size + 1) * 2, static_cast<size_type>(distance));
+          // Can't use the parameter 'pos' after this point!
         }
       }
       else
@@ -1053,7 +1055,8 @@ class simple_vector
       {
         if(m_size == m_capacity)
         {
-          reserve_and_move(yy_bit_twiddling::round_up_pow2(m_size + 1), static_cast<size_type>(distance));
+          // In search of the perfect dynamic array growth factor: https://youtu.be/GZPqDvG615k?si=-UBeW34k9mIj3Njv
+          reserve_and_move((m_size + 1) * 2, static_cast<size_type>(distance));
           // Can't use the parameter 'pos' after this point!
         }
         else
