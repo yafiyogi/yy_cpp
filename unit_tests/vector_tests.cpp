@@ -261,7 +261,7 @@ TEST_F(TestVector, TestEraseFirstClear)
   ASSERT_EQ(3, vec.capacity());
   ASSERT_EQ(1, vec.offset());
 
-  ASSERT_EQ(begin, vec.begin());
+  ASSERT_EQ(begin + 1, vec.begin());
 }
 
 TEST_F(TestVector, TestEraseFirstKeep)
@@ -291,7 +291,7 @@ TEST_F(TestVector, TestEraseFirstKeep)
   ASSERT_EQ(3, vec.capacity());
   ASSERT_EQ(1, vec.offset());
 
-  ASSERT_EQ(begin, vec.begin());
+  ASSERT_EQ(begin + 1, vec.begin());
 }
 
 TEST_F(TestVector, TestEraseLastClear)
@@ -660,7 +660,7 @@ TEST_F(TestVector, TestResetOffsetFromFront)
   ASSERT_EQ(3, vec.capacity());
   ASSERT_EQ(2, vec.offset());
 
-  ASSERT_EQ(begin, vec.begin());
+  ASSERT_EQ(begin + 2, vec.begin());
 
   EXPECT_TRUE(vec.erase(vec.begin()));
 

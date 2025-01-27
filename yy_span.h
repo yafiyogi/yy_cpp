@@ -41,6 +41,8 @@
 #include "yy_string_traits.h"
 #include "yy_vector_traits.h"
 
+#include "yy_iterator_ptr.hpp"
+
 namespace yafiyogi::yy_quad {
 namespace span_detail {
 
@@ -57,449 +59,6 @@ struct span_traits final
     using ssize_type = std::ptrdiff_t;
 };
 
-template<typename Traits>
-class iterator final
-{
-  public:
-    using traits = Traits;
-
-    using iterator_category = std::random_access_iterator_tag;
-    using difference_type = typename traits::ssize_type;
-    using value_type = typename traits::value_type;
-    using pointer = typename traits::ptr;
-    using const_pointer = typename traits::const_ptr;
-    using reference = std::add_lvalue_reference_t<value_type>;
-    using const_reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
-
-    constexpr iterator(pointer p_ptr) noexcept:
-      m_ptr(p_ptr)
-    {
-    }
-
-    constexpr iterator() noexcept = default;
-    constexpr iterator(const iterator &) noexcept = default;
-    constexpr iterator(iterator && other) noexcept:
-      m_ptr(other.m_ptr)
-    {
-      other.m_ptr = nullptr;
-    }
-
-    constexpr ~iterator() noexcept = default;
-
-    constexpr iterator & operator=(const iterator &) noexcept = default;
-    constexpr iterator & operator=(iterator && other) noexcept
-    {
-      if(this != &other)
-      {
-        m_ptr = other.m_ptr;
-        other.m_ptr = nullptr;
-      }
-      return *this;
-    }
-
-    constexpr iterator & operator++() noexcept
-    {
-      ++m_ptr;
-
-      return *this;
-    }
-
-    constexpr iterator operator++(int) noexcept
-    {
-      iterator tmp{*this};
-
-      ++m_ptr;
-
-      return tmp;
-    }
-
-    constexpr iterator & operator+=(ssize_type p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    constexpr iterator & operator+=(int p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    constexpr iterator & operator+=(size_type p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    friend constexpr iterator operator+(const iterator & p_iter,
-                                        ssize_type p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    friend constexpr iterator operator+(const iterator & p_iter,
-                                        int p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    friend constexpr iterator operator+(const iterator & p_iter,
-                                        size_type p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    constexpr iterator & operator--() noexcept
-    {
-      --m_ptr;
-
-      return *this;
-    }
-
-    constexpr iterator operator--(int) noexcept
-    {
-      iterator tmp{*this};
-
-      --m_ptr;
-
-      return tmp;
-    }
-
-    constexpr iterator & operator-=(ssize_type p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr iterator & operator-=(int p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr iterator & operator-=(size_type p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr ssize_type operator-(const iterator & other) const noexcept
-    {
-      return m_ptr - other.m_ptr;
-    }
-
-    friend constexpr iterator operator-(const iterator & p_iter,
-                                        ssize_type p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    friend constexpr iterator operator-(const iterator & p_iter,
-                                        int p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    friend constexpr iterator operator-(const iterator & p_iter,
-                                        size_type p_offset) noexcept
-    {
-      iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    constexpr bool operator==(const iterator & other) const noexcept
-    {
-      return m_ptr == other.m_ptr;
-    }
-
-    constexpr bool operator<(const iterator & other) const noexcept
-    {
-      return m_ptr < other.m_ptr;
-    }
-
-    constexpr bool operator>(const iterator & other) const noexcept
-    {
-      return m_ptr > other.m_ptr;
-    }
-
-    constexpr pointer ptr() noexcept
-    {
-      return m_ptr;
-    }
-
-    constexpr const_pointer ptr() const noexcept
-    {
-      return m_ptr;
-    }
-
-    constexpr reference operator*() noexcept
-    {
-      return *ptr();
-    }
-
-    constexpr const_reference operator*() const noexcept
-    {
-      return *ptr();
-    }
-
-    constexpr pointer operator->() noexcept
-    {
-      return ptr();
-    }
-
-    constexpr const_pointer operator->() const noexcept
-    {
-      return ptr();
-    }
-
-  private:
-    pointer m_ptr;
-};
-
-template<typename Traits>
-class const_iterator final
-{
-  public:
-    using traits = Traits;
-
-    using iterator_category = std::random_access_iterator_tag;
-    using difference_type = typename traits::ssize_type;
-    using value_type = typename traits::value_type;
-    using pointer = typename traits::const_ptr;
-    using reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
-
-    constexpr const_iterator(pointer p_ptr) noexcept:
-      m_ptr(p_ptr)
-    {
-    }
-
-    constexpr const_iterator() noexcept = default;
-    constexpr const_iterator(const const_iterator &) noexcept = default;
-    constexpr const_iterator(const_iterator && other) noexcept:
-      m_ptr(other.m_ptr)
-    {
-      other.m_ptr = nullptr;
-    }
-
-    constexpr ~const_iterator() noexcept = default;
-
-    constexpr const_iterator & operator=(const const_iterator &) noexcept = default;
-    constexpr const_iterator & operator=(const_iterator && other) noexcept
-    {
-      if(this != &other)
-      {
-        m_ptr = other.m_ptr;
-        other.m_ptr = nullptr;
-      }
-      return *this;
-    }
-
-    constexpr const_iterator & operator++() noexcept
-    {
-      ++m_ptr;
-
-      return *this;
-    }
-
-    constexpr const_iterator operator++(int) noexcept
-    {
-      const_iterator tmp{*this};
-
-      ++m_ptr;
-
-      return tmp;
-    }
-
-    constexpr const_iterator & operator+=(ssize_type p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    constexpr const_iterator & operator+=(int p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    constexpr const_iterator & operator+=(size_type p_offset) noexcept
-    {
-      m_ptr += p_offset;
-
-      return *this;
-    }
-
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
-                                              ssize_type p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
-                                              int p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    friend constexpr const_iterator operator+(const const_iterator & p_iter,
-                                              size_type p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv += p_offset;
-
-      return rv;
-    }
-
-    constexpr const_iterator & operator--() noexcept
-    {
-      --m_ptr;
-
-      return *this;
-    }
-
-    constexpr const_iterator operator--(int) noexcept
-    {
-      const_iterator tmp{*this};
-
-      --m_ptr;
-
-      return tmp;
-    }
-
-    constexpr const_iterator & operator-=(ssize_type p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr const_iterator & operator-=(int p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr const_iterator & operator-=(size_type p_offset) noexcept
-    {
-      m_ptr -= p_offset;
-
-      return *this;
-    }
-
-    constexpr ssize_type operator-(const const_iterator & other) const noexcept
-    {
-      return m_ptr - other.m_ptr;
-    }
-
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
-                                              ssize_type p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
-                                              int p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    friend constexpr const_iterator operator-(const const_iterator & p_iter,
-                                              size_type p_offset) noexcept
-    {
-      const_iterator rv{p_iter};
-
-      rv -= p_offset;
-
-      return rv;
-    }
-
-    constexpr bool operator==(const const_iterator & other) const noexcept
-    {
-      return m_ptr == other.m_ptr;
-    }
-
-    constexpr bool operator<(const const_iterator & other) const noexcept
-    {
-      return m_ptr < other.m_ptr;
-    }
-
-    constexpr bool operator>(const const_iterator & other) const noexcept
-    {
-      return m_ptr > other.m_ptr;
-    }
-
-    constexpr pointer ptr() const noexcept
-    {
-      return m_ptr;
-    }
-
-    constexpr reference operator*() const noexcept
-    {
-      return *ptr();
-    }
-
-    constexpr pointer operator->() const noexcept
-    {
-      return ptr();
-    }
-
-  private:
-    pointer m_ptr;
-};
-
 } // namespace span_detail
 
 template<typename ValueType>
@@ -512,11 +71,11 @@ class span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::ptr;
-    using iterator = span_detail::iterator<traits>;
     using const_ptr = typename traits::const_ptr;
-    using const_iterator = span_detail::const_iterator<traits>;
     using size_type = typename traits::size_type;
     using ssize_type = typename traits::ssize_type;
+    using iterator = yy_data::iterator_detail::iterator_ptr<span>;
+    using const_iterator = yy_data::iterator_detail::const_iterator_ptr<span>;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
@@ -580,25 +139,25 @@ class span final
     [[nodiscard]]
     constexpr iterator begin() noexcept
     {
-      return iterator{m_begin};
+      return iterator{this, 0};
     }
 
     [[nodiscard]]
     constexpr const_iterator begin() const noexcept
     {
-      return const_iterator{m_begin};
+      return const_iterator{this, 0};
     }
 
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return iterator{m_end};
+      return iterator{this, static_cast<size_type>(m_end - m_begin)};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return const_iterator{m_end};
+      return const_iterator{this, static_cast<size_type>(m_end - m_begin)};
     }
 
     constexpr span & inc_begin() noexcept
@@ -809,8 +368,9 @@ class const_span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::const_ptr;
-    using iterator = span_detail::const_iterator<traits>;
     using size_type = typename traits::size_type;
+    using ssize_type = typename traits::ssize_type;
+    using iterator = yy_data::iterator_detail::const_iterator_ptr<const_span>;
 
     static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
@@ -851,14 +411,14 @@ class const_span final
     {
     }
 
-    constexpr explicit const_span(span_detail::iterator<traits> p_begin,
-                                  span_detail::iterator<traits> p_end) noexcept:
+    constexpr explicit const_span(yy_data::iterator_detail::iterator_ptr<const_span> p_begin,
+                                  yy_data::iterator_detail::iterator_ptr<const_span> p_end) noexcept:
       m_begin(p_begin.ptr()),
       m_end(p_end.ptr())
     {
     }
 
-    constexpr explicit const_span(span_detail::iterator<traits> p_begin,
+    constexpr explicit const_span(yy_data::iterator_detail::iterator_ptr<const_span> p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin.ptr()),
       m_end(p_begin.ptr() + p_size)
@@ -906,13 +466,13 @@ class const_span final
     [[nodiscard]]
     constexpr iterator begin() const noexcept
     {
-      return iterator{m_begin};
+      return iterator{this, 0};
     }
 
     [[nodiscard]]
     constexpr iterator end() const noexcept
     {
-      return iterator{m_end};
+      return iterator{this, static_cast<size_type>(m_end - m_begin)};
     }
 
     constexpr const_span & inc_begin() noexcept

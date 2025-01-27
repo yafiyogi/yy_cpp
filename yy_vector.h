@@ -36,12 +36,13 @@
 #include "yy_bit_twiddling.h"
 #include "yy_clear_action.h"
 #include "yy_compare_util.h"
+#include "yy_iterator_ptr.hpp"
 #include "yy_ref_traits.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
-#include "yy_vector_iter.h"
 #include "yy_vector_traits.h"
+
 
 namespace yafiyogi {
 namespace yy_quad {
@@ -83,10 +84,10 @@ class vector
     using const_value_ptr = typename traits::const_value_ptr;
     using size_type = typename traits::size_type;
     using ssize_type = typename traits::ssize_type;
-    using iterator = vector_detail::iterator<vector>;
-    using const_iterator = vector_detail::const_iterator<vector>;
     using reference = typename traits::reference;
     using const_reference = typename traits::const_reference;
+    using iterator = yy_data::iterator_detail::iterator_ptr<vector>;
+    using const_iterator = yy_data::iterator_detail::const_iterator_ptr<vector>;
 
     struct insert_result final
     {
@@ -737,7 +738,7 @@ class vector
     constexpr distance_valid_type distance_valid(const iterator pos,
                                                  size_type max) const noexcept
     {
-      const ssize_type distance = pos.offset() - begin().offset();
+      const ssize_type distance = const_iterator{pos} - begin();
 
       return distance_valid_type{distance,
                                  (distance >= 0) && (static_cast<size_type>(distance) < max)};
@@ -805,8 +806,8 @@ class simple_vector
     using const_value_ptr = typename traits::const_value_ptr;
     using size_type = typename traits::size_type;
     using ssize_type = typename traits::ssize_type;
-    using iterator = vector_detail::iterator<simple_vector>;
-    using const_iterator = vector_detail::const_iterator<simple_vector>;
+    using iterator = yy_data::iterator_detail::iterator_ptr<simple_vector>;
+    using const_iterator = yy_data::iterator_detail::const_iterator_ptr<simple_vector>;
     using reference = typename traits::reference;
     using const_reference = typename traits::const_reference;
 
@@ -1364,7 +1365,7 @@ class simple_vector
     constexpr distance_valid_type distance_valid(const iterator pos,
                                                  size_type max) noexcept
     {
-      const ssize_type distance = pos.offset() - begin().offset();
+      const ssize_type distance = const_iterator{pos} - begin();
 
       return distance_valid_type{distance,
                                  (distance >= 0) && (static_cast<size_type>(distance) < max)};

@@ -81,6 +81,8 @@ target_sources(yy_cpp
       yy_hash.h
       yy_init.h
       yy_int_util.h
+      yy_iterator_idx.hpp
+      yy_iterator_ptr.hpp
       yy_locale.h
       yy_lockable_value.h
       yy_lower_bound.h
@@ -103,7 +105,6 @@ target_sources(yy_cpp
       yy_utility.h
       yy_variant_util.h
       yy_vector.h
-      yy_vector_iter.h
       yy_vector_traits.h
       yy_vector_util.h )
 

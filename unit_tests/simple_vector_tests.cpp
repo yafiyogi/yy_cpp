@@ -38,7 +38,8 @@ class TestSimpleVector:
       public testing::Test
 {
   public:
-    using simple_vector = yy_quad::vector<int>;
+    using simple_vector = yy_quad::simple_vector<int>;
+    using pointer = simple_vector::value_ptr;
     using iterator = simple_vector::iterator;
     using size_type = simple_vector::size_type;
 
@@ -64,61 +65,64 @@ class TestSimpleVector:
 
 TEST_F(TestSimpleVector, IteratorArithmatic)
 {
-  iterator iter_1{nullptr, 0};
+  simple_vector vec{};
+  pointer ptr = nullptr;
+  iterator iter_1{&vec, 0};
 
-  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
   ++iter_1;
-  EXPECT_EQ(iter_1.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 1);
 
   auto iter_2 = iter_1++;
-  EXPECT_EQ(iter_1.offset(), 2);
-  EXPECT_EQ(iter_2.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 2);
+  EXPECT_EQ(iter_2.ptr(), ptr + 1);
 
   auto iter_3 = iter_1 + 1;
-  EXPECT_EQ(iter_1.offset(), 2);
-  EXPECT_EQ(iter_3.offset(), 3);
+  EXPECT_EQ(iter_1.ptr(), ptr + 2);
+  EXPECT_EQ(iter_3.ptr(), ptr + 3);
 
 
   --iter_1;
-  EXPECT_EQ(iter_1.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 1);
 
   auto iter_4 = iter_1--;
-  EXPECT_EQ(iter_1.offset(), 0);
-  EXPECT_EQ(iter_4.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
+  EXPECT_EQ(iter_4.ptr(), ptr + 1);
 
   auto iter_5 = iter_1 - 1;
-  EXPECT_EQ(iter_1.offset(), 0);
-  EXPECT_EQ(iter_5.offset(), -1);
-
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
+  EXPECT_EQ(iter_5.ptr(), ptr - 1);
 }
 
 TEST_F(TestSimpleVector, ConstIteratorArithmatic)
 {
-  iterator iter_1{nullptr, 0};
+  simple_vector vec{};
+  pointer ptr = nullptr;
+  iterator iter_1{&vec, 0};
 
-  EXPECT_EQ(iter_1.offset(), 0);
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
   ++iter_1;
-  EXPECT_EQ(iter_1.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 1);
 
   auto iter_2 = iter_1++;
-  EXPECT_EQ(iter_1.offset(), 2);
-  EXPECT_EQ(iter_2.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 2);
+  EXPECT_EQ(iter_2.ptr(), ptr + 1);
 
   auto iter_3 = iter_1 + 1;
-  EXPECT_EQ(iter_1.offset(), 2);
-  EXPECT_EQ(iter_3.offset(), 3);
+  EXPECT_EQ(iter_1.ptr(), ptr + 2);
+  EXPECT_EQ(iter_3.ptr(), ptr + 3);
 
 
   --iter_1;
-  EXPECT_EQ(iter_1.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 1);
 
   auto iter_4 = iter_1--;
-  EXPECT_EQ(iter_1.offset(), 0);
-  EXPECT_EQ(iter_4.offset(), 1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
+  EXPECT_EQ(iter_4.ptr(), ptr + 1);
 
   auto iter_5 = iter_1 - 1;
-  EXPECT_EQ(iter_1.offset(), 0);
-  EXPECT_EQ(iter_5.offset(), -1);
+  EXPECT_EQ(iter_1.ptr(), ptr + 0);
+  EXPECT_EQ(iter_5.ptr(), ptr - 1);
 
 }
 
