@@ -30,6 +30,7 @@
 
 #include "yy_test/yy_test_count.h"
 
+#include "yy_span.h"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_cpp::tests {
