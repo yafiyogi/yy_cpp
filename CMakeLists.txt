@@ -65,6 +65,7 @@ target_sources(yy_cpp
       yy_bit_twiddling.h
       yy_clear_action.h
       yy_compare_util.h
+      yy_constants.hpp
       yy_fast_atoi.h
       yy_find_iter_util.h
       yy_find_util.h
@@ -104,6 +105,7 @@ target_sources(yy_cpp
       yy_trie_common.h
       yy_type_traits.h
       yy_type_traits_std.hpp
+      yy_types.hpp
       yy_utility.h
       yy_variant_util.h
       yy_vector.h
