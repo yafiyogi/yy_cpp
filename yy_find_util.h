@@ -27,8 +27,10 @@
 #pragma once
 
 #include <algorithm>
+#include <string>
 #include <type_traits>
 
+#include "yy_constants.hpp"
 #include "yy_find_iter_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
@@ -36,8 +38,6 @@
 
 namespace yafiyogi::yy_data {
 namespace find_util_detail {
-
-using size_type = std::size_t;
 
 template<typename KeyType>
 struct iter_end_t;
@@ -120,6 +120,47 @@ struct pos_found_type final
     bool found = false;
 };
 
+template<typename Iterator,
+         typename ValueType,
+         typename Enable = void>
+struct find_pos_linear
+{
+    constexpr static pos_found_type find(const Iterator & p_begin,
+                                         const Iterator & p_end,
+                                         const ValueType & p_value) noexcept
+    {
+      auto found = std::find(p_begin, p_end, p_value);
+
+      if(found == p_end)
+      {
+        return pos_found_type{npos, false};
+      }
+
+      return pos_found_type{static_cast<size_type>(found - p_begin), true};
+    }
+};
+
+template<typename Iterator,
+         typename ValueType>
+struct find_pos_linear<Iterator,
+                       ValueType,
+                       std::enable_if_t<std::is_same_v<char, yy_traits::remove_cvr_t<ValueType>>>>
+{
+    constexpr static pos_found_type find(const Iterator & p_begin,
+                                         const Iterator & p_end,
+                                         const ValueType & p_value) noexcept
+    {
+      auto found{std::char_traits<char>::find(p_begin, p_end - p_begin, p_value)};
+
+      if(nullptr == found)
+      {
+        return pos_found_type{npos, false};
+      }
+
+      return pos_found_type{static_cast<size_type>(found - p_begin), true};
+    };
+};
+
 } // find_util_detail
 
 template<typename KeyType,
@@ -162,7 +203,7 @@ constexpr inline auto do_lower_bound(const KeyStore & p_keys,
 
   auto [iter, is_end] = do_lower_bound_raw(begin, p_keys.end(), p_key);
 
-  return find_util_detail::pos_end_type{static_cast<find_util_detail::size_type>(iter - begin), is_end};
+  return find_util_detail::pos_end_type{static_cast<size_type>(iter - begin), is_end};
 }
 
 template<typename KeyType,
@@ -204,7 +245,7 @@ constexpr inline auto do_upper_bound(const KeyStore & p_keys,
 {
   auto [iter, is_end] = do_upper_bound_raw(p_keys.begin(), p_keys.end(), p_key);
 
-  return find_util_detail::pos_end_type{static_cast<find_util_detail::size_type>(iter - p_keys.data()), is_end};
+  return find_util_detail::pos_end_type{static_cast<size_type>(iter - p_keys.data()), is_end};
 }
 
 template<typename KeyStore,
@@ -307,8 +348,18 @@ constexpr inline auto do_find(const KeyStore & p_keys,
 {
   auto [key_iter, found] = do_find_raw(p_keys, p_key);
 
-  return find_util_detail::pos_found_type{static_cast<KeyStore::size_type>(key_iter - p_keys.data()), found};
+  return find_util_detail::pos_found_type{static_cast<size_type>(key_iter - p_keys.data()), found};
 }
 
+template<typename Iterator,
+         typename ValueType>
+constexpr inline find_util_detail::pos_found_type find_pos_linear(const Iterator & p_begin,
+                                                                  const Iterator & p_end,
+                                                                  const ValueType & p_value) noexcept
+{
+  return find_util_detail::find_pos_linear<Iterator, ValueType>::find(p_begin,
+                                                                      p_end,
+                                                                      p_value);
+}
 
 } //namespace yafiyogi::yy_data

@@ -29,13 +29,14 @@
 #include <cstddef>
 
 #include <algorithm>
-#include <limits>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
 
 #include "yy_array_traits.h"
 #include "yy_compare_util.h"
+#include "yy_constants.hpp"
+#include "yy_find_util.h"
 #include "yy_ref_traits.h"
 #include "yy_span_traits.h"
 #include "yy_string_traits.h"
@@ -56,8 +57,6 @@ struct span_traits final
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using ptr = std::add_pointer_t<value_type>;
     using const_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
-    using size_type = std::size_t;
-    using ssize_type = std::ptrdiff_t;
 };
 
 } // namespace span_detail
@@ -73,12 +72,8 @@ class span final
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::ptr;
     using const_ptr = typename traits::const_ptr;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using iterator = yy_data::iterator_detail::iterator_ptr<span>;
     using const_iterator = yy_data::iterator_detail::const_iterator_ptr<span>;
-
-    static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
     template<typename T,
              std::enable_if_t<yy_traits::is_container_v<T>
@@ -290,18 +285,9 @@ class span final
       return span{m_begin + pos, len};
     }
 
-    constexpr size_type find_pos(value_type p_value) const noexcept
+    constexpr size_type find_pos(const value_type & p_value) const noexcept
     {
-      auto begin_pos = begin();
-      auto end_pos = end();
-      auto found = std::find(begin_pos, end_pos, p_value);
-
-      if(found == end_pos)
-      {
-        return npos;
-      }
-
-      return static_cast<size_type>(found - begin_pos);
+      return yy_data::find_pos_linear(m_begin, m_end, p_value).pos;
     }
 
     [[nodiscard]]
@@ -369,11 +355,7 @@ class const_span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::const_ptr;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using iterator = yy_data::iterator_detail::const_iterator_ptr<const_span>;
-
-    static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
     template<typename T,
              std::enable_if_t<yy_traits::is_container_v<T>
@@ -577,18 +559,9 @@ class const_span final
       return const_span{m_begin + pos, len};
     }
 
-    constexpr size_type find_pos(value_type p_value) const noexcept
+    constexpr size_type find_pos(const value_type & p_value) const noexcept
     {
-      auto begin_pos = begin();
-      auto end_pos = end();
-      auto found = std::find(begin_pos, end_pos, p_value);
-
-      if(found == end_pos)
-      {
-        return npos;
-      }
-
-      return static_cast<size_type>(found - begin_pos);
+      return yy_data::find_pos_linear(m_begin, m_end, p_value).pos;
     }
 
     [[nodiscard]]
