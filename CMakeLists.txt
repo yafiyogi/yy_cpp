@@ -94,6 +94,7 @@ target_sources(yy_cpp
       yy_span_traits.h
       yy_static_flat_map.h
       yy_static_vector.h
+      yy_static_vector_traits.hpp
       yy_string_case.h
       yy_string_traits.h
       yy_string_util.h
@@ -102,6 +103,7 @@ target_sources(yy_cpp
       yy_trie.h
       yy_trie_common.h
       yy_type_traits.h
+      yy_type_traits_std.hpp
       yy_utility.h
       yy_variant_util.h
       yy_vector.h
