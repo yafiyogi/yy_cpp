@@ -766,7 +766,7 @@ class vector
         if((m_size > 0) && m_data)
         {
           std::move(begin(), begin() + pos, new_data.get());
-          if(static_cast<size_type>(pos) != m_size)
+          if(pos != m_size)
           {
             std::move(begin() + pos, end(), new_data.get() + pos + 1);
           }
@@ -1397,7 +1397,7 @@ class simple_vector
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-          if(static_cast<size_type>(pos) != m_size)
+          if(pos != m_size)
           {
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic push
