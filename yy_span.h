@@ -40,6 +40,7 @@
 #include "yy_span_traits.h"
 #include "yy_string_traits.h"
 #include "yy_vector_traits.h"
+#include "yy_static_vector_traits.hpp"
 
 #include "yy_iterator_ptr.hpp"
 
