@@ -113,34 +113,28 @@ class iterator_ptr final
       return *this;
     }
 
-    friend constexpr iterator_ptr operator+(const iterator_ptr & p_iter,
-                                        ssize_type p_offset) noexcept
+    friend constexpr iterator_ptr operator+(iterator_ptr p_iter,
+                                            ssize_type p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator_ptr operator+(const iterator_ptr & p_iter,
-                                        int p_offset) noexcept
+    friend constexpr iterator_ptr operator+(iterator_ptr p_iter,
+                                            int p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator_ptr operator+(const iterator_ptr & p_iter,
-                                        size_type p_offset) noexcept
+    friend constexpr iterator_ptr operator+(iterator_ptr p_iter,
+                                            size_type p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
     constexpr iterator_ptr & operator--() noexcept
@@ -185,34 +179,28 @@ class iterator_ptr final
       return m_ptr - other.m_ptr;
     }
 
-    friend constexpr iterator_ptr operator-(const iterator_ptr & p_iter,
-                                        ssize_type p_offset) noexcept
+    friend constexpr iterator_ptr operator-(iterator_ptr p_iter,
+                                            ssize_type p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator_ptr operator-(const iterator_ptr & p_iter,
-                                        int p_offset) noexcept
+    friend constexpr iterator_ptr operator-(iterator_ptr p_iter,
+                                            int p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr iterator_ptr operator-(const iterator_ptr & p_iter,
-                                        size_type p_offset) noexcept
+    friend constexpr iterator_ptr operator-(iterator_ptr p_iter,
+                                            size_type p_offset) noexcept
     {
-      iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
     constexpr bool operator==(const iterator_ptr & other) const noexcept
@@ -279,7 +267,7 @@ class const_iterator_ptr final
     using reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
 
     constexpr const_iterator_ptr(const container_type * p_container,
-                           size_type p_offset) noexcept:
+                                 size_type p_offset) noexcept:
       m_ptr(p_container->data() + p_offset)
     {
     }
@@ -352,34 +340,28 @@ class const_iterator_ptr final
       return *this;
     }
 
-    friend constexpr const_iterator_ptr operator+(const const_iterator_ptr & p_iter,
-                                              ssize_type p_offset) noexcept
+    friend constexpr const_iterator_ptr operator+(const_iterator_ptr p_iter,
+                                                  ssize_type p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator_ptr operator+(const const_iterator_ptr & p_iter,
-                                              int p_offset) noexcept
+    friend constexpr const_iterator_ptr operator+(const_iterator_ptr p_iter,
+                                                  int p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator_ptr operator+(const const_iterator_ptr & p_iter,
-                                              size_type p_offset) noexcept
+    friend constexpr const_iterator_ptr operator+(const_iterator_ptr p_iter,
+                                                  size_type p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter += p_offset;
 
-      rv += p_offset;
-
-      return rv;
+      return p_iter;
     }
 
     constexpr const_iterator_ptr & operator--() noexcept
@@ -424,34 +406,28 @@ class const_iterator_ptr final
       return m_ptr - other.m_ptr;
     }
 
-    friend constexpr const_iterator_ptr operator-(const const_iterator_ptr & p_iter,
-                                              ssize_type p_offset) noexcept
+    friend constexpr const_iterator_ptr operator-(const_iterator_ptr p_iter,
+                                                  ssize_type p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator_ptr operator-(const const_iterator_ptr & p_iter,
-                                              int p_offset) noexcept
+    friend constexpr const_iterator_ptr operator-(const_iterator_ptr p_iter,
+                                                  int p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
-    friend constexpr const_iterator_ptr operator-(const const_iterator_ptr & p_iter,
-                                              size_type p_offset) noexcept
+    friend constexpr const_iterator_ptr operator-(const_iterator_ptr p_iter,
+                                                  size_type p_offset) noexcept
     {
-      const_iterator_ptr rv{p_iter};
+      p_iter -= p_offset;
 
-      rv -= p_offset;
-
-      return rv;
+      return p_iter;
     }
 
     constexpr bool operator==(const const_iterator_ptr & other) const noexcept
