@@ -42,8 +42,6 @@ class TestSpanIter:
     using vector = yy_quad::vector<int>;
     using span_type = yy_quad::span<int>;
     using const_span_type = yy_quad::const_span<int>;
-    using ssize_type = span_type::ssize_type;
-    using size_type = span_type::size_type;
 
     void SetUp() override
     {

@@ -65,7 +65,6 @@ struct trie_node_traits final
     using node_edge = trie_node_edge<LabelElemType, value_type>;
     using edges_type = yy_quad::simple_vector<node_edge>;
     using edges_iterator = edges_type::iterator;
-    using size_type = typename edges_type::size_type;
     using edge_traits = find_util_detail::traits_type<node_edge>;
     using edge_ptr = typename edge_traits::key_ptr;
     using found_value_type = found_value<LabelElemType, ValueType>;
@@ -77,7 +76,6 @@ struct found_value final
 {
     using traits = trie_node_traits<LabelElemType, ValueType>;
     using edges_iterator = typename traits::edges_iterator;
-    using size_type = typename traits::size_type;
 
     edges_iterator iter{};
     size_type common = 0;
@@ -171,7 +169,6 @@ class trie_node
     using edges_type = typename traits::edges_type;
     using edges_iterator = typename traits::edges_iterator;
     using edge_ptr = typename traits::edge_ptr;
-    using size_type = typename traits::size_type;
     using found_value_type = typename traits::found_value_type;
 
     constexpr trie_node() noexcept = default;

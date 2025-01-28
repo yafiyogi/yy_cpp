@@ -29,7 +29,6 @@
 #include <cstddef>
 
 #include <algorithm>
-#include <limits>
 #include <memory>
 #include <vector>
 
@@ -68,7 +67,7 @@ struct trie_node_traits final
     using found_value_type = found_value<edges_iterator>;
 
     static constexpr node_idx_type root_idx{};
-    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
+    static constexpr node_idx_type empty_idx = end_idx;
 };
 
 template<typename LabelType,
@@ -178,8 +177,6 @@ class trie_node final
     using edges_type = std::vector<node_edge>;
     using edges_iterator = typename edges_type::iterator;
     using found_value_type = typename traits::found_value_type;
-
-    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
     constexpr explicit trie_node(const data_idx_type p_data_idx) noexcept:
       m_data_idx(p_data_idx)

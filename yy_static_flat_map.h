@@ -63,8 +63,6 @@ struct traits_type final
     using value_ptr = value_vector::value_ptr;
     using const_value_ptr = value_vector::const_value_ptr;
     using EmplaceResult = yy_quad::static_vector_detail::EmplaceResult;
-    using size_type = key_vector::size_type;
-    using ssize_type = key_vector::ssize_type;
 
     static constexpr const size_type capacity = Capacity;
 };
@@ -82,8 +80,6 @@ class static_flat_map final
 {
   public:
     using traits = static_flat_map_detail::traits_type<Key, Value, Capacity, KeyClearAction, ValueClearAction>;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using key_type = typename traits::key_type;
     using key_ptr = typename traits::key_ptr;
     using const_key_ptr = typename traits::const_key_ptr;

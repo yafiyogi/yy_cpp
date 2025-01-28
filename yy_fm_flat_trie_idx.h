@@ -28,9 +28,8 @@
 
 #include <cstddef>
 
-#include <limits>
-
 #include "yy_assert.h"
+#include "yy_constants.hpp"
 #include "yy_span.h"
 #include "yy_flat_map.h"
 #include "yy_ref_traits.h"
@@ -64,7 +63,6 @@ struct trie_node_idx_traits final
     using node_idx_type = std::size_t;
     using data_idx_type = std::size_t;
     using edges_type = flat_map<label_type, node_idx_type>;
-    using size_type = typename edges_type::size_type;
 };
 
 template<typename LabelType,
@@ -81,11 +79,9 @@ class trie_node_idx final
     using value_type = typename traits::value_type;
     using data_idx_type = typename traits::data_idx_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     static constexpr node_idx_type root_idx = 0;
-    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
-    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
+    static constexpr node_idx_type empty_idx = end_idx;
 
     constexpr explicit trie_node_idx(data_idx_type p_data) noexcept:
       m_data(p_data)
@@ -169,7 +165,6 @@ struct trie_idx_traits final
     using value_type = typename traits::value_type;
     using data_idx_type = typename traits::data_idx_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     using trie_vector = yy_quad::simple_vector<node_type>;
     using data_vector = yy_quad::simple_vector<value_type>;
@@ -190,7 +185,6 @@ class Automaton final
     using value_type = typename traits::value_type;
     using data_idx_type = typename traits::data_idx_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     using trie_vector = typename traits::trie_vector;
     using data_vector = typename traits::data_vector;
@@ -352,7 +346,6 @@ class fm_flat_trie_idx final
     using value_type = typename traits::value_type;
     using data_idx_type = typename traits::data_idx_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     using trie_vector = typename traits::trie_vector;
     using data_vector = typename traits::data_vector;

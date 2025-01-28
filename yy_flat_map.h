@@ -38,6 +38,7 @@
 #include "yy_find_iter_util.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
@@ -61,8 +62,6 @@ struct traits_type final
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
     using value_ptr = value_vector::value_ptr;
     using const_value_ptr = value_vector::const_value_ptr;
-    using size_type = key_vector::size_type;
-    using ssize_type = key_vector::ssize_type;
 };
 
 } // namespace flat_map_detail
@@ -76,8 +75,6 @@ class flat_map final
 {
   public:
     using traits = flat_map_detail::traits_type<Key, Value, KeyClearAction, ValueClearAction>;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using key_type = typename traits::key_type;
     using key_ptr = typename traits::key_ptr;
     using const_key_ptr = typename traits::const_key_ptr;

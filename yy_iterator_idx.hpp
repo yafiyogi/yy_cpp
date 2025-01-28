@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include "yy_types.hpp"
+
 namespace yafiyogi::yy_data::iterator_detail {
 
 template<typename ContainerType>
@@ -36,15 +38,14 @@ class iterator_idx final
 {
   public:
     using container_type = yy_traits::remove_cvr_t<ContainerType>;
-    using size_type = container_type::size_type;
-    using ssize_type = container_type::ssize_type;
 
     using iterator_category = std::contiguous_iterator_tag;
     using difference_type = ssize_type;
     using value_type = typename container_type::value_type;
     using pointer = std::add_pointer_t<value_type>;
-    using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
     using reference = std::add_lvalue_reference_t<value_type>;
+
+    using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
     using const_reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
 
     friend const_iterator_idx<ContainerType>;
@@ -274,8 +275,6 @@ class const_iterator_idx final
 {
   public:
     using container_type = yy_traits::remove_cvr_t<ContainerType>;
-    using size_type = container_type::size_type;
-    using ssize_type = container_type::ssize_type;
 
     using iterator_category = std::contiguous_iterator_tag;
     using difference_type = ssize_type;

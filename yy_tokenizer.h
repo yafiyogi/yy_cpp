@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "yy_type_traits.h"
 #include "yy_ref_traits.h"
 #include "yy_span.h"
@@ -54,7 +56,6 @@ class tokenizer
     using const_value_ptr = typename traits::const_value_ptr;
     using const_l_value_ref = typename traits::const_l_value_ref;
     using token_type = typename traits::token_type;
-    using size_type = typename token_type::size_type;
 
     constexpr explicit tokenizer(token_type p_source, const_l_value_ref p_delim) noexcept:
       m_source(p_source),
@@ -143,7 +144,6 @@ class tokenizer<char>
     using char_traits = std::char_traits<value_type>;
     using const_l_value_ref = typename traits::const_l_value_ref;
     using token_type = typename traits::token_type;
-    using size_type = typename token_type::size_type;
 
     constexpr explicit tokenizer(token_type p_source, const_l_value_ref p_delim) noexcept:
       m_source(p_source),
@@ -231,7 +231,6 @@ class tokenizer_first:
     using value_type = tokenizer<T>::value_type;
     using const_l_value_ref = tokenizer<T>::const_l_value_ref;
     using token_type = tokenizer<T>::token_type;
-    using size_type = tokenizer<T>::size_type;
 
     constexpr explicit tokenizer_first(token_type p_source, const_l_value_ref p_delim) noexcept:
       tokenizer<T>(p_source, p_delim)

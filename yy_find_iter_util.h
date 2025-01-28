@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include "yy_types.hpp"
+
 namespace yafiyogi::yy_data {
 namespace find_iter_util_detail {
 
@@ -57,7 +59,7 @@ struct pos_found_type final
     bool found = false;
 };
 
-static constexpr std::size_t SizeThreshold = 16;
+static constexpr size_type SizeThreshold = 16;
 
 } // namespace find_iter_util_detail
 
@@ -82,7 +84,6 @@ constexpr auto lower_bound_iter_pos(const Iterator & p_begin,
                                     const Iterator & p_end,
                                     KeyType && p_key) noexcept
 {
-  using size_type = Iterator::size_type;
   using pos_end_type = find_iter_util_detail::pos_end_type<size_type>;
 
   auto [iter, is_end] = lower_bound_iter(p_begin, p_end, p_key);
@@ -116,7 +117,6 @@ constexpr auto find_iter_pos(const Iterator & p_begin,
                              const KeyType & p_key,
                              std::size_t size_threshold = find_iter_util_detail::SizeThreshold) noexcept
 {
-  using size_type = Iterator::size_type;
   using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
   using iter_found_type = find_iter_util_detail::iter_found_type<Iterator>;
 

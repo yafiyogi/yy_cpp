@@ -28,14 +28,14 @@
 
 #include <cstddef>
 
-#include <limits>
-
 #include "yy_assert.h"
+#include "yy_constants.hpp"
 #include "yy_span.h"
 #include "yy_flat_map.h"
 #include "yy_ref_traits.h"
 #include "yy_trie_common.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 #include "yy_vector.h"
 
 namespace yafiyogi::yy_data {
@@ -67,8 +67,6 @@ struct trie_node_idx_traits final
     using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
     using node_idx_type = std::size_t;
     using edges_type = flat_map<label_type, node_idx_type>;
-
-    using size_type = typename edges_type::size_type;
 };
 
 template<typename LabelType,
@@ -88,11 +86,9 @@ class trie_node_idx final
     using node_idx_type = typename traits::node_idx_type;
     using node_type = typename traits::node_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     static constexpr node_idx_type root_idx = 0;
-    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
-    static constexpr value_idx_type no_data = std::numeric_limits<value_idx_type>::max();
+    static constexpr node_idx_type empty_idx = end_idx;
 
     constexpr explicit trie_node_idx(const value_idx_type p_data) noexcept:
       m_data(p_data)
@@ -187,7 +183,6 @@ struct trie_node_ptr_traits final
     using node_ptr = std::add_pointer_t<node_type>;
     using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
     using edges_type = flat_map<label_type, node_ptr>;
-    using size_type = typename edges_type::size_type;
 };
 
 template<typename LabelType,
@@ -209,8 +204,6 @@ class trie_node_ptr final
     using node_ptr = typename traits::node_ptr;
     using const_node_ptr = typename traits::const_node_ptr;
     using edges_type = typename traits::edges_type;
-
-    using size_type = typename traits::size_type;
 
     constexpr explicit trie_node_ptr(const_value_ptr p_data) noexcept:
       m_data(p_data)
@@ -320,8 +313,6 @@ struct trie_traits final
     using value_idx_type = typename idx_traits::value_idx_type;
     using node_idx_type = typename idx_traits::node_idx_type;
 
-    using size_type = typename idx_traits::size_type;
-
     using tokenizer_type = TokenizerType<label_type>;
     using token_type = typename tokenizer_type::token_type;
 };
@@ -338,8 +329,6 @@ class Automaton final
     using label_span_type = typename tokenizer_type::label_span_type;
 
     using node_ptr = typename traits::ptr_node_ptr;
-
-    using size_type = typename traits::size_type;
 
     using trie_vector = typename traits::ptr_trie_vector;
     using data_vector = typename traits::data_vector;
@@ -452,8 +441,6 @@ class fm_flat_trie_ptr final
     using label_span_type = tokenizer_type::label_span_type;
 
     using value_ptr = typename trie_traits::value_ptr;
-
-    using size_type = typename trie_traits::size_type;
 
     using idx_trie_vector = typename trie_traits::idx_trie_vector;
     using ptr_trie_vector = typename trie_traits::ptr_trie_vector;

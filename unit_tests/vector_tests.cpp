@@ -39,7 +39,6 @@ class TestVector:
 {
   public:
     using vector = yy_quad::vector<int>;
-    using size_type = vector::size_type;
 
     void SetUp() override
     {

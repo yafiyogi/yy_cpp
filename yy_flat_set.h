@@ -55,8 +55,6 @@ struct traits_type final
     using iterator = value_vector::iterator;
     using const_iterator = value_vector::const_iterator;
     using const_value_ptr = value_vector::const_value_ptr;
-    using size_type = value_vector::size_type;
-    using ssize_type = value_vector::ssize_type;
 };
 
 } // namespace flat_set_detail
@@ -68,8 +66,6 @@ class flat_set final
 {
   public:
     using traits = flat_set_detail::traits_type<Value, ValueClearAction>;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using value_type = typename traits::value_type;
     using value_l_value_ref = typename traits::value_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;

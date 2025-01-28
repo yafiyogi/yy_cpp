@@ -65,8 +65,6 @@ struct vector_traits final
     using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
     using reference = std::add_lvalue_reference_t<value_type>;
     using const_reference = std::add_lvalue_reference_t<std::add_const_t<value_type>>;
-    using size_type = std::size_t;
-    using ssize_type = std::ptrdiff_t;
     static constexpr const size_type vector_capacity = Capacity;
 
     static constexpr ClearAction default_action = yy_data::default_clear_action_v<value_type>;
@@ -88,8 +86,6 @@ class static_vector
     using value_r_value_ref = typename traits::value_r_value_ref;
     using value_ptr = typename traits::value_ptr;
     using const_value_ptr = typename traits::const_value_ptr;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using reference = typename traits::reference;
     using const_reference = typename traits::const_reference;
     using iterator = yy_data::iterator_detail::iterator_ptr<static_vector>;
@@ -691,8 +687,6 @@ class static_simple_vector
     using value_r_value_ref = typename traits::value_r_value_ref;
     using value_ptr = typename traits::value_ptr;
     using const_value_ptr = typename traits::const_value_ptr;
-    using size_type = typename traits::size_type;
-    using ssize_type = typename traits::ssize_type;
     using reference = typename traits::reference;
     using const_reference = typename traits::const_reference;
     using iterator = yy_data::iterator_detail::iterator_ptr<static_simple_vector>;

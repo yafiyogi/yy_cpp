@@ -57,7 +57,6 @@ struct trie_node_traits final
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
     using edges_type = flat_map<label_type, node_ptr>;
-    using size_type = typename edges_type::size_type;
 };
 
 template<typename LabelType,
@@ -73,7 +72,6 @@ class trie_node
     using node_ptr = typename traits::node_ptr;
     using value_type = typename traits::value_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
 
     constexpr trie_node() noexcept = default;
     constexpr trie_node(const trie_node & node) noexcept = default;
@@ -200,7 +198,6 @@ class Automaton final
     using node_type = typename traits::node_type;
     using node_ptr = typename traits::node_ptr;
     using root_node_ptr = typename traits::root_node_ptr;
-    using size_type = typename traits::size_type;
 
     constexpr explicit Automaton(root_node_ptr p_root) noexcept:
       m_root(std::move(p_root)),
@@ -298,7 +295,6 @@ class fm_trie final
     using node_ptr = typename traits::node_ptr;
     using root_node_ptr = typename traits::root_node_ptr;
     using value_type = typename traits::value_type;
-    using size_type = typename traits::size_type;
     using value_node = typename fm_trie_detail::Payload<label_type, value_type>;
     using automaton = Automaton;
 

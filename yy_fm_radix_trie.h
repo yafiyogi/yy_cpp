@@ -71,7 +71,6 @@ struct trie_node_traits final
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
     using edges_type = flat_map<label_type, node_ptr>;
-    using size_type = typename edges_type::size_type;
     using key_value_pos_type = typename edges_type::key_value_pos_type;
     using edge_found_type = edge_found<LabelElemType, ValueType>;
     using edge_part_found_type = edge_part_found<LabelElemType, ValueType>;
@@ -82,7 +81,6 @@ template<typename LabelElemType,
 struct edge_found final
 {
     using traits = trie_node_traits<LabelElemType, ValueType>;
-    using size_type = typename traits::size_type;
     using label_type = typename traits::label_type;
     using node_ptr = typename traits::node_ptr;
 
@@ -98,7 +96,6 @@ template<typename LabelElemType,
 struct edge_part_found final
 {
     using traits = trie_node_traits<LabelElemType, ValueType>;
-    using size_type = typename traits::size_type;
     using node_type = typename traits::node_type;
 
     node_type * edge_node = nullptr;
@@ -123,7 +120,6 @@ class trie_node
     using node_ptr = typename traits::node_ptr;
     using value_type = typename traits::value_type;
     using edges_type = typename traits::edges_type;
-    using size_type = typename traits::size_type;
     using edge_found_type = typename traits::edge_found_type;
     using edge_part_found_type = typename traits::edge_part_found_type;
 

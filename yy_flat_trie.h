@@ -28,10 +28,10 @@
 
 #include <cstddef>
 
-#include <limits>
 #include <memory>
 #include <vector>
 
+#include "yy_constants.hpp"
 #include "yy_find_util.h"
 #include "yy_span.h"
 #include "yy_ref_traits.h"
@@ -66,7 +66,7 @@ struct trie_node_traits final
     using found_value_type = typename edge_traits::iter_found_type;
 
     static constexpr node_idx_type root_idx{};
-    static constexpr node_idx_type empty_idx = std::numeric_limits<node_idx_type>::max();
+    static constexpr node_idx_type empty_idx = end_idx;
 };
 
 template<typename LabelType,
@@ -165,8 +165,6 @@ class trie_node final
     using found_value_type = typename traits::found_value_type;
     using edges_type = typename traits::edges_type;
     using edge_ptr = typename traits::edge_ptr;
-
-    static constexpr data_idx_type no_data = std::numeric_limits<data_idx_type>::max();
 
     constexpr explicit trie_node(const data_idx_type p_data_idx) noexcept:
       m_data_idx(p_data_idx)
