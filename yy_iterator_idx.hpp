@@ -39,7 +39,7 @@ class iterator_idx final
     using size_type = container_type::size_type;
     using ssize_type = container_type::ssize_type;
 
-    using iterator_category = std::random_access_iterator_tag;
+    using iterator_category = std::contiguous_iterator_tag;
     using difference_type = ssize_type;
     using value_type = typename container_type::value_type;
     using pointer = std::add_pointer_t<value_type>;
@@ -277,7 +277,7 @@ class const_iterator_idx final
     using size_type = container_type::size_type;
     using ssize_type = container_type::ssize_type;
 
-    using iterator_category = std::random_access_iterator_tag;
+    using iterator_category = std::contiguous_iterator_tag;
     using difference_type = ssize_type;
     using value_type = container_type::value_type;
     using pointer = std::add_pointer_t<std::add_const_t<value_type>>;
