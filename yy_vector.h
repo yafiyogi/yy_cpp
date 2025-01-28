@@ -38,14 +38,13 @@
 #include "yy_compare_util.h"
 #include "yy_iterator_ptr.hpp"
 #include "yy_ref_traits.h"
-#include "yy_span.h"
+#include "yy_span_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
 #include "yy_vector_traits.h"
 
 
-namespace yafiyogi {
-namespace yy_quad {
+namespace yafiyogi::yy_quad {
 
 using ClearAction = yy_data::ClearAction;
 
@@ -1430,9 +1429,4 @@ class simple_vector
     size_type m_capacity = 0;
 };
 
-} // namespace yy_quad
-
-namespace yy_traits::traits_detail {
-
-} // namespace yy_traits::traits_detail
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_quad
