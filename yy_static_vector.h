@@ -40,13 +40,12 @@
 #include "yy_compare_util.h"
 #include "yy_iterator_ptr.hpp"
 #include "yy_ref_traits.h"
-#include "yy_span.h"
+#include "yy_span_traits.h"
+#include "yy_static_vector_traits.hpp"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
-#include "yy_vector_traits.h"
 
-namespace yafiyogi {
-namespace yy_quad {
+namespace yafiyogi::yy_quad {
 
 using ClearAction = yy_data::ClearAction;
 
@@ -1292,43 +1291,4 @@ class static_simple_vector
     static constexpr const size_type m_capacity = traits::vector_capacity;
 };
 
-} // namespace yy_quad
-
-namespace yy_traits::traits_detail {
-
-template<typename T,
-         std::size_t Capacity,
-         yy_quad::ClearAction ca>
-struct vector_traits<yy_quad::static_vector<T, Capacity, ca>>:
-      std::true_type
-{
-};
-
-template<typename T,
-         std::size_t Capacity,
-         yy_quad::ClearAction ca>
-struct container_traits<yy_quad::static_vector<T, Capacity, ca>>:
-      std::true_type
-{
-    using value_type = typename yy_quad::static_vector<T, Capacity, ca>::value_type;
-};
-
-template<typename T,
-         std::size_t Capacity,
-         yy_quad::ClearAction ca>
-struct vector_traits<yy_quad::static_simple_vector<T, Capacity, ca>>:
-      std::true_type
-{
-};
-
-template<typename T,
-         std::size_t Capacity,
-         yy_quad::ClearAction ca>
-struct container_traits<yy_quad::static_simple_vector<T, Capacity, ca>>:
-      std::true_type
-{
-    using value_type = typename yy_quad::static_simple_vector<T, Capacity, ca>::value_type;
-};
-
-} // namespace yy_traits::traits_detail
-} // namespace yafiyogi
+} // namespace yafiyogi::yy_quad
