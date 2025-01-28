@@ -39,8 +39,6 @@ class TestSimpleVectorIter:
 {
   public:
     using vector = yy_quad::simple_vector<int>;
-    using ssize_type = vector::ssize_type;
-    using size_type = vector::size_type;
 
     void SetUp() override
     {

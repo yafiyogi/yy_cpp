@@ -41,7 +41,6 @@ class TestSimpleVector:
     using simple_vector = yy_quad::simple_vector<int>;
     using pointer = simple_vector::value_ptr;
     using iterator = simple_vector::iterator;
-    using size_type = simple_vector::size_type;
 
     void SetUp() override
     {
