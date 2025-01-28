@@ -410,7 +410,7 @@ class flat_trie final
     using data_container_type = typename traits::data_container_type;
 
     constexpr flat_trie() noexcept:
-      m_nodes(std::make_shared<trie_container_type>(1, node_type{node_type::no_data})), // add root node
+      m_nodes(std::make_shared<trie_container_type>(1, node_type{no_data})), // add root node
       m_data(std::make_shared<data_container_type>())
     {
     }
@@ -533,7 +533,7 @@ class flat_trie final
         auto node = get_node(node_idx);
         auto [edge_iter, found] = node->find(label_part);
 
-        node_idx = add_node(node, edge_iter, label_part, node_type::no_data);
+        node_idx = add_node(node, edge_iter, label_part, no_data);
       }
 
       return node_idx;

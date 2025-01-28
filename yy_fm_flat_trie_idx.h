@@ -523,7 +523,7 @@ class fm_flat_trie_idx final
         auto node = get_node(nodes.data(), node_idx);
         auto [edge_pos, ignore] = node->find_edge_pos(token);
 
-        node_idx = add_node(nodes, node, edge_pos, tokenizer_type::create(token), node_type::no_data);
+        node_idx = add_node(nodes, node, edge_pos, tokenizer_type::create(token), no_data);
 
         token = p_tokenizer.scan();
       }

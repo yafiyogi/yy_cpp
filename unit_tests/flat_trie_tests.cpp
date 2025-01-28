@@ -30,6 +30,7 @@
 #include <gtest/gtest.h>
 #include <fmt/format.h>
 
+#include "yy_constants.hpp"
 #include "yy_flat_trie.h"
 
 namespace yafiyogi::yy_data::tests {
@@ -56,7 +57,7 @@ class TestFlatTrie:
 TEST_F(TestFlatTrie, TrieNodeGetBeforeAdd)
 {
   // No child nodes added.
-  flat_trie_node node{flat_trie_node::no_data};
+  flat_trie_node node{no_data};
   EXPECT_FALSE(node.find('a').found);
   EXPECT_FALSE(node.find('b').found);
 }
@@ -64,7 +65,7 @@ TEST_F(TestFlatTrie, TrieNodeGetBeforeAdd)
 TEST_F(TestFlatTrie, TrieNodeGetAfterAdd)
 {
   // Add 'a' node, but not 'b' node.
-  flat_trie_node node{flat_trie_node::no_data};
+  flat_trie_node node{no_data};
   node.add_edge(node.find('a').iter, flat_node_edge{'a', 1});
 
   EXPECT_TRUE(node.find('a').found);
@@ -74,7 +75,7 @@ TEST_F(TestFlatTrie, TrieNodeGetAfterAdd)
 TEST_F(TestFlatTrie, TrieNodeAddDuplicate)
 {
   // Add 2 'b' nodes.
-  flat_trie_node node{flat_trie_node::no_data};
+  flat_trie_node node{no_data};
   node.add_edge(node.find('b').iter, flat_node_edge{'b', 668});
   node.add_edge(node.find('b').iter, flat_node_edge{'b', 777});
   EXPECT_EQ(777, node.find('b').iter->m_idx);
@@ -84,7 +85,7 @@ TEST_F(TestFlatTrie, TestNodeChildOrder)
 {
   // Add 'a', 'b', 'c', & 'd' nodes out of order.
   // Check node has children in order.
-  flat_trie_node node{flat_trie_node::no_data};
+  flat_trie_node node{no_data};
   const char * result = "abcd";
   const size_t idxs[] = {2, 1, 4, 3};
   const size_t * idx = idxs;

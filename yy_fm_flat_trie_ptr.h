@@ -507,7 +507,7 @@ class fm_flat_trie_ptr final
 
         // Transform data.
         if(value_idx_type value_idx = idx_node.data();
-           idx_node_type::no_data != value_idx)
+           no_data != value_idx)
         {
           ptr_node.data(ptr_data_begin + value_idx);
         }
@@ -651,7 +651,7 @@ class fm_flat_trie_ptr final
         auto node = get_node(p_nodes.data(), node_idx);
         auto [edge_pos, ignore] = node->find_edge_pos(token);
 
-        node_idx = add_node(p_nodes, node, edge_pos, tokenizer_type::create(token), idx_node_type::no_data);
+        node_idx = add_node(p_nodes, node, edge_pos, tokenizer_type::create(token), no_data);
 
         token = p_tokenizer.scan();
       }

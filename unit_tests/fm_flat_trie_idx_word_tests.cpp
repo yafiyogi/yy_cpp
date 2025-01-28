@@ -64,7 +64,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieNodeGetBeforeAdd)
   //auto edge_getter = [](auto &){};
 
   // No child nodes added.
-  trie_node node{trie_node::no_data};
+  trie_node node{no_data};
 
   EXPECT_FALSE(node.find_edge([](auto, auto){}, "a"sv).found);
   EXPECT_FALSE(node.find_edge([](auto, auto){}, "b"sv).found);
@@ -75,7 +75,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieNodeGetAfterAdd)
   //auto edge_getter = [](auto &){};
 
   // Add 'a' node, but not 'b' node.
-  trie_node node{trie_node::no_data};
+  trie_node node{no_data};
   node.add_edge(node.find_edge_pos("a"sv).pos, "a"s, 1);
 
   EXPECT_TRUE(node.find_edge([](auto, auto){}, "a"sv).found);
@@ -85,7 +85,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieNodeGetAfterAdd)
 TEST_F(TestFMFlatTrieIdxWord, TrieNodeAddDuplicate)
 {
   // Add 2 'b' nodes.
-  trie_node node{trie_node::no_data};
+  trie_node node{no_data};
   node.add_edge(node.find_edge_pos("b"sv).pos, "b"s, 668);
   node.add_edge(node.find_edge_pos("b"sv).pos, "b"s, 777);
 
@@ -97,7 +97,7 @@ TEST_F(TestFMFlatTrieIdxWord, TestNodeChildOrder)
 {
   // Add 'a', 'b', 'c', & 'd' nodes out of order.
   // Check node has children in order.
-  trie_node node{trie_node::no_data};
+  trie_node node{no_data};
   const char * result[] = {"a", "b", "c", "d"};
   int r_idx = 0;
   const size_t idxs[] = {2, 1, 4, 3};

@@ -448,7 +448,7 @@ class flat_radix_trie final
     using data_container_type = typename traits::data_container_type;
 
     constexpr flat_radix_trie() noexcept:
-      m_nodes(std::make_shared<trie_container_type>(1, node_type{node_type::no_data})), // add root node
+      m_nodes(std::make_shared<trie_container_type>(1, node_type{no_data})), // add root node
       m_data(std::make_shared<data_container_type>())
     {
     }
@@ -574,7 +574,7 @@ class flat_radix_trie final
             // Repurpose 'abcd' edge and node for 'ab'.
             label_span_type ab_span{yy_quad::make_const_span(abcd_label).subspan(0, common)};
             edge.m_label = label_type{ab_span.begin(), ab_span.end()};
-            *get_node(abcd_idx) = node_type{node_type::no_data};
+            *get_node(abcd_idx) = node_type{no_data};
 
             // Add 'cd' node to 'ab' node.
             // N.B this invatidates edge_iter & edge!
