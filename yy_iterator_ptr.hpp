@@ -26,15 +26,18 @@
 
 #pragma once
 
+#include <concepts>
+
 #include "yy_types.hpp"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data::iterator_detail {
 
-template<typename ConatinerType>
+template<typename ContainerType>
 class iterator_ptr final
 {
   public:
-    using container_type = yy_traits::remove_cvr_t<ConatinerType>;
+    using container_type = yy_traits::remove_cvr_t<ContainerType>;
 
     using iterator_category = std::contiguous_iterator_tag;
     using difference_type = ssize_type;
