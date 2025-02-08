@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2019-2024 Yafiyogi
+  Copyright (c) 2019-2025 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,9 @@
 
 namespace yafiyogi::yy_data {
 
+// Based on code here https://github.com/boostcon/cppnow_presentations_2023/blob/main/cppnow_slides/What_Is_Low_Latency_Cpp_Part2.pdf page 61
+// See https://www.youtube.com/watch?v=5uIsadq-nyk&t=1978s
+
 template<typename ValueType,
          std::size_t Capacity>
 class ring_buffer final
@@ -45,7 +48,6 @@ class ring_buffer final
   public:
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using array_type = std::array<value_type, Capacity>;
-    using size_type = array_type::size_type;
 
     template<typename InputValueType>
     bool push(InputValueType && value) noexcept
@@ -54,17 +56,17 @@ class ring_buffer final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
-      const auto old_pos = m_write_pos.load();
+      const auto old_pos = m_write_pos.load(std::memory_order_relaxed); // only push() thread changes m_write_pos
       const auto new_pos = calc_new_pos(old_pos);
 
-      if(const auto read_pos = m_read_pos.load();
+      if(const auto read_pos = m_read_pos.load(std::memory_order_acquire);
          new_pos == read_pos)
       {
         return false;
       }
 
       m_buffer[old_pos] = std::move(value);
-      m_write_pos.store(new_pos);
+      m_write_pos.store(new_pos, std::memory_order_release);
 
       wake();
 
@@ -73,8 +75,8 @@ class ring_buffer final
 
     bool pop(value_type & value) noexcept
     {
-      const auto write_pos = m_write_pos.load();
-      const auto old_pos = m_read_pos.load();
+      const auto write_pos = m_write_pos.load(std::memory_order_acquire);
+      const auto old_pos = m_read_pos.load(std::memory_order_relaxed);  // only pop() thread changes m_read_pos
 
       if(write_pos == old_pos)
       {
@@ -82,7 +84,7 @@ class ring_buffer final
       }
 
       value = std::move(m_buffer[old_pos]);
-      m_read_pos.store(calc_new_pos(old_pos));
+      m_read_pos.store(calc_new_pos(old_pos), std::memory_order_release);
 
       return true;
     }
@@ -94,10 +96,10 @@ class ring_buffer final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "Value is of an incompatible type.");
 
-      const auto old_pos = m_write_pos.load();
+      const auto old_pos = m_write_pos.load(std::memory_order_relaxed); // only swap_in() thread changes m_write_pos
       const auto new_pos = calc_new_pos(old_pos);
 
-      if(const auto read_pos = m_read_pos.load();
+      if(const auto read_pos = m_read_pos.load(std::memory_order_acquire);
          new_pos == read_pos)
       {
         return false;
@@ -105,7 +107,7 @@ class ring_buffer final
 
       std::swap(m_buffer[old_pos], value);
 
-      m_write_pos.store(new_pos);
+      m_write_pos.store(new_pos, std::memory_order_release);
 
       wake();
 
@@ -114,8 +116,8 @@ class ring_buffer final
 
     bool swap_out(value_type & value) noexcept
     {
-      const auto write_pos = m_write_pos.load();
-      const auto old_pos = m_read_pos.load();
+      const auto write_pos = m_write_pos.load(std::memory_order_acquire);
+      const auto old_pos = m_read_pos.load(std::memory_order_relaxed);  // only swap_out() thread changes m_read_pos
 
       if(write_pos == old_pos)
       {
@@ -124,14 +126,15 @@ class ring_buffer final
 
       std::swap(m_buffer[old_pos], value);
 
-      m_read_pos.store(calc_new_pos(old_pos));
+      m_read_pos.store(calc_new_pos(old_pos), std::memory_order_release);
 
       return true;
     }
 
     bool empty() const noexcept
     {
-      return m_write_pos.load() == m_read_pos.load();
+      return m_write_pos.load(std::memory_order_relaxed)
+        == m_read_pos.load(std::memory_order_relaxed);
     }
 
     size_type size() const noexcept
@@ -139,20 +142,21 @@ class ring_buffer final
       return m_size;
     }
 
-    void wait(const std::chrono::nanoseconds duration)
+    bool wait(const std::chrono::nanoseconds duration)
     {
       std::unique_lock lck{m_mxt};
 
-      m_cv.wait(lck, duration);
+      return std::cv_status::no_timeout == m_cv.wait(lck, duration);
     }
 
-    template<typename Duration>
-    void wait(const Duration & duration,
+    template<typename Duration,
+             typename Pred>
+    bool wait(const Duration & duration,
               Pred && pred)
     {
       std::unique_lock lck{m_mxt};
 
-      m_cv.wait(lck, duration, std::forward<Pred>(pred));
+      return m_cv.wait_for(lck, duration, std::forward<Pred>(pred));
     }
 
   private:
@@ -164,7 +168,13 @@ class ring_buffer final
     static constexpr size_type calc_new_pos(size_type pos) noexcept
     {
       ++pos;
-      return (pos == m_size) ? 0 : pos;
+
+      if(pos == m_size)
+      {
+        pos = 0;
+      }
+
+      return pos;
     }
 
     static constexpr size_type m_size = Capacity;
