@@ -114,29 +114,10 @@ class span final
 
     constexpr span() noexcept = default;
     constexpr span(const span &) noexcept = default;
-    constexpr span(span && p_other) noexcept:
-      m_begin(p_other.m_begin),
-      m_end(p_other.m_end)
-    {
-      p_other.m_begin = nullptr;
-      p_other.m_end = nullptr;
-    }
 
     constexpr ~span() noexcept = default;
 
     constexpr span & operator=(const span &) noexcept = default;
-    constexpr span & operator=(span && p_other) noexcept
-    {
-      if(this != &p_other)
-      {
-        m_begin = p_other.m_begin;
-        p_other.m_begin = nullptr;
-        m_end = p_other.m_end;
-        p_other.m_end = nullptr;
-      }
-
-      return *this;
-    }
 
     [[nodiscard]]
     constexpr value_type & operator[](size_type idx) noexcept
@@ -434,29 +415,10 @@ class const_span final
 
     constexpr const_span() noexcept = default;
     constexpr const_span(const const_span &) noexcept = default;
-    constexpr const_span(const_span && other) noexcept:
-      m_begin(other.m_begin),
-      m_end(other.m_end)
-    {
-      other.m_begin = nullptr;
-      other.m_end = nullptr;
-    }
 
     constexpr ~const_span() noexcept = default;
 
     constexpr const_span & operator=(const const_span &) noexcept = default;
-    constexpr const_span & operator=(const_span && other) noexcept
-    {
-      if(this != &other)
-      {
-        m_begin = other.m_begin;
-        other.m_begin = nullptr;
-        m_end = other.m_end;
-        other.m_end = nullptr;
-      }
-
-      return *this;
-    }
 
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
