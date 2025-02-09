@@ -39,7 +39,7 @@ template<typename T>
 class traits final
 {
   public:
-    using value_type = T;
+    using value_type = yy_traits::remove_cvr_t<T>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<T>>;
     using const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using token_type = yy_quad::const_span<value_type>;
@@ -89,10 +89,8 @@ class tokenizer
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      auto source_end{m_source.end()};
-
       m_token = scan(m_source, m_delim);
-      m_source = token_type{m_token.end(), source_end};
+      m_source = token_type{m_token.end(), m_source.end()};
       m_source.inc_begin();
 
       return token();
@@ -162,12 +160,11 @@ class tokenizer<char>
     [[nodiscard]]
     static constexpr token_type scan(const token_type p_source, value_type p_delim) noexcept
     {
-      token_type::iterator source_end{p_source.end()};
       token_type::iterator token_end{char_traits::find(p_source.data(), p_source.size(), p_delim)};
 
       if(not_found == token_end)
       {
-        token_end = source_end;
+        token_end = p_source.end();
       }
 
       return token_type{p_source.begin(), token_end};
@@ -176,10 +173,8 @@ class tokenizer<char>
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      token_type::iterator source_end{m_source.end()};
-
       m_token = scan(m_source, m_delim);
-      m_source = token_type{m_token.end(), source_end};
+      m_source = token_type{m_token.end(), m_source.end()};
       m_source.inc_begin();
 
       return token();
