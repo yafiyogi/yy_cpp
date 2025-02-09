@@ -692,7 +692,6 @@ class vector
       if(this != &p_other)
       {
         m_data = std::move(p_other.m_data);
-        p_other.m_data.release();
         m_capacity = p_other.m_capacity;
         p_other.m_capacity = 0;
         m_size = p_other.m_size;
@@ -1340,7 +1339,6 @@ class simple_vector
       if(this != &p_other)
       {
         m_data = std::move(p_other.m_data);
-        p_other.m_data.release();
         m_capacity = p_other.m_capacity;
         p_other.m_capacity = 0;
         m_size = p_other.m_size;
