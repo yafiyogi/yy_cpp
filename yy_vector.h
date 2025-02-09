@@ -687,18 +687,18 @@ class vector
     }
 
   private:
-    constexpr void move(vector && other) noexcept
+    constexpr void move(vector && p_other) noexcept
     {
-      if(this != &other)
+      if(this != &p_other)
       {
-        m_data = std::move(other.m_data);
-        other.m_data.release();
-        m_capacity = std::move(other.m_capacity);
-        other.m_capacity = 0;
-        m_size = std::move(other.m_size);
-        other.m_size = 0;
-        m_offset = std::move(other.m_offset);
-        other.m_offset = 0;
+        m_data = std::move(p_other.m_data);
+        p_other.m_data.release();
+        m_capacity = p_other.m_capacity;
+        p_other.m_capacity = 0;
+        m_size = p_other.m_size;
+        p_other.m_size = 0;
+        m_offset = p_other.m_offset;
+        p_other.m_offset = 0;
       }
     }
 
@@ -1335,16 +1335,16 @@ class simple_vector
     }
 
   private:
-    constexpr void move(simple_vector && other) noexcept
+    constexpr void move(simple_vector && p_other) noexcept
     {
-      if(this != &other)
+      if(this != &p_other)
       {
-        m_data = std::move(other.m_data);
-        other.m_data.release();
-        m_capacity = std::move(other.m_capacity);
-        other.m_capacity = 0;
-        m_size = std::move(other.m_size);
-        other.m_size = 0;
+        m_data = std::move(p_other.m_data);
+        p_other.m_data.release();
+        m_capacity = p_other.m_capacity;
+        p_other.m_capacity = 0;
+        m_size = p_other.m_size;
+        p_other.m_size = 0;
       }
     }
 

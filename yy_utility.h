@@ -61,11 +61,24 @@ class Range final
 
     Range() = delete;
     constexpr Range(const Range &) noexcept = default;
-    constexpr Range(Range &&) noexcept = default;
+    constexpr Range(Range && p_other) noexcept:
+      m_begin(std::move(p_other.m_begin)),
+      m_end(std::move(p_other.m_end))
+    {
+      p_other.m_begin = Iterator{};
+      p_other.m_end = Iterator{};
+    }
+
     constexpr ~Range() noexcept = default;
 
     constexpr Range & operator=(const Range &) noexcept = default;
-    constexpr Range & operator=(Range &&) noexcept = default;
+    constexpr Range & operator=(Range && p_other) noexcept
+    {
+      m_begin = std::move(p_other.m_begin);
+      p_other.m_begin = Iterator{};
+      m_end = std::move(p_other.m_end);
+      p_other.m_end = Iterator{};
+    }
 
     [[nodiscard]]
     constexpr iterator begin() noexcept

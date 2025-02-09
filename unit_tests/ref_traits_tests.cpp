@@ -88,8 +88,8 @@ TEST_F(TestRefTraits, TestSpan)
   using test_type = yy_quad::span<char>;
   using ref_traits = yy_traits::ref_traits<test_type>;
 
-  EXPECT_TRUE(!std::is_lvalue_reference_v<ref_traits::l_value_ref>);
-  EXPECT_TRUE(!std::is_rvalue_reference_v<ref_traits::r_value_ref>);
+  EXPECT_TRUE(std::is_lvalue_reference_v<ref_traits::l_value_ref>);
+  EXPECT_TRUE(std::is_rvalue_reference_v<ref_traits::r_value_ref>);
 }
 
 TEST_F(TestRefTraits, TestNonTrivialStruct)

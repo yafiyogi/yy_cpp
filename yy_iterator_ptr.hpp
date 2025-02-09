@@ -61,21 +61,21 @@ class iterator_ptr final
 
     constexpr iterator_ptr() noexcept = default;
     constexpr iterator_ptr(const iterator_ptr &) noexcept = default;
-    constexpr iterator_ptr(iterator_ptr && other) noexcept:
-      m_ptr(other.m_ptr)
+    constexpr iterator_ptr(iterator_ptr && p_other) noexcept:
+      m_ptr(p_other.m_ptr)
     {
-      other.m_ptr = nullptr;
+      p_other.m_ptr = nullptr;
     }
 
     constexpr ~iterator_ptr() noexcept = default;
 
     constexpr iterator_ptr & operator=(const iterator_ptr &) noexcept = default;
-    constexpr iterator_ptr & operator=(iterator_ptr && other) noexcept
+    constexpr iterator_ptr & operator=(iterator_ptr && p_other) noexcept
     {
-      if(this != &other)
+      if(this != &p_other)
       {
-        m_ptr = other.m_ptr;
-        other.m_ptr = nullptr;
+        m_ptr = p_other.m_ptr;
+        p_other.m_ptr = nullptr;
       }
       return *this;
     }
