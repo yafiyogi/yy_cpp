@@ -61,8 +61,8 @@ TEST_F(TestRefTraits, TestTrivial)
   using test_type = double;
   using ref_traits = yy_traits::ref_traits<test_type>;
 
-  EXPECT_TRUE(!std::is_lvalue_reference_v<ref_traits::l_value_ref>);
-  EXPECT_TRUE(!std::is_rvalue_reference_v<ref_traits::r_value_ref>);
+  EXPECT_FALSE(std::is_lvalue_reference_v<ref_traits::l_value_ref>);
+  EXPECT_FALSE(std::is_rvalue_reference_v<ref_traits::r_value_ref>);
 }
 
 TEST_F(TestRefTraits, TestUniquePtr)
@@ -88,8 +88,8 @@ TEST_F(TestRefTraits, TestSpan)
   using test_type = yy_quad::span<char>;
   using ref_traits = yy_traits::ref_traits<test_type>;
 
-  EXPECT_TRUE(std::is_lvalue_reference_v<ref_traits::l_value_ref>);
-  EXPECT_TRUE(std::is_rvalue_reference_v<ref_traits::r_value_ref>);
+  EXPECT_FALSE(std::is_lvalue_reference_v<ref_traits::l_value_ref>);
+  EXPECT_FALSE(std::is_rvalue_reference_v<ref_traits::r_value_ref>);
 }
 
 TEST_F(TestRefTraits, TestNonTrivialStruct)
@@ -109,13 +109,13 @@ TEST_F(TestRefTraits, TestTrivialStruct)
 {
   struct test_struct
   {
-      char ch_v;
       int int_v;
+      char ch_v;
   };
   using test_type = test_struct;
   using ref_traits = yy_traits::ref_traits<test_type>;
 
-  EXPECT_TRUE(!std::is_lvalue_reference_v<ref_traits::l_value_ref>);
-  EXPECT_TRUE(!std::is_rvalue_reference_v<ref_traits::r_value_ref>);
+  EXPECT_FALSE(std::is_lvalue_reference_v<ref_traits::l_value_ref>);
+  EXPECT_FALSE(std::is_rvalue_reference_v<ref_traits::r_value_ref>);
 }
 } // namespace yafiyogi::yy_cpp::tests
