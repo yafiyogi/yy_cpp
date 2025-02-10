@@ -41,11 +41,15 @@ template<typename Key,
 class const_lookup final
 {
   public:
+    static constexpr std::size_t key_idx = 0;
+    static constexpr std::size_t value_idx = 1;
+
     constexpr explicit const_lookup(std::tuple<Key, Value> (&& arr)[Capacity]) noexcept
     {
       for(std::size_t idx = 0; idx < Capacity; ++idx)
       {
-        m_lookup.emplace(std::move(std::get<0>(arr[idx])), std::move(std::get<1>(arr[idx])));
+        m_lookup.emplace(std::move(std::get<key_idx>(arr[idx])),
+                         std::move(std::get<value_idx>(arr[idx])));
       }
     }
 
@@ -55,7 +59,8 @@ class const_lookup final
     {
       for(std::size_t idx = 0; idx < Capacity; ++idx)
       {
-        m_lookup.emplace(std::move(std::get<0>(arr[idx])), std::move(std::get<1>(arr[idx])));
+        m_lookup.emplace(std::move(std::get<key_idx>(arr[idx])),
+                         std::move(std::get<value_idx>(arr[idx])));
       }
     }
 
