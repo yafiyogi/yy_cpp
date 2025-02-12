@@ -47,7 +47,8 @@ class traits final
 
 } // namespace tokenizer_detail
 
-template<typename T>
+template<typename T,
+         typename Enable = void>
 class tokenizer
 {
   public:
@@ -132,8 +133,9 @@ class tokenizer
     value_type m_delim{};
 };
 
-template<>
-class tokenizer<char>
+template<typename T>
+class tokenizer<T,
+                std::enable_if_t<std::is_same_v<char, yy_traits::remove_cvr_t<T>>>>
 {
   public:
     using traits = tokenizer_detail::traits<char>;
