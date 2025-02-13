@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "yy_type_traits.h"
+#include "yy_string_traits.h"
 
 namespace yafiyogi::yy_util {
 namespace compare_util_detail {
@@ -69,18 +69,43 @@ struct Compare final
 template<typename A,
          typename B>
 struct Compare<A, B,
-               std::enable_if_t<std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
-                                && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>>> final
+               std::enable_if_t<(yy_traits::is_std_string_v<A>
+                                 || yy_traits::is_std_string_view_v<A>)
+                                && (yy_traits::is_std_string_v<B>
+                                 || yy_traits::is_std_string_view_v<B>)>> final
 {
     using a_type = yy_traits::remove_cvr_t<A>;
     using b_type = yy_traits::remove_cvr_t<B>;
 
     static constexpr bool equal(const a_type & a, const b_type & b) noexcept
     {
+      return 0 == a.compare(b);
+    }
+
+    static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
+    {
+      return a.compare(b) < 0;
+    }
+};
+
+template<typename A,
+         typename B>
+struct Compare<A, B,
+               std::enable_if_t<(std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
+                                 && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>)
+                                || (std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<A>::value_type>
+                                 && std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<B>::value_type>)>> final
+{
+    using a_type = yy_traits::remove_cvr_t<A>;
+    using b_type = yy_traits::remove_cvr_t<B>;
+    using char_type = a_type::value_type;
+
+    static constexpr bool equal(const a_type & a, const b_type & b) noexcept
+    {
       const auto a_size{a.size()};
 
       return (a_size == b.size())
-        && (0 == std::char_traits<char>::compare(a.data(), b.data(), a_size));
+        && (0 == std::char_traits<char_type>::compare(a.data(), b.data(), a_size));
     }
 
     static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
@@ -89,7 +114,7 @@ struct Compare<A, B,
       const auto b_size{b.size()};
       const auto size{std::min(a_size, b_size)};
 
-      auto comp{std::char_traits<char>::compare(a.data(), b.data(), size)};
+      auto comp{std::char_traits<char_type>::compare(a.data(), b.data(), size)};
 
       return (comp < 0) || ((0 == comp) && (a_size < b_size));
     }
