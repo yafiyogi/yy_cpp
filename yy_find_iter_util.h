@@ -110,12 +110,12 @@ constexpr auto find_iter(const Iterator & p_begin,
 
 static constexpr std::size_t find_iter_pos_size_threshold_cache_line_size = 64;
 
-template<typename Iterator,
+template<std::size_t size_threshold = find_iter_util_detail::SizeThreshold,
+         typename Iterator,
          typename KeyType>
 constexpr auto find_iter_pos(const Iterator & p_begin,
                              const Iterator & p_end,
-                             const KeyType & p_key,
-                             std::size_t size_threshold = find_iter_util_detail::SizeThreshold) noexcept
+                             const KeyType & p_key) noexcept
 {
   using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
   using iter_found_type = find_iter_util_detail::iter_found_type<Iterator>;

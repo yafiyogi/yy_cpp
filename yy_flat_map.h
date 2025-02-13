@@ -168,7 +168,7 @@ class flat_map final
     [[nodiscard]]
     constexpr key_value_pos_type find(const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = find_iter_pos(m_keys.begin(), m_keys.end(), p_key, SearchSizeThreshold);
+      auto [pos, found] = find_iter_pos<SearchSizeThreshold>(m_keys.begin(), m_keys.end(), p_key);
 
       if(found)
       {
@@ -189,7 +189,7 @@ class flat_map final
     [[nodiscard]]
     constexpr const_key_value_pos_type find(const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = find_iter_pos(m_keys.begin(), m_keys.end(), p_key, SearchSizeThreshold);
+      auto [pos, found] = find_iter_pos<SearchSizeThreshold>(m_keys.begin(), m_keys.end(), p_key);
 
       if(found)
       {
@@ -207,7 +207,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      pos_found_type pos_found{find_iter_pos(m_keys.begin(), m_keys.end(), p_key, SearchSizeThreshold)};
+      pos_found_type pos_found{find_iter_pos<SearchSizeThreshold>(m_keys.begin(), m_keys.end(), p_key)};
 
       if(pos_found.found)
       {
@@ -223,7 +223,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      pos_found_type pos_found{find_iter_pos(m_keys.begin(), m_keys.end(), p_key, SearchSizeThreshold)};
+      pos_found_type pos_found{find_iter_pos<SearchSizeThreshold>(m_keys.begin(), m_keys.end(), p_key)};
 
       if(pos_found.found)
       {
@@ -237,7 +237,7 @@ class flat_map final
     [[nodiscard]]
     constexpr pos_found_type find_pos(const KeyParamType & p_key) const noexcept
     {
-      return find_iter_pos(m_keys.begin(), m_keys.end(), p_key, SearchSizeThreshold);
+      return find_iter_pos<SearchSizeThreshold>(m_keys.begin(), m_keys.end(), p_key);
     }
 
     struct ref_type final
