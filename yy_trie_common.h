@@ -115,19 +115,19 @@ class default_label_tokenizer final
 
 template<typename LabelType,
          typename LabelType::value_type t_delim,
-         template<typename L> class Tokenizer = yy_util::tokenizer>
+         template<typename L, L l_delim> class Tokenizer = yy_util::tokenizer>
 class label_word_tokenizer final
 {
   public:
     using traits = label_traits<LabelType>;
     using label_type = typename traits::label_type;
-    using tokenizer_type = Tokenizer<decltype(t_delim)>;
+    using tokenizer_type = Tokenizer<decltype(t_delim), t_delim>;
     using label_span_type = typename tokenizer_type::token_type;
     using source_type = label_span_type;
     using token_type = label_span_type;
 
     constexpr explicit label_word_tokenizer(source_type p_source) noexcept:
-      m_tokenizer(p_source, t_delim)
+      m_tokenizer(p_source)
     {
     }
 
