@@ -118,7 +118,7 @@ class static_vector
     {
       auto l_size = std::min(static_cast<size_type>(std::distance(p_begin, p_end)), m_capacity);
 
-      std::copy(p_begin, p_begin + l_size, begin());
+      std::copy(p_begin.ptr(), p_begin.ptr() + l_size, begin().ptr());
 
       m_size = l_size;
     }
@@ -343,7 +343,7 @@ class static_vector
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #endif
-        std::move_backward(pos, end(), end() + 1);
+        std::move_backward(pos.ptr(), end().ptr(), end().ptr() + 1);
 
         iter = begin() + distance;
         result = EmplaceResult::Ok;
@@ -449,7 +449,7 @@ class static_vector
             // The element is in the middle.
             if(ClearAction::Clear == action)
             {
-              std::move(pos + 1, end(), pos);
+              std::move(pos.ptr() + 1, end().ptr(), pos.ptr());
             }
             --m_size;
           }
@@ -504,7 +504,7 @@ class static_vector
           }
           else
           {
-            std::move(p_end, end(), p_begin);
+            std::move(p_end.ptr(), end().ptr(), p_begin.ptr());
             if(ClearAction::Clear == action)
             {
               for(auto range{yy_util::make_range<iterator>(p_end, end())};
@@ -565,7 +565,7 @@ class static_vector
         // Copy elements from othe vector.
         if(!other.empty())
         {
-          std::copy(other.begin(), other.end(), begin());
+          std::copy(other.begin().ptr(), other.end().ptr(), begin().ptr());
         }
       }
     }
@@ -597,7 +597,7 @@ class static_vector
     {
       if(this != &p_other)
       {
-        std::move(p_other.begin(), p_other.end(), begin());
+        std::move(p_other.begin().ptr(), p_other.end().ptr(), begin().ptr());
 
         if(ClearAction::Clear ==  action)
         {
@@ -718,7 +718,7 @@ class static_simple_vector
     {
       auto l_size = std::min(static_cast<size_type>(std::distance(p_begin, p_end)), m_capacity);
 
-      std::copy(p_begin, p_begin + l_size, begin());
+      std::copy(p_begin.ptr(), p_begin.ptr() + l_size, begin().ptr());
 
       m_size = l_size;
     }
@@ -938,7 +938,7 @@ class static_simple_vector
 #pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
 #endif
-        std::move_backward(pos, end(), end() + 1);
+        std::move_backward(pos.ptr(), end().ptr(), end().ptr() + 1);
 
         iter = begin() + distance;
         result = EmplaceResult::Ok;
@@ -1038,7 +1038,7 @@ class static_simple_vector
 #if defined(__GNUC__) && ! defined(__clang__)
 #pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #endif
-          std::move(pos + 1, end(), pos);
+          std::move(pos.ptr() + 1, end().ptr(), pos.ptr());
           --m_size;
         }
       }
@@ -1077,7 +1077,7 @@ class static_simple_vector
         {
           erased = true;
 
-          std::move(p_end, end(), p_begin);
+          std::move(p_end.ptr(), end().ptr(), p_begin.ptr());
           if(ClearAction::Clear == action)
           {
             for(auto range{yy_util::make_range<iterator>(p_end, end())};
@@ -1134,7 +1134,7 @@ class static_simple_vector
         // Copy elements from othe static_simple_vector.
         if(!other.empty())
         {
-          std::copy(other.begin(), other.end(), begin());
+          std::copy(other.begin().ptr(), other.end().ptr(), begin().ptr());
         }
       }
     }
@@ -1167,7 +1167,7 @@ class static_simple_vector
         clear(action);
         reserve(other_size);
 
-        std::copy(other.begin(), other.end(), begin());
+        std::copy(other.begin().ptr(), other.end().ptr(), begin().ptr());
         m_size = other_size;
       }
     }
@@ -1183,7 +1183,7 @@ class static_simple_vector
         {
           result = EmplaceResult::Part;
         }
-        std::copy(other.begin(), other.begin() + num, end());
+        std::copy(other.begin().ptr(), other.begin().ptr() + num, end().ptr());
         m_size += num;
       }
 
@@ -1201,7 +1201,7 @@ class static_simple_vector
         {
           result = EmplaceResult::Part;
         }
-        std::move(other.begin(), other.begin() + num, end());
+        std::move(other.begin().ptr(), other.begin().ptr() + num, end().ptr());
         m_size += num;
       }
 
@@ -1234,7 +1234,7 @@ class static_simple_vector
     {
       if(this != &p_other)
       {
-        std::move(p_other.begin(), p_other.end(), begin());
+        std::move(p_other.begin().ptr(), p_other.end().ptr(), begin().ptr());
 
         if(ClearAction::Clear ==  action)
         {
