@@ -121,7 +121,7 @@ class label_word_tokenizer final
   public:
     using traits = label_traits<LabelType>;
     using label_type = typename traits::label_type;
-    using tokenizer_type = Tokenizer<decltype(t_delim), t_delim>;
+    using tokenizer_type = Tokenizer<yy_traits::remove_cvr_t<decltype(t_delim)>, t_delim>;
     using label_span_type = typename tokenizer_type::token_type;
     using source_type = label_span_type;
     using token_type = label_span_type;
