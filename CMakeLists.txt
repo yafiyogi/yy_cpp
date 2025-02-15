@@ -67,8 +67,12 @@ target_sources(yy_cpp
       yy_compare_util.h
       yy_constants.hpp
       yy_fast_atoi.h
-      yy_find_iter_util.h
-      yy_find_util.h
+      yy_find_iter_types.hpp
+      yy_find_iter_util.hpp
+      yy_find_raw_types.hpp
+      yy_find_raw_util.hpp
+      yy_find_types.hpp
+      yy_find_util.hpp
       yy_flat_map.h
       yy_flat_radix_trie.h
       yy_flat_set.h
