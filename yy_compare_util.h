@@ -91,14 +91,14 @@ struct Compare<A, B,
 template<typename A,
          typename B>
 struct Compare<A, B,
-               std::enable_if_t<(std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
-                                 && std::is_same_v<char, typename yy_traits::remove_cvr_t<B>::value_type>)
-                                || (std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<A>::value_type>
-                                 && std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<B>::value_type>)>> final
+               std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
+                                               typename yy_traits::remove_cvr_t<B>::value_type>
+                                && (std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
+                                    || std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<A>::value_type>)>> final
 {
     using a_type = yy_traits::remove_cvr_t<A>;
     using b_type = yy_traits::remove_cvr_t<B>;
-    using char_type = a_type::value_type;
+    using char_type = yy_traits::remove_cvr_t<typename a_type::value_type>;
 
     static constexpr bool equal(const a_type & a, const b_type & b) noexcept
     {
