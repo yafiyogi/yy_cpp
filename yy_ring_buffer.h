@@ -144,9 +144,9 @@ class ring_buffer final
 
     bool wait(const std::chrono::nanoseconds duration)
     {
-      std::unique_lock lck{m_mxt};
+      std::unique_lock lck{m_mtx};
 
-      return std::cv_status::no_timeout == m_cv.wait(lck, duration);
+      return std::cv_status::no_timeout == m_cv.wait_for(lck, duration);
     }
 
     template<typename Duration,
@@ -154,7 +154,7 @@ class ring_buffer final
     bool wait(const Duration & duration,
               Pred && pred)
     {
-      std::unique_lock lck{m_mxt};
+      std::unique_lock lck{m_mtx};
 
       return m_cv.wait_for(lck, duration, std::forward<Pred>(pred));
     }
@@ -162,7 +162,7 @@ class ring_buffer final
   private:
     void wake()
     {
-      cv.notify_one();
+      m_cv.notify_one();
     }
 
     static constexpr size_type calc_new_pos(size_type pos) noexcept
