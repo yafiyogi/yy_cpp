@@ -110,18 +110,20 @@ class trie_node_idx final
       std::ignore = m_edges.emplace(pos, std::move(label), node_idx);
     }
 
+    using pos_found_type = yy_data::pos_found_type;
+
     template<typename Visitor,
              typename InputLabelType>
     [[nodiscard]]
-    constexpr auto find_edge(Visitor && visitor,
-                             const InputLabelType & label) noexcept
+    constexpr pos_found_type find_edge(Visitor && visitor,
+                                       const InputLabelType & label) noexcept
     {
       return m_edges.find_value(std::forward<Visitor>(visitor), label);
     }
 
     template<typename InputLabelType>
     [[nodiscard]]
-    constexpr auto find_edge_pos(const InputLabelType & label) const noexcept
+    constexpr pos_found_type find_edge_pos(const InputLabelType & label) const noexcept
     {
       return m_edges.find_pos(label);
     }
@@ -388,10 +390,9 @@ class Automaton final
     {
       reset();
 
-      auto node = m_state;
-      auto next_node_do = [&node](node_ptr * edge_node, size_type)
+      auto next_node_do = [this](node_ptr * edge_node, size_type)
       {
-        node = *edge_node;
+        m_state = *edge_node;
       };
 
       tokenizer_type tokenizer{label};
@@ -399,14 +400,12 @@ class Automaton final
       while(!tokenizer.empty())
       {
         if(token_type label_part{tokenizer.scan()};
-           !node->find_edge(next_node_do, label_part))
+           !m_state->find_edge(next_node_do, label_part))
         {
           m_state = nullptr;
           return false;
         }
       }
-
-      m_state = node;
 
       return has_payload();
     }
