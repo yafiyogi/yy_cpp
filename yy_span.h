@@ -36,7 +36,7 @@
 #include "yy_array_traits.h"
 #include "yy_compare_util.h"
 #include "yy_constants.hpp"
-#include "yy_find_util.h"
+#include "yy_find_util.hpp"
 #include "yy_ref_traits.h"
 #include "yy_span_traits.h"
 #include "yy_string_traits.h"
@@ -122,12 +122,14 @@ class span final
     [[nodiscard]]
     constexpr value_type & operator[](size_type idx) noexcept
     {
+      idx = std::min(idx, size());
       return *(m_begin + idx);
     }
 
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
+      idx = std::min(idx, size());
       return *(m_begin + idx);
     }
 
@@ -146,13 +148,13 @@ class span final
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return iterator{this, static_cast<size_type>(m_end - m_begin)};
+      return iterator{this, size()};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return const_iterator{this, static_cast<size_type>(m_end - m_begin)};
+      return const_iterator{this, size()};
     }
 
     constexpr span & inc_begin() noexcept
@@ -423,6 +425,7 @@ class const_span final
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
+      idx = std::min(idx, size());
       return *(m_begin + idx);
     }
 
@@ -435,7 +438,7 @@ class const_span final
     [[nodiscard]]
     constexpr iterator end() const noexcept
     {
-      return iterator{this, static_cast<size_type>(m_end - m_begin)};
+      return iterator{this, size()};
     }
 
     constexpr const_span & inc_begin() noexcept
