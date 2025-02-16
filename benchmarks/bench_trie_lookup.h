@@ -73,8 +73,8 @@ using FMFlatTriePtrWord = yafiyogi::yy_data::fm_flat_trie_ptr<std::string, int,
                                                               tokenizer_type_word>;
 
 using FlatMap = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep>;
-using FlatMapSingle = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_iter_pos_size_threshold_cache_line_size * 1) / sizeof(int)) + 1>;
-using FlatMapDouble = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_iter_pos_size_threshold_cache_line_size * 2) / sizeof(int)) + 1>;
+using FlatMapSingle = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_util_detail::size_threshold_cache_line_size * 1) / sizeof(int)) + 1>;
+using FlatMapDouble = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, ((yafiyogi::yy_data::find_util_detail::size_threshold_cache_line_size * 2) / sizeof(int)) + 1>;
 using FlatMapBinary = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, std::numeric_limits<std::size_t>::min()>;
 using FlatMapLinear = yafiyogi::yy_data::flat_map<std::string, int, yafiyogi::yy_data::ClearAction::Clear, yafiyogi::yy_data::ClearAction::Keep, std::numeric_limits<std::size_t>::max()>;
 using Map = std::map<std::string, int>;

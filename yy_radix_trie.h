@@ -31,7 +31,7 @@
 #include <stdexcept>
 
 #include "yy_assert.h"
-#include "yy_find_util.h"
+#include "yy_find_iter_util.hpp"
 #include "yy_span.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -65,7 +65,7 @@ struct trie_node_traits final
     using node_edge = trie_node_edge<LabelElemType, value_type>;
     using edges_type = yy_quad::simple_vector<node_edge>;
     using edges_iterator = edges_type::iterator;
-    using edge_traits = find_util_detail::traits_type<node_edge>;
+    using edge_traits = find_util_detail::iter_traits_type<typename edges_type::value_type, typename edges_type::iterator>;
     using edge_ptr = typename edge_traits::key_ptr;
     using found_value_type = found_value<LabelElemType, ValueType>;
 };

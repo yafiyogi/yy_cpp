@@ -34,7 +34,7 @@
 #include <type_traits>
 
 #include "yy_clear_action.h"
-#include "yy_find_util.h"
+#include "yy_find_iter_util.hpp"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
@@ -97,8 +97,6 @@ class flat_set final
     constexpr flat_set & operator=(const flat_set &) noexcept = default;
     constexpr flat_set & operator=(flat_set &&) noexcept = default;
 
-    using pos_end_type = find_util_detail::pos_end_type;
-
     template<typename ValueParamType>
     [[nodiscard]]
     constexpr pos_end_type lower_bound_pos(const ValueParamType & p_value) const noexcept
@@ -114,9 +112,7 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) noexcept
     {
-      auto [pos, is_end] = lower_bound_iter_pos(m_values.begin(),
-                                                m_values.end(),
-                                                p_value);
+      auto [pos, is_end] = lower_bound_iter_pos(m_values, p_value);
 
       if(!is_end)
       {
@@ -132,9 +128,7 @@ class flat_set final
     constexpr bool lower_bound(Visitor && visitor,
                                const ValueParamType & p_value) const noexcept
     {
-      auto [pos, is_end] = lower_bound_iter_pos(m_values.begin(),
-                                                m_values.end(),
-                                                p_value);
+      auto [pos, is_end] = lower_bound_iter_pos(m_values, p_value);
 
       if(!is_end)
       {
@@ -154,9 +148,7 @@ class flat_set final
     [[nodiscard]]
     constexpr value_pos_type find(const ValueParamType & p_value) noexcept
     {
-      auto [pos, found] = find_iter_pos(m_values.begin(),
-                                        m_values.end(),
-                                        p_value);
+      auto [pos, found] = find_iter_pos(m_values, p_value);
 
       if(found)
       {
@@ -176,9 +168,7 @@ class flat_set final
     [[nodiscard]]
     constexpr const_value_pos_type find(const ValueParamType & p_value) const noexcept
     {
-      auto [pos, found] = find_iter_pos(m_values.begin(),
-                                        m_values.end(),
-                                        p_value);
+      auto [pos, found] = find_iter_pos(m_values, p_value);
 
       if(found)
       {
@@ -188,17 +178,13 @@ class flat_set final
       return const_value_pos_type{nullptr, pos};
     }
 
-    using pos_found_type = find_iter_util_detail::pos_found_type<size_type>;
-
     template<typename ValueParamType,
              typename Visitor>
     [[nodiscard]]
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) noexcept
     {
-      auto pos_found{find_iter_pos(m_values.begin(),
-                                   m_values.end(),
-                                   p_value)};
+      auto pos_found{find_iter_pos(m_values, p_value)};
 
       if(pos_found.found)
       {
@@ -214,9 +200,7 @@ class flat_set final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const ValueParamType & p_value) const noexcept
     {
-      auto pos_found{find_iter_pos(m_values.begin(),
-                                   m_values.end(),
-                                   p_value)};
+      auto pos_found{find_iter_pos(m_values, p_value)};
 
       if(pos_found.found)
       {
@@ -277,7 +261,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = find_iter(m_values.begin(), m_values.end(), p_value);
+      auto [iter, found] = find_iter(m_values, p_value);
 
       if(!found)
       {
@@ -295,7 +279,7 @@ class flat_set final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [iter, found] = find_iter(m_values.begin(), m_values.end(), p_value);
+      auto [iter, found] = find_iter(m_values, p_value);
 
       if(!found)
       {

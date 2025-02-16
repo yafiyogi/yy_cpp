@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-#include "yy_find_util.h"
+#include "yy_find_iter_util.hpp"
 #include "yy_span.h"
 #include "yy_utility.h"
 
@@ -141,7 +141,7 @@ class trie_node
     constexpr node_type * add(label_type label,
                               node_type * fail)
     {
-      auto [iter, found] = yy_data::do_find_raw(m_edges, label);
+      auto [iter, found] = yy_data::find_iter(m_edges, label);
 
       if(found)
       {
@@ -151,20 +151,22 @@ class trie_node
       auto node = std::make_unique<trie_node>(fail);
       trie_node * node_rv = node.get();
 
-      auto pos = iter - m_edges.data();
-      m_edges.emplace(m_edges.begin() + pos, node_edge{std::move(label), std::move(node)});
+      auto l_begin{m_edges.begin()};
+      auto pos = iter - l_begin;
+      m_edges.emplace(l_begin + pos, node_edge{std::move(label), std::move(node)});
 
       return node_rv;
     }
 
     constexpr void add(node_edge edge)
     {
-      auto [iter, found] = yy_data::do_find_raw(m_edges, edge.m_label);
+      auto [iter, found] = yy_data::find_iter(m_edges, edge.m_label);
 
       if(!found)
       {
-        auto pos = iter - m_edges.data();
-        m_edges.emplace(m_edges.begin() + pos, std::move(edge));
+        auto l_begin{m_edges.begin()};
+        auto pos = iter - l_begin;
+        m_edges.emplace(l_begin + pos, std::move(edge));
       }
       else
       {
@@ -180,7 +182,7 @@ class trie_node
     [[nodiscard]]
     constexpr trie_node * find(const label_type & label) const noexcept
     {
-      auto [iter, found] = yy_data::do_find_raw(m_edges, label);
+      auto [iter, found] = yy_data::find_iter(m_edges, label);
 
       if(!found)
       {

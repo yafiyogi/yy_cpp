@@ -30,7 +30,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "yy_find_util.h"
+#include "yy_find_raw_util.hpp"
 #include "yy_span.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
@@ -61,9 +61,9 @@ struct trie_node_traits final
     using root_node_ptr = std::shared_ptr<node_type>;
     using node_edge = trie_node_edge<label_type, value_type>;
     using edges_type = std::vector<node_edge>;
-    using edge_traits = find_util_detail::traits_type<node_edge>;
+    using edge_traits = find_util_detail::raw_traits_type<typename edges_type::value_type>;
     using edge_ptr = typename edge_traits::key_ptr;
-    using found_value_type = typename edge_traits::iter_found_type;
+    using found_value_type = typename edge_traits::found_type;
 };
 
 template<typename LabelType,
@@ -177,7 +177,7 @@ class trie_node
     [[nodiscard]]
     constexpr found_value_type find_edge(label_const_l_value_ref label) noexcept
     {
-      return yy_data::do_find_raw(m_edges, label);
+      return yy_data::find_raw(m_edges, label);
     }
 
     [[nodiscard]]
