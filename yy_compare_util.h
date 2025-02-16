@@ -72,7 +72,7 @@ struct Compare<A, B,
                std::enable_if_t<(yy_traits::is_std_string_v<A>
                                  || yy_traits::is_std_string_view_v<A>)
                                 && (yy_traits::is_std_string_v<B>
-                                 || yy_traits::is_std_string_view_v<B>)>> final
+                                    || yy_traits::is_std_string_view_v<B>)>> final
 {
     using a_type = yy_traits::remove_cvr_t<A>;
     using b_type = yy_traits::remove_cvr_t<B>;
