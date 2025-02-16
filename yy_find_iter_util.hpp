@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "yy_find_types.hpp"
+#include "yy_find_iter_types.hpp"
 
 namespace yafiyogi::yy_data {
 
@@ -40,13 +40,15 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
                                 const Iterator & p_end,
                                 KeyType && p_key) noexcept
 {
-  using iter_end_type = find_iter_util_detail::iter_end_type<Iterator>;
+  using traits = find_util_detail::iter_traits_type<KeyType,
+                                                     Iterator>;
+  using end_type = typename traits::end_type;
 
   Iterator key_iter{std::lower_bound(p_begin, p_end, p_key)};
 
   auto is_end = p_end == key_iter;
 
-  return iter_end_type{key_iter, is_end};
+  return end_type{key_iter, is_end};
 }
 
 template<typename KeyStore,
@@ -55,8 +57,8 @@ template<typename KeyStore,
 constexpr inline auto lower_bound_iter_pos(const KeyStore & p_key_store,
                                            const InputKeyType & p_key) noexcept
 {
-  autp l_begin{p_keys_store.begin()}
-  auto [iter, is_end] = lower_bound_iter(l_begin, p_keys_store.end(), p_key);
+  auto l_begin{p_key_store.begin()};
+  auto [iter, is_end] = lower_bound_iter(l_begin, p_key_store.end(), p_key);
 
   return pos_end_type{static_cast<size_type>(iter - l_begin), is_end};
 }
@@ -67,15 +69,15 @@ template<typename KeyStore,
 constexpr inline auto find_iter(KeyStore & p_key_store,
                                 const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::iter_traits_type<typename KeyStore::value_type,
+  using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                      typename KeyStore::iterator>;
-  using iter_found_type = typename traits::iter_found_type;
+  using found_type = typename traits::found_type;
 
-  auto [iter, is_end] = lower_bound_iter_pos(p_key_store, p_end, p_key);
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key);
 
   bool found = !is_end && (*iter == p_key);
 
-  return iter_found_type{iter, found};
+  return found_type{iter, found};
 }
 
 template<typename KeyStore,
@@ -84,15 +86,15 @@ template<typename KeyStore,
 constexpr inline auto find_iter(const KeyStore & p_key_store,
                                 const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::iter_traits_type<typename KeyStore::value_type,
+  using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                      typename KeyStore::const_iterator>;
-  using iter_found_type = typename traits::iter_found_type;
+  using found_type = typename traits::found_type;
 
-  auto [iter, is_end] = lower_bound_iter_pos(p_key_store, p_end, p_key);
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key);
 
   bool found = !is_end && (*iter == p_key);
 
-  return iter_found_type{iter, found};
+  return found_type{iter, found};
 }
 
 template<std::size_t size_threshold = find_util_detail::default_size_threshold,
@@ -100,12 +102,14 @@ template<std::size_t size_threshold = find_util_detail::default_size_threshold,
          typename InputKeyType>
 [[nodiscard]]
 constexpr auto find_iter_pos(const KeyStore & p_key_store,
-                             const KeyType & p_key) noexcept
+                             const InputKeyType & p_key) noexcept
 {
-  using iter_found_type = find_iter_util_detail::iter_found_type<Iterator>;
+  using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
+                                                     typename KeyStore::const_iterator>;
+  using found_type = typename traits::found_type;
 
   auto l_begin{p_key_store.begin()};
-  iter_found_type iter_found{};
+  found_type iter_found{};
 
   if(p_key_store.size() > size_threshold)
   {
@@ -113,14 +117,14 @@ constexpr auto find_iter_pos(const KeyStore & p_key_store,
   }
   else
   {
-    auto l_end{p_key_store.end()}
+    auto l_end{p_key_store.end()};
     auto found{std::find_if(l_begin, l_end, [&p_key](const auto & value){
       return !(value < p_key);
     })};
 
     bool is_equal = (found != l_end) && (p_key == *found);
 
-    iter_found = iter_found_type{found, is_equal};
+    iter_found = found_type{found, is_equal};
   }
 
   return pos_found_type{static_cast<size_type>(iter_found.iter - l_begin), iter_found.found};

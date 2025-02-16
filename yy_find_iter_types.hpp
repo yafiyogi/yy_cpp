@@ -30,10 +30,8 @@
 #include "yy_ref_traits.h"
 #include "yy_types.hpp"
 #include "yy_type_traits.h"
-#include "yy_utility.h"
 
-namespace yafiyogi::yy_data {
-namespace find_types_detail {
+namespace yafiyogi::yy_data::find_util_detail {
 
 template<typename Iterator>
 struct iter_end_t;
@@ -53,9 +51,6 @@ struct iter_traits_type final
     using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
     using end_type = iter_end_t<iterator>;
     using found_type = iter_found_t<iterator>;
-    using range = yy_util::Range<iterator>;
-    using const_range = yy_util::Range<const_iterator>;
-    using pos_range = yy_util::Range<size_type>;
 };
 
 template<typename Iterator>
@@ -72,6 +67,4 @@ struct iter_found_t final
     bool found = false;
 };
 
-} // namespace find_types_detail
-
-} // namespace yafiyogi::yy_data
+} // namespace yafiyogi::yy_data::find_util_detail

@@ -40,7 +40,7 @@ constexpr inline auto lower_bound_raw(KeyType * p_begin,
                                       KeyType * p_end,
                                       const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::raw_traits_type<KeyType>;
+  using traits = find_util_detail::raw_traits_type<KeyType>;
   using key_ptr = typename traits::key_ptr;
   using end_type = typename traits::end_type;
 
@@ -57,7 +57,7 @@ constexpr inline auto lower_bound_raw(const KeyType * p_begin,
                                       const KeyType * p_end,
                                       const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::raw_traits_type<KeyType>;
+  using traits = find_util_detail::raw_traits_type<KeyType>;
   using const_key_ptr = typename traits::const_key_ptr;
   using const_end_type = typename traits::const_end_type;
 
@@ -85,7 +85,7 @@ template<typename KeyStore,
 constexpr inline auto find_raw(KeyStore & p_key_store,
                                const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::raw_traits_type<typename KeyStore::value_type>;
+  using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using key_ptr = typename traits::key_ptr;
   using found_type = typename traits::found_type;
 
@@ -104,7 +104,7 @@ template<typename KeyStore,
 constexpr inline auto find_raw(const KeyStore & p_key_store,
                                const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::raw_traits_type<typename KeyStore::value_type>;
+  using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using const_key_ptr = typename traits::const_key_ptr;
   using const_found_type = typename traits::const_found_type;
 
@@ -124,7 +124,7 @@ template<std::size_t size_threshold = find_util_detail::default_size_threshold,
 constexpr inline auto find_raw_pos(const KeyStore & p_key_store,
                                    const InputKeyType & p_key) noexcept
 {
-  using traits = find_types_detail::raw_traits_type<typename KeyStore::value_type>;
+  using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using found_type = typename traits::const_found_type;
 
   auto l_begin{p_key_store.data()};

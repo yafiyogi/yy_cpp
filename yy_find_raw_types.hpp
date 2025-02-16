@@ -26,15 +26,12 @@
 
 #pragma once
 
-#include "yy_constants.hpp"
 #include "yy_find_types.hpp"
 #include "yy_ref_traits.h"
 #include "yy_types.hpp"
 #include "yy_type_traits.h"
-#include "yy_utility.h"
 
-namespace yafiyogi::yy_data {
-namespace find_types_detail {
+namespace yafiyogi::yy_data::find_util_detail {
 
 template<typename KeyType>
 struct raw_found_t;
@@ -68,7 +65,7 @@ struct raw_traits_type final
 template<typename KeyType>
 struct raw_found_t final
 {
-    using traits = find_types_detail::raw_traits_type<KeyType>;
+    using traits = raw_traits_type<KeyType>;
     using key_ptr = typename traits::key_ptr;
 
     key_ptr iter = nullptr;
@@ -78,7 +75,7 @@ struct raw_found_t final
 template<typename KeyType>
 struct const_raw_found_t final
 {
-    using traits = find_types_detail::raw_traits_type<KeyType>;
+    using traits = raw_traits_type<KeyType>;
     using const_key_ptr = typename traits::const_key_ptr;
 
     const_key_ptr iter = nullptr;
@@ -88,7 +85,7 @@ struct const_raw_found_t final
 template<typename KeyType>
 struct raw_end_t final
 {
-    using traits = find_types_detail::raw_traits_type<KeyType>;
+    using traits = raw_traits_type<KeyType>;
     using key_ptr = typename traits::key_ptr;
 
     key_ptr iter = nullptr;
@@ -98,12 +95,11 @@ struct raw_end_t final
 template<typename KeyType>
 struct const_raw_end_t final
 {
-    using traits = find_types_detail::raw_traits_type<KeyType>;
+    using traits = raw_traits_type<KeyType>;
     using const_key_ptr = typename traits::const_key_ptr;
 
     const_key_ptr iter = nullptr;
     bool is_end = false;
 };
 
-} // namespace find_types_detail
-} // namespace yafiyogi::yy_data
+} // namespace yafiyogi::yy_data::find_util_detail
