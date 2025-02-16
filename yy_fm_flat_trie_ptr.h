@@ -241,6 +241,15 @@ class trie_node_ptr final
       return m_edges.find_value(std::forward<Visitor>(visitor), label).found;
     }
 
+    template<typename Visitor,
+             typename InputLabelType>
+    [[nodiscard]]
+    constexpr bool find_edge(Visitor && visitor,
+                             const InputLabelType & label) const noexcept
+    {
+      return m_edges.find_value(std::forward<Visitor>(visitor), label).found;
+    }
+
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) noexcept
     {
@@ -302,6 +311,7 @@ struct trie_traits final
     using ptr_label_type = typename ptr_traits::label_type;
     using ptr_node_type = typename ptr_traits::node_type;
     using ptr_node_ptr = typename ptr_traits::node_ptr;
+    using ptr_const_node_ptr = typename ptr_traits::const_node_ptr;
 
     using ptr_trie_vector = yy_quad::simple_vector<ptr_node_type>;
 
