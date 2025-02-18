@@ -25,9 +25,10 @@
 */
 
 #include <string>
+#include <string_view>
 
-#include <gtest/gtest.h>
 #include "fmt/format.h"
+#include "gtest/gtest.h"
 
 #include "yy_trie.h"
 
@@ -64,7 +65,7 @@ TEST_F(TestTrie, TrieNodeGetAfterAdd)
 {
   // Add 'a' node, but not 'b' node.
   trie_node node{};
-  node.add_edge(node.find_edge('a').iter, node_edge{'a', {}});
+  node.add_edge(node.find_edge('a').iter, node_edge{'a', std::make_unique<trie_node>()});
 
   EXPECT_TRUE(node.find_edge('a').found);
   EXPECT_FALSE(node.find_edge('b').found);
@@ -77,10 +78,10 @@ TEST_F(TestTrie, TestNodeChildOrder)
   trie_node node{};
   const char * result = "abcd";
 
-  node.add_edge(node.find_edge('b').iter, node_edge{'b', {}});
-  node.add_edge(node.find_edge('a').iter, node_edge{'a', {}});
-  node.add_edge(node.find_edge('d').iter, node_edge{'d', {}});
-  node.add_edge(node.find_edge('c').iter, node_edge{'c', {}});
+  node.add_edge(node.find_edge('b').iter, node_edge{'b', std::make_unique<trie_node>()});
+  node.add_edge(node.find_edge('a').iter, node_edge{'a', std::make_unique<trie_node>()});
+  node.add_edge(node.find_edge('d').iter, node_edge{'d', std::make_unique<trie_node>()});
+  node.add_edge(node.find_edge('c').iter, node_edge{'c', std::make_unique<trie_node>()});
 
   node.visit([&result](const auto & k, const auto & /* node */) {
     EXPECT_TRUE(k == *result);
