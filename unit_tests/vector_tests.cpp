@@ -49,11 +49,13 @@ class TestVector:
     {
     }
 
-    size_type calc_capacity(size_type capacity, size_type size)
+    size_type calc_capacity(size_type capacity, int size)
     {
-      if(capacity < size)
+      auto u_size{static_cast<size_type>(size)};
+
+      if(capacity < u_size)
       {
-        capacity = size * 2;
+        capacity = u_size * 2;
       }
 
       return capacity;
@@ -75,7 +77,7 @@ TEST_F(TestVector, TestEmplaceBackNoCapacity)
   vector vec{};
   size_type capacity = 0;
 
-  for(size_type ii = 0; ii < 65; ++ii)
+  for(int ii = 0; ii < 65; ++ii)
   {
     vec.emplace_back(ii + 7);
 
