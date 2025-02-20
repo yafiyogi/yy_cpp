@@ -35,14 +35,17 @@ add_executable(aho_corasick
   aho_corasick.cpp )
 
 target_include_directories(aho_corasick
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/.." )
+
+target_include_directories(aho_corasick
   SYSTEM PRIVATE
-    ${PROJECT_SOURCE_DIR}/..
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_compile_options(aho_corasick
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
 
 target_link_libraries(aho_corasick
   fmt::fmt
@@ -52,14 +55,17 @@ add_executable(lockable_values
   lockable_values.cpp )
 
 target_include_directories(lockable_values
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/.." )
+
+target_include_directories(lockable_values
   SYSTEM PRIVATE
-    ${PROJECT_SOURCE_DIR}/..
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_compile_options(lockable_values
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
 
 target_link_libraries(lockable_values
   fmt::fmt
@@ -69,14 +75,17 @@ add_executable(subject_observer
   subject_observer.cpp )
 
 target_include_directories(subject_observer
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/.." )
+
+target_include_directories(subject_observer
   SYSTEM PRIVATE
-    ${PROJECT_SOURCE_DIR}/..
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_compile_options(subject_observer
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
 
 target_link_libraries(subject_observer
   fmt::fmt
@@ -86,14 +95,15 @@ add_executable(table
   table.cpp )
 
 target_include_directories(table
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/.."
   SYSTEM PRIVATE
-    ${PROJECT_SOURCE_DIR}/..
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_compile_options(table
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
 
 target_link_libraries(table
   fmt::fmt

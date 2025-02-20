@@ -80,18 +80,21 @@ add_dependencies(test_yy_cpp yy_cpp)
 
 target_compile_options(test_yy_cpp
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
+
+target_include_directories(test_yy_cpp
+  PRIVATE
+    "${PROJECT_SOURCE_DIR}/.."
+    "${CMAKE_INSTALL_PREFIX}/include" )
 
 target_include_directories(test_yy_cpp
   SYSTEM PRIVATE
-    "${PROJECT_SOURCE_DIR}/.."
-    "${CMAKE_INSTALL_PREFIX}/include"
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
 target_link_directories(test_yy_cpp
   PUBLIC
-  /opt/local/lib)
+    "/opt/local/lib")
 
 target_link_libraries(test_yy_cpp
   yy_cpp

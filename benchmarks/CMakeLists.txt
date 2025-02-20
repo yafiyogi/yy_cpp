@@ -71,15 +71,19 @@ target_include_directories(benchmark_yy_cpp
   PRIVATE
     ${PROJECT_SOURCE_DIR}/..)
 
+target_include_directories(benchmark_yy_cpp
+  SYSTEM PRIVATE
+    "${YY_THIRD_PARTY_LIBRARY}/include" )
+
 target_compile_options(yy_cpp
   PRIVATE
-  "-DSPDLOG_COMPILED_LIB"
-  "-DSPDLOG_FMT_EXTERNAL")
+    "-DSPDLOG_COMPILED_LIB"
+    "-DSPDLOG_FMT_EXTERNAL")
 
 target_link_directories(benchmark_yy_cpp
   PRIVATE
     "${YY_THIRD_PARTY_LIBRARY}/lib"
-    /opt/local/lib)
+    "/opt/local/lib")
 
 target_link_libraries(benchmark_yy_cpp
   yy_cpp
