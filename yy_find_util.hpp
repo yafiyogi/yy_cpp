@@ -65,7 +65,7 @@ struct find_pos_linear<Iterator,
                                          const Iterator & p_end,
                                          const ValueType & p_value) noexcept
     {
-      auto found{std::char_traits<char>::find(p_begin, p_end - p_begin, p_value)};
+      auto found{std::char_traits<char>::find(p_begin, static_cast<size_t>(p_end - p_begin), p_value)};
 
       if(nullptr == found)
       {
@@ -87,6 +87,18 @@ constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
   return find_util_detail::find_pos_linear<Iterator, ValueType>::find(p_begin,
                                                                       p_end,
                                                                       p_value);
+}
+
+template<typename ValueStore>
+constexpr inline pos_found_type find_pos_linear(const ValueStore & p_store,
+                                                const typename ValueStore::value_type & p_value) noexcept
+{
+  using iterator = typename ValueStore::iterator;
+  using value_type = typename ValueStore::value_type;
+
+  return find_util_detail::find_pos_linear<iterator, value_type>::find(p_store.begin(),
+                                                                       p_store.end(),
+                                                                       p_value);
 }
 
 } // namespace yafiyogi::yy_data
