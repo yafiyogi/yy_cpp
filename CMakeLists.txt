@@ -114,7 +114,8 @@ target_sources(yy_cpp
       yy_variant_util.h
       yy_vector.h
       yy_vector_traits.h
-      yy_vector_util.h )
+      yy_vector_util.h
+      yy_yaml_util.h )
 
 #install(FILES $<TARGET_FILE_NAME:yy_cpp> DESTINATION lib)
 
