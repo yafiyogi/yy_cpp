@@ -92,6 +92,7 @@ target_sources(yy_cpp
       yy_lockable_value.h
       yy_lower_bound.h
       yy_make_lookup.h
+      yy_observer_ptr.hpp
       yy_radix_trie.h
       yy_ref_traits.h
       yy_ring_buffer.h
