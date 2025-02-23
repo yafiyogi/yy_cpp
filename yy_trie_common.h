@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "yy_observer_ptr.hpp"
 #include "yy_ref_traits.h"
 #include "yy_span.h"
 #include "yy_tokenizer.h"
@@ -46,8 +47,8 @@ template<typename ValueType>
 struct value_traits final
 {
     using value_type = yy_traits::remove_cvr_t<ValueType>;
-    using value_ptr = std::add_pointer_t<value_type>;
-    using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
+    using value_ptr = yy_data::observer_ptr<value_type>;
+    using const_value_ptr = yy_data::observer_ptr<std::add_const_t<value_type>>;
 };
 
 template<typename LabelType>

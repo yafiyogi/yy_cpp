@@ -30,9 +30,10 @@
 
 #include "yy_assert.h"
 #include "yy_constants.hpp"
-#include "yy_span.h"
 #include "yy_flat_map.h"
+#include "yy_observer_ptr.hpp"
 #include "yy_ref_traits.h"
+#include "yy_span.h"
 #include "yy_trie_common.h"
 #include "yy_type_traits.h"
 #include "yy_types.hpp"
@@ -63,8 +64,8 @@ struct trie_node_idx_traits final
     using value_idx_type = std::size_t;
 
     using node_type = trie_node_idx<LabelType, ValueType>;
-    using node_ptr = std::add_pointer_t<node_type>;
-    using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
+    using node_ptr = yy_data::observer_ptr<node_type>;
+    using const_node_ptr = yy_data::observer_ptr<std::add_const_t<node_type>>;
     using node_idx_type = std::size_t;
     using edges_type = flat_map<label_type, node_idx_type>;
 };
@@ -182,8 +183,8 @@ struct trie_node_ptr_traits final
     using const_value_ptr = typename value_traits::const_value_ptr;
 
     using node_type = trie_node_ptr<LabelType, ValueType>;
-    using node_ptr = std::add_pointer_t<node_type>;
-    using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
+    using node_ptr = yy_data::observer_ptr<node_type>;
+    using const_node_ptr = yy_data::observer_ptr<std::add_const_t<node_type>>;
     using edges_type = flat_map<label_type, node_ptr>;
 };
 
@@ -228,7 +229,7 @@ class trie_node_ptr final
 
     struct found_edge_type final
     {
-        node_ptr edge_node = nullptr;
+        node_ptr edge_node{};
         bool found = false;
     };
 
@@ -264,7 +265,7 @@ class trie_node_ptr final
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return nullptr == m_data;
+      return m_data.empty();
     }
 
     constexpr void data(value_ptr p_data) noexcept
@@ -281,11 +282,11 @@ class trie_node_ptr final
     [[nodiscard]]
     constexpr const_value_ptr data() const noexcept
     {
-      return m_data;
+      return const_value_ptr{m_data.get()};
     }
 
   private:
-    value_ptr m_data = nullptr;
+    value_ptr m_data{};
     edges_type m_edges{};
 };
 
@@ -312,6 +313,8 @@ struct trie_traits final
     using ptr_node_type = typename ptr_traits::node_type;
     using ptr_node_ptr = typename ptr_traits::node_ptr;
     using ptr_const_node_ptr = typename ptr_traits::const_node_ptr;
+    using ptr_value_ptr = typename ptr_traits::value_ptr;
+    using ptr_const_value_ptr = typename ptr_traits::const_value_ptr;
 
     using ptr_trie_vector = yy_quad::simple_vector<ptr_node_type>;
 
@@ -376,7 +379,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return nullptr == m_state;
+      return m_state.empty();
     }
 
     [[nodiscard]]
@@ -412,7 +415,7 @@ class Automaton final
         if(token_type label_part{tokenizer.scan()};
            !m_state->find_edge(next_node_do, label_part))
         {
-          m_state = nullptr;
+          m_state.reset();
           return false;
         }
       }
@@ -422,7 +425,7 @@ class Automaton final
 
     trie_vector m_nodes{};
     data_vector m_data{};
-    node_ptr m_state = nullptr;
+    node_ptr m_state{};
 };
 
 } // namespace fm_flat_trie_ptr_detail
@@ -455,6 +458,10 @@ class fm_flat_trie_ptr final
     using ptr_trie_vector = typename trie_traits::ptr_trie_vector;
     using data_vector = typename trie_traits::data_vector;
 
+    using ptr_node_type = trie_traits::ptr_node_type;
+    using ptr_node_ptr = trie_traits::ptr_node_ptr;
+    using ptr_value_ptr = trie_traits::ptr_value_ptr;
+
     using source_type = tokenizer_type::source_type;
     using token_type = tokenizer_type::token_type;
 
@@ -473,7 +480,7 @@ class fm_flat_trie_ptr final
 
     struct data_added_type final
     {
-        value_ptr data = nullptr;
+        value_ptr data{};
         bool added = false;
     };
 
@@ -498,8 +505,8 @@ class fm_flat_trie_ptr final
 
       // Transform node_idx_type to node_type *,
       // and transform value_idx_type to value_type *.
-      auto ptr_nodes_begin{ptr_nodes.data()};
-      auto ptr_data_begin{ptr_data.data()};
+      ptr_node_ptr ptr_nodes_begin{ptr_nodes.data()};
+      ptr_value_ptr ptr_data_begin{ptr_data.data()};
 
       for(size_type idx = 0; idx < m_nodes.size(); ++idx)
       {
@@ -532,9 +539,6 @@ class fm_flat_trie_ptr final
     using idx_node_ptr = typename trie_traits::idx_node_ptr;
     using idx_const_node_ptr = typename trie_traits::idx_const_node_ptr;
 
-    using ptr_node_type = trie_traits::ptr_node_type;
-    using ptr_node_ptr = trie_traits::ptr_node_ptr;
-
     [[nodiscard]]
     constexpr idx_node_ptr get_node(const node_idx_type idx) noexcept
     {
@@ -548,17 +552,17 @@ class fm_flat_trie_ptr final
     }
 
     [[nodiscard]]
-    static constexpr idx_node_ptr get_node(idx_node_ptr raw_nodes,
+    static constexpr idx_node_ptr get_node(idx_node_ptr::pointer raw_nodes,
                                            const node_idx_type idx) noexcept
     {
-      return raw_nodes + idx;
+      return idx_node_ptr{raw_nodes + idx};
     }
 
     [[nodiscard]]
-    static constexpr idx_const_node_ptr get_node(idx_const_node_ptr raw_nodes,
+    static constexpr idx_const_node_ptr get_node(idx_const_node_ptr::pointer raw_nodes,
                                                  const node_idx_type idx) noexcept
     {
-      return raw_nodes + idx;
+      return idx_const_node_ptr{raw_nodes + idx};
     }
 
     [[nodiscard]]
@@ -601,7 +605,7 @@ class fm_flat_trie_ptr final
     {
       YY_ASSERT(idx < data.size());
 
-      return data.data() + idx;
+      return value_ptr{data.data() + idx};
     }
 
     template<typename InternalValueType>
@@ -677,9 +681,9 @@ class fm_flat_trie_ptr final
         tokenizer_type l_tokenizer{label};
 
         node_idx_type node_idx = add_empty_nodes(m_nodes, l_tokenizer);
-        auto node = get_node(m_nodes.data(), node_idx);
+        idx_node_ptr node{get_node(m_nodes.data(), node_idx)};
 
-        node_idx_type * edge_node_idx = nullptr;;
+        node_idx_type * edge_node_idx = nullptr;
         auto do_find_edge = [&edge_node_idx]
                             (node_idx_type * idx, size_type) {
           edge_node_idx = idx;
