@@ -92,11 +92,7 @@ class iterator_idx final
 
     constexpr iterator_idx operator++(int) noexcept
     {
-      iterator_idx tmp{*this};
-
-      ++m_offset;
-
-      return tmp;
+      return iterator_idx{m_vec, m_offset++};
     }
 
     constexpr iterator_idx & operator+=(ssize_type p_offset) noexcept
@@ -153,11 +149,7 @@ class iterator_idx final
 
     constexpr iterator_idx operator--(int) noexcept
     {
-      iterator_idx tmp{*this};
-
-      --m_offset;
-
-      return tmp;
+      return iterator_idx{m_vec, m_offset--};
     }
 
     constexpr iterator_idx & operator-=(ssize_type p_offset) noexcept

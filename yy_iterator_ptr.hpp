@@ -89,11 +89,7 @@ class iterator_ptr final
 
     constexpr iterator_ptr operator++(int) noexcept
     {
-      iterator_ptr tmp{*this};
-
-      ++m_ptr;
-
-      return tmp;
+      return iterator_ptr{m_ptr++};
     }
 
     constexpr iterator_ptr & operator+=(ssize_type p_offset) noexcept
@@ -150,11 +146,7 @@ class iterator_ptr final
 
     constexpr iterator_ptr operator--(int) noexcept
     {
-      iterator_ptr tmp{*this};
-
-      --m_ptr;
-
-      return tmp;
+      return iterator_ptr{m_ptr--};
     }
 
     constexpr iterator_ptr & operator-=(ssize_type p_offset) noexcept
