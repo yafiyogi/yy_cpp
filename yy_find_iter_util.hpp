@@ -41,7 +41,7 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
                                 KeyType && p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<KeyType,
-                                                     Iterator>;
+                                                    Iterator>;
   using end_type = typename traits::end_type;
 
   Iterator key_iter{std::lower_bound(p_begin, p_end, p_key)};
@@ -70,7 +70,7 @@ constexpr inline auto find_iter(KeyStore & p_key_store,
                                 const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
-                                                     typename KeyStore::iterator>;
+                                                    typename KeyStore::iterator>;
   using found_type = typename traits::found_type;
 
   auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key);
@@ -87,7 +87,7 @@ constexpr inline auto find_iter(const KeyStore & p_key_store,
                                 const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
-                                                     typename KeyStore::const_iterator>;
+                                                    typename KeyStore::const_iterator>;
   using found_type = typename traits::found_type;
 
   auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key);
@@ -105,7 +105,7 @@ constexpr auto find_iter_pos(const KeyStore & p_key_store,
                              const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
-                                                     typename KeyStore::const_iterator>;
+                                                    typename KeyStore::const_iterator>;
   using found_type = typename traits::found_type;
 
   auto l_begin{p_key_store.begin()};

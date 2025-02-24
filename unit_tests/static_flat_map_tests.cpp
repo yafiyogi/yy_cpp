@@ -403,7 +403,7 @@ TEST_F(TestStaticFlatMap, find_value)
   vec.emplace(3, 3);
 
   {
-    auto [found_pos, found] = vec.find_value([](auto * value, auto pos) {
+    auto [found_pos, found] = vec.find_value([](auto value, auto pos) {
       ASSERT_NE(nullptr, value);
       EXPECT_EQ(2, *value);
       EXPECT_EQ(1, pos);
@@ -414,7 +414,7 @@ TEST_F(TestStaticFlatMap, find_value)
   }
 
   {
-    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+    auto [found_pos, found] = vec.find_value([](auto /* value */, auto /* pos */) {
       EXPECT_FALSE(true);
     }, 0);
 
@@ -423,7 +423,7 @@ TEST_F(TestStaticFlatMap, find_value)
   }
 
   {
-    auto [found_pos, found] = vec.find_value([](auto * /* value */, auto /* pos */) {
+    auto [found_pos, found] = vec.find_value([](auto /* value */, auto /* pos */) {
       EXPECT_FALSE(true);
     }, 10);
 
@@ -442,7 +442,7 @@ TEST_F(TestStaticFlatMap, const_find_value)
   vec.emplace(3, 3);
 
   {
-    auto [found_pos, found] = const_vec.find_value([](auto * value, auto pos) {
+    auto [found_pos, found] = const_vec.find_value([](auto value, auto pos) {
       ASSERT_NE(nullptr, value);
       EXPECT_EQ(2, *value);
       EXPECT_EQ(1, pos);
@@ -453,7 +453,7 @@ TEST_F(TestStaticFlatMap, const_find_value)
   }
 
   {
-    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+    auto [found_pos, found] = const_vec.find_value([](auto /* value */, auto /* pos */) {
       EXPECT_FALSE(true);
     }, 0);
 
@@ -462,7 +462,7 @@ TEST_F(TestStaticFlatMap, const_find_value)
   }
 
   {
-    auto [found_pos, found] = const_vec.find_value([](auto * /* value */, auto /* pos */) {
+    auto [found_pos, found] = const_vec.find_value([](auto /* value */, auto /* pos */) {
       EXPECT_FALSE(true);
     }, 10);
 

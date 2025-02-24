@@ -403,7 +403,7 @@ class Automaton final
     {
       reset();
 
-      auto next_node_do = [this](node_ptr * edge_node, size_type)
+      auto next_node_do = [this](auto edge_node, size_type)
       {
         m_state = *edge_node;
       };
@@ -642,7 +642,7 @@ class fm_flat_trie_ptr final
                                             tokenizer_type & p_tokenizer)
     {
       node_idx_type node_idx = idx_node_type::root_idx;
-      auto next_node_do = [&node_idx](node_idx_type *edge_node_idx,
+      auto next_node_do = [&node_idx](auto edge_node_idx,
                                       size_type /* pos */) {
         node_idx = *edge_node_idx;
       };
@@ -685,8 +685,8 @@ class fm_flat_trie_ptr final
 
         node_idx_type * edge_node_idx = nullptr;
         auto do_find_edge = [&edge_node_idx]
-                            (node_idx_type * idx, size_type) {
-          edge_node_idx = idx;
+                            (auto idx, size_type) {
+          edge_node_idx = idx.get();
         };
 
         auto payload_label{l_tokenizer.token()};

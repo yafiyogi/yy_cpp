@@ -259,9 +259,15 @@ class Automaton final
 
       auto node = m_state;
 
+      auto do_find = [&node](auto edge_node, size_type /* pos */)
+      {
+        node = edge_node->get();
+      };
+
       for(label_const_l_value_ref label_part : label)
       {
-        if(!node->find_edge([&node](node_ptr * edge_node, size_type /* pos */) { node = edge_node->get();}, label_part).found)
+        if(auto [_, found] = node->find_edge(do_find, label_part);
+           !found)
         {
           m_state = nullptr;
           return false;
@@ -366,7 +372,7 @@ class fm_trie final
       while(!label.empty())
       {
         auto [ignore, found] = node->find_edge([&node]
-                                               (node_ptr * edge_node, size_type /* pos */) {
+                                               (auto edge_node, size_type /* pos */) {
           node = edge_node->get();
         }, label[0]);
 
@@ -402,10 +408,12 @@ class fm_trie final
 
         auto last = label.back();
         node_ptr * edge_node = nullptr;
-        auto [edge_pos, found] = parent->find_edge([&edge_node]
-                                                   (node_ptr * node, size_type) {
-          edge_node = node;
-        }, last);
+
+        auto do_find = [&edge_node](auto node, size_type) {
+          edge_node = node.get();
+        };
+
+        auto [edge_pos, found] = parent->find_edge(do_find, last);
 
         if(found)
         {

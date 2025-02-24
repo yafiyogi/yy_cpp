@@ -107,7 +107,7 @@ TEST_F(TestFMTrie, TestNodeAddNodeEdge)
                 'e',
                 yy_util::static_unique_cast<trie_node>(std::make_unique<value_node>(668)));
   int e1 = 0;
-  std::ignore = node.find_edge([&e1](auto * edge_node, auto){
+  std::ignore = node.find_edge([&e1](auto edge_node, auto){
     e1 = (*edge_node)->value();},
     'e');
 
@@ -115,7 +115,7 @@ TEST_F(TestFMTrie, TestNodeAddNodeEdge)
                 'e',
                 yy_util::static_unique_cast<trie_node>(std::make_unique<value_node>(777)));
   int e2 = 0;
-  std::ignore = node.find_edge([&e2](auto * edge_node, auto){ e2 = (*edge_node)->value();},
+  std::ignore = node.find_edge([&e2](auto edge_node, auto){ e2 = (*edge_node)->value();},
                  'e');
 
   EXPECT_NE(e1, e2);

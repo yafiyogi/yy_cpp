@@ -154,9 +154,9 @@ class trie_node
     {
       edge_found_type edge{nullptr, nullptr, m_edges.size(), 0, label.size()};
 
-      auto egde_getter = [label, &edge](label_type * key, node_ptr * node, size_type pos) {
-        edge.edge_label = key;
-        edge.edge_node = node;
+      auto egde_getter = [label, &edge](auto key, auto node, size_type pos) {
+        edge.edge_label = key.get();
+        edge.edge_node = node.get();
         edge.edge_pos = pos;
 
         auto [target_first, edge_first] = std::mismatch(label.begin(),
@@ -179,8 +179,8 @@ class trie_node
       edge_part_found_type edge_part{nullptr, 0, label.size()};
 
       auto edge_part_getter = [label, &edge_part]
-                              (const label_type * label_found,
-                               node_ptr * node_found,
+                              (auto label_found,
+                               auto node_found,
                                size_type /* pos */) {
         auto edge_label = yy_quad::make_const_span(*label_found);
         auto [target_first, edge_first] = std::mismatch(label.begin(),

@@ -36,6 +36,7 @@
 #include "yy_assert.h"
 #include "yy_clear_action.h"
 #include "yy_find_iter_util.hpp"
+#include "yy_observer_ptr.hpp"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_types.hpp"
@@ -54,14 +55,14 @@ struct traits_type final
     using key_l_value_ref = typename yy_traits::ref_traits<key_type>::l_value_ref;
     using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
     using key_vector = yy_quad::simple_vector<key_type, KeyClearAction>;
-    using key_ptr = key_vector::value_ptr;
-    using const_key_ptr = key_vector::const_value_ptr;
+    using key_ptr = observer_ptr<typename key_vector::value_type>;
+    using const_key_ptr = observer_ptr<std::add_const_t<typename key_vector::value_type>>;
     using value_type = yy_traits::remove_cvr_t<Value>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
-    using value_ptr = value_vector::value_ptr;
-    using const_value_ptr = value_vector::const_value_ptr;
+    using value_ptr = observer_ptr<typename value_vector::value_type>;
+    using const_value_ptr = observer_ptr<std::add_const_t<typename value_vector::value_type>>;
 };
 
 } // namespace flat_map_detail
@@ -154,8 +155,8 @@ class flat_map final
 
     struct key_value_pos_type final
     {
-        key_ptr key = nullptr;
-        value_ptr value = nullptr;
+        key_ptr key{};
+        value_ptr value{};
         size_type pos = 0;
     };
 
@@ -170,13 +171,13 @@ class flat_map final
         return key_value_pos_type{key(pos), value(pos), pos};
       }
 
-      return key_value_pos_type{nullptr, nullptr, pos};
+      return key_value_pos_type{.pos = pos};
     }
 
     struct const_key_value_pos_type final
     {
-        const_key_ptr key = nullptr;
-        const_value_ptr value = nullptr;
+        const_key_ptr key{};
+        const_value_ptr value{};
         size_type pos = 0;
     };
 
@@ -191,7 +192,7 @@ class flat_map final
         return const_key_value_pos_type{key(pos), value(pos), pos};
       }
 
-      return const_key_value_pos_type{nullptr, nullptr, pos};
+      return const_key_value_pos_type{.pos = pos};
     }
 
     template<typename KeyParamType,
@@ -511,25 +512,25 @@ class flat_map final
     [[nodiscard]]
     constexpr key_ptr key(size_type idx) noexcept
     {
-      return m_keys.data() + idx;
+      return key_ptr{m_keys.data() + idx};
     }
 
     [[nodiscard]]
     constexpr const_key_ptr key(size_type idx) const noexcept
     {
-      return m_keys.data() + idx;
+      return const_key_ptr{m_keys.data() + idx};
     }
 
     [[nodiscard]]
     constexpr value_ptr value(size_type idx) noexcept
     {
-      return m_values.data() + idx;
+      return value_ptr{m_values.data() + idx};
     }
 
     [[nodiscard]]
     constexpr const_value_ptr value(size_type idx) const noexcept
     {
-      return m_values.data() + idx;
+      return const_value_ptr{m_values.data() + idx};
     }
 
     key_vector m_keys;
