@@ -61,12 +61,12 @@ struct trie_node_idx_traits final
     using value_type = typename value_traits::value_type;
     using value_ptr = typename value_traits::value_ptr;
     using const_value_ptr = typename value_traits::const_value_ptr;
-    using value_idx_type = std::size_t;
+    using value_idx_type = size_type;
 
     using node_type = trie_node_idx<LabelType, ValueType>;
     using node_ptr = yy_data::observer_ptr<node_type>;
     using const_node_ptr = yy_data::observer_ptr<std::add_const_t<node_type>>;
-    using node_idx_type = std::size_t;
+    using node_idx_type = size_type;
     using edges_type = flat_map<label_type, node_idx_type>;
 };
 
@@ -257,7 +257,7 @@ class trie_node_ptr final
       m_edges.visit(std::forward<Visitor>(visitor));
     }
 
-    constexpr void reserve(size_t size)
+    constexpr void reserve(size_type size)
     {
       m_edges.reserve(size);
     }
@@ -297,15 +297,14 @@ struct trie_traits final
 {
     using idx_traits = trie_node_idx_traits<LabelType, ValueType>;
     using label_type = typename idx_traits::label_type;
-    using value_type = typename idx_traits::value_type;
-    using value_ptr = typename idx_traits::value_ptr;
-
-    using data_vector = yy_quad::simple_vector<value_type>;
+    using idx_value_type = typename idx_traits::value_type;
+    using idx_value_ptr = typename idx_traits::value_ptr;
 
     using idx_node_type = typename idx_traits::node_type;
     using idx_node_ptr = typename idx_traits::node_ptr;
     using idx_const_node_ptr = typename idx_traits::const_node_ptr;
 
+    using idx_data_vector = yy_quad::simple_vector<idx_value_type>;
     using idx_trie_vector = yy_quad::simple_vector<idx_node_type>;
 
     using ptr_traits = trie_node_ptr_traits<LabelType, ValueType>;
@@ -313,13 +312,19 @@ struct trie_traits final
     using ptr_node_type = typename ptr_traits::node_type;
     using ptr_node_ptr = typename ptr_traits::node_ptr;
     using ptr_const_node_ptr = typename ptr_traits::const_node_ptr;
+    using ptr_value_type = typename ptr_traits::value_type;
     using ptr_value_ptr = typename ptr_traits::value_ptr;
     using ptr_const_value_ptr = typename ptr_traits::const_value_ptr;
 
+    using ptr_data_vector = yy_quad::simple_vector<ptr_value_type>;
     using ptr_trie_vector = yy_quad::simple_vector<ptr_node_type>;
 
+    using value_type = ptr_value_type;
+    using value_ptr = ptr_value_ptr;
+    using data_vector = ptr_data_vector;
+
     static_assert(std::is_same_v<label_type, typename ptr_traits::label_type>, "trie_traits: value types different!");
-    static_assert(std::is_same_v<value_type, typename ptr_traits::value_type>, "trie_traits: value types different!");
+    static_assert(std::is_same_v<ptr_value_type, typename ptr_traits::value_type>, "trie_traits: value types different!");
 
     using label_l_value_ref = typename idx_traits::label_l_value_ref;
     using label_const_l_value_ref = typename idx_traits::label_const_l_value_ref;
@@ -440,11 +445,10 @@ class fm_flat_trie_ptr final
     using trie_traits = fm_flat_trie_ptr_detail::trie_traits<LabelType,
                                                              ValueType,
                                                              TokenizerType>;
-
     using automaton_type = Automaton<trie_traits>;
 
     using label_type = typename trie_traits::label_type;
-    using value_type = typename trie_traits::value_type;
+    using value_type = typename trie_traits::ptr_value_type;
     using tokenizer_type = typename trie_traits::tokenizer_type;
 
     using label_l_value_ref = typename trie_traits::label_l_value_ref;
@@ -454,9 +458,12 @@ class fm_flat_trie_ptr final
 
     using value_ptr = typename trie_traits::value_ptr;
 
+    using idx_value_type =  typename trie_traits::idx_value_type;
+    using idx_value_ptr =  typename trie_traits::idx_value_ptr;
     using idx_trie_vector = typename trie_traits::idx_trie_vector;
+    using idx_data_vector = typename trie_traits::idx_data_vector;
     using ptr_trie_vector = typename trie_traits::ptr_trie_vector;
-    using data_vector = typename trie_traits::data_vector;
+    using ptr_data_vector = typename trie_traits::ptr_data_vector;
 
     using ptr_node_type = trie_traits::ptr_node_type;
     using ptr_node_ptr = trie_traits::ptr_node_ptr;
@@ -480,17 +487,16 @@ class fm_flat_trie_ptr final
 
     struct data_added_type final
     {
-        value_ptr data{};
+        idx_value_ptr data{};
         bool added = false;
     };
 
-    template<typename InputType,
+    template<typename InputLabelType,
              typename InputValueType>
-    constexpr data_added_type add(InputType && label,
+    constexpr data_added_type add(InputLabelType && label,
                                   InputValueType && value)
     {
-      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>,
-                    yy_traits::remove_cvr_t<value_type>>,
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, idx_value_type>,
                     "The value provided is not the correct type.");
 
       return add_span(yy_quad::make_const_span(label), std::forward<InputValueType>(value));
@@ -500,8 +506,16 @@ class fm_flat_trie_ptr final
     constexpr automaton_type create_automaton() noexcept
     {
       // Copy nodes & data.
-      ptr_trie_vector ptr_nodes{m_nodes.size()};
-      data_vector ptr_data{m_data};
+      ptr_trie_vector ptr_nodes{};
+      ptr_nodes.reserve(m_nodes.size());
+
+      ptr_data_vector ptr_data{};
+      ptr_data.reserve(m_data.size());
+
+      for(auto & data : m_data)
+      {
+        ptr_data.emplace_back(data);
+      }
 
       // Transform node_idx_type to node_type *,
       // and transform value_idx_type to value_type *.
@@ -517,7 +531,7 @@ class fm_flat_trie_ptr final
         ptr_node.reserve(idx_node.edges());
 
         idx_node.visit([ptr_nodes_begin, &ptr_node](label_l_value_ref label, node_idx_type node_idx) {
-          // BUG! leave 'std::move(label)' as it causes performance reduction.
+          // BUG! leave 'std::move(label)'! Removing 'std::move()' causes lookup performance reduction.
           ptr_node.add_edge(std::move(label), ptr_nodes_begin + node_idx);
         });
 
@@ -566,26 +580,26 @@ class fm_flat_trie_ptr final
     }
 
     [[nodiscard]]
-    constexpr value_type & get_data(const value_idx_type idx) noexcept
+    constexpr idx_value_type & get_data(const value_idx_type idx) noexcept
     {
       return get_data(m_data, idx);
     }
 
     [[nodiscard]]
-    constexpr const value_type & get_data(const value_idx_type idx) const noexcept
+    constexpr const idx_value_type & get_data(const value_idx_type idx) const noexcept
     {
       return get_data(m_data, idx);
     }
 
     [[nodiscard]]
-    static constexpr value_type & get_data(data_vector & data,
+    static constexpr idx_value_type & get_data(idx_data_vector & data,
                                            const value_idx_type idx) noexcept
     {
       return *get_data_ptr(data, idx);
     }
 
     [[nodiscard]]
-    static constexpr const value_type & get_data(const data_vector & data,
+    static constexpr const idx_value_type & get_data(const idx_data_vector & data,
                                                  const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
@@ -594,27 +608,27 @@ class fm_flat_trie_ptr final
     }
 
     [[nodiscard]]
-    constexpr value_ptr get_data_ptr(const value_idx_type idx) noexcept
+    constexpr idx_value_ptr get_data_ptr(const value_idx_type idx) noexcept
     {
       return get_data_ptr(m_data, idx);
     }
 
     [[nodiscard]]
-    static constexpr value_ptr get_data_ptr(data_vector & data,
+    static constexpr idx_value_ptr get_data_ptr(idx_data_vector & data,
                                             const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
-      return value_ptr{data.data() + idx};
+      return idx_value_ptr{data.data() + idx};
     }
 
     template<typename InternalValueType>
     [[nodiscard]]
-    static constexpr value_idx_type add_data(data_vector & data,
+    static constexpr value_idx_type add_data(idx_data_vector & data,
                                              InternalValueType && value)
     {
-      static_assert(std::is_same_v<value_type, yy_traits::remove_cvr_t<InternalValueType>>,
-                    "The data type of value is not 'value_type'");
+      // static_assert(std::is_same_v<idx_value_type, yy_traits::remove_cvr_t<InternalValueType>>,
+      //               "The data type of value is not 'value_type'");
       value_idx_type value_idx = data.size();
 
       data.emplace_back(std::forward<InternalValueType>(value));
@@ -632,7 +646,7 @@ class fm_flat_trie_ptr final
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(pos, std::move(label), node_idx);
 
-      nodes.emplace_back(value_idx);
+      nodes.emplace_back(idx_node_type{value_idx});
 
       return node_idx;
     }
@@ -723,7 +737,7 @@ class fm_flat_trie_ptr final
     }
 
     idx_trie_vector m_nodes{};
-    data_vector m_data{};
+    idx_data_vector m_data{};
 };
 
 } // namespace yafiyogi::yy_data
