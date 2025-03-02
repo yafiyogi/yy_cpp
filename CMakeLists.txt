@@ -61,11 +61,13 @@ target_sources(yy_cpp
       yy_arg_traits.h
       yy_array_traits.h
       yy_assert.h
+      yy_atomic_traits.hpp
       yy_binary_search.h
       yy_bit_twiddling.h
       yy_clear_action.h
       yy_compare_util.h
       yy_constants.hpp
+      yy_default_value_type.hpp
       yy_fast_atoi.h
       yy_find_iter_types.hpp
       yy_find_iter_util.hpp
@@ -93,6 +95,7 @@ target_sources(yy_cpp
       yy_lower_bound.h
       yy_make_lookup.h
       yy_observer_ptr.hpp
+      yy_observer_ptr_fwd.hpp
       yy_radix_trie.h
       yy_ref_traits.h
       yy_ring_buffer.h
