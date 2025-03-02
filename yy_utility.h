@@ -35,6 +35,7 @@
 
 #include "yy_assert.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_util {
 
