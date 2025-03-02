@@ -65,7 +65,7 @@ struct find_pos_linear<Iterator,
                                          const Iterator & p_end,
                                          const ValueType & p_value) noexcept
     {
-      auto found{std::char_traits<char>::find(p_begin, static_cast<size_t>(p_end - p_begin), p_value)};
+      auto found{std::char_traits<char>::find(p_begin, static_cast<size_type>(p_end - p_begin), p_value)};
 
       if(nullptr == found)
       {

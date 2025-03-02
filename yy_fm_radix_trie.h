@@ -164,7 +164,7 @@ class trie_node
                                                         key->begin(),
                                                         key->end());
 
-        edge.common = static_cast<std::size_t>(target_first - label.begin());
+        edge.common = static_cast<size_type>(target_first - label.begin());
         edge.remaining = edge.edge_label->size() - edge.common;
       };
 
@@ -189,7 +189,7 @@ class trie_node
                                                         edge_label.end());
 
         edge_part.edge_node = node_found->get();
-        edge_part.common = static_cast<std::size_t>(target_first - label.begin());
+        edge_part.common = static_cast<size_type>(target_first - label.begin());
         edge_part.remaining = edge_label.size() - edge_part.common;
       };
 

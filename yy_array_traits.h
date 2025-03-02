@@ -26,17 +26,16 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <array>
 #include <type_traits>
 
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_traits {
 namespace traits_detail {
 
-template<typename T, std::size_t N>
+template<typename T, size_type N>
 struct container_traits<std::array<T, N>>:
       std::true_type
 {
@@ -49,7 +48,7 @@ struct array_traits:
 {
 };
 
-template<typename T, std::size_t N>
+template<typename T, size_type N>
 struct array_traits<std::array<T, N>>:
       std::true_type
 {

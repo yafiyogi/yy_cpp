@@ -37,16 +37,16 @@ namespace make_lookup_detail {
 
 template<typename Key,
          typename Value,
-         std::size_t Capacity>
+         size_type Capacity>
 class const_lookup final
 {
   public:
-    static constexpr std::size_t key_idx = 0;
-    static constexpr std::size_t value_idx = 1;
+    static constexpr size_type key_idx = 0;
+    static constexpr size_type value_idx = 1;
 
     constexpr explicit const_lookup(std::tuple<Key, Value> (&& arr)[Capacity]) noexcept
     {
-      for(std::size_t idx = 0; idx < Capacity; ++idx)
+      for(size_type idx = 0; idx < Capacity; ++idx)
       {
         m_lookup.emplace(std::move(std::get<key_idx>(arr[idx])),
                          std::move(std::get<value_idx>(arr[idx])));
@@ -57,7 +57,7 @@ class const_lookup final
                                     std::tuple<Key, Value> (&& arr)[Capacity]) noexcept:
       m_default_value(std::move(p_default_value))
     {
-      for(std::size_t idx = 0; idx < Capacity; ++idx)
+      for(size_type idx = 0; idx < Capacity; ++idx)
       {
         m_lookup.emplace(std::move(std::get<key_idx>(arr[idx])),
                          std::move(std::get<value_idx>(arr[idx])));
@@ -99,7 +99,7 @@ class const_lookup final
 
 template<typename Key,
          typename Value,
-         std::size_t N>
+         size_type N>
 consteval auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
 {
   return make_lookup_detail::const_lookup{std::forward<std::tuple<Key, Value>[N]>(arr)};
@@ -107,7 +107,7 @@ consteval auto make_lookup(std::tuple<Key, Value> (&& arr)[N])
 
 template<typename Key,
          typename Value,
-         std::size_t N>
+         size_type N>
 consteval auto make_lookup(Value default_value, std::tuple<Key, Value> (&& arr)[N])
 {
   return make_lookup_detail::const_lookup{default_value, std::forward<std::tuple<Key, Value>[N]>(arr)};

@@ -117,7 +117,7 @@ constexpr inline auto find_raw(const KeyStore & p_key_store,
   return const_found_type{key_iter, found};
 }
 
-template<std::size_t size_threshold = find_util_detail::default_size_threshold,
+template<size_type size_threshold = find_util_detail::default_size_threshold,
          typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]

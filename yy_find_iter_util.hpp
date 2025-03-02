@@ -97,7 +97,7 @@ constexpr inline auto find_iter(const KeyStore & p_key_store,
   return found_type{iter, found};
 }
 
-template<std::size_t size_threshold = find_util_detail::default_size_threshold,
+template<size_type size_threshold = find_util_detail::default_size_threshold,
          typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]

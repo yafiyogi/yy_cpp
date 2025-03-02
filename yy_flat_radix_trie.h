@@ -49,8 +49,8 @@ template<typename EdgesIterator>
 struct found_value final
 {
     EdgesIterator iter{};
-    std::size_t common = 0;
-    std::size_t remaining = 0;
+    size_type common = 0;
+    size_type remaining = 0;
 };
 
 template<typename LabelType>
@@ -59,8 +59,8 @@ struct trie_node_traits final
     using label_type = std::vector<yy_traits::remove_cvr_t<LabelType>>;
     using label_span_type = typename yy_quad::span_traits_helper<label_type>::const_span_type;
     using node_type = trie_node<LabelType>;
-    using node_idx_type = std::size_t;
-    using data_idx_type = std::size_t;
+    using node_idx_type = size_type;
+    using data_idx_type = size_type;
     using node_edge = trie_node_edge<LabelType>;
     using edges_type = std::vector<node_edge>;
     using edges_iterator = typename edges_type::iterator;
@@ -229,7 +229,7 @@ class trie_node final
                                                         label_edge.begin(),
                                                         label_edge.end());
 
-        const auto common_size = static_cast<std::size_t>(std::distance(label_target.begin(), target_first));
+        const auto common_size = static_cast<size_type>(std::distance(label_target.begin(), target_first));
 
         return found_value_type{std::move(edge_iter),
                                 common_size,

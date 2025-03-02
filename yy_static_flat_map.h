@@ -46,7 +46,7 @@ namespace static_flat_map_detail {
 
 template<typename Key,
          typename Value,
-         std::size_t Capacity,
+         size_type Capacity,
          ClearAction KeyClearAction,
          ClearAction ValueClearAction>
 struct traits_type final
@@ -73,10 +73,10 @@ struct traits_type final
 
 template<typename Key,
          typename Value,
-         std::size_t Capacity,
+         size_type Capacity,
          ClearAction KeyClearAction = default_clear_action_v<Key>,
          ClearAction ValueClearAction = default_clear_action_v<Value>,
-         std::size_t SearchSizeThreshold = ((yy_data::find_util_detail::size_threshold_cache_line_size * 2) / sizeof(Key)) + 1>
+         size_type SearchSizeThreshold = ((yy_data::find_util_detail::size_threshold_cache_line_size * 2) / sizeof(Key)) + 1>
 class static_flat_map final
 {
   public:

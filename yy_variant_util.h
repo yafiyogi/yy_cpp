@@ -26,20 +26,19 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <variant>
 #include <stdexcept>
 #include <type_traits>
 
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_util {
 namespace variant_detail {
 
 template<typename V,
          typename T,
-         std::size_t N>
+         size_type N>
 struct check_variant_for_type final
 {
     using variant_type = std::variant_alternative_t<N - 1, V>;

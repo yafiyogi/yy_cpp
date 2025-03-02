@@ -60,8 +60,8 @@ struct trie_node_idx_traits final
     using value_type = typename value_traits::value_type;
 
     using node_type = trie_node_idx<LabelType, ValueType>;
-    using node_idx_type = std::size_t;
-    using data_idx_type = std::size_t;
+    using node_idx_type = size_type;
+    using data_idx_type = size_type;
     using edges_type = flat_map<label_type, node_idx_type>;
 };
 
@@ -491,7 +491,7 @@ class fm_flat_trie_idx final
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
       node->add_edge(pos, std::move(label), node_idx);
 
-      nodes.emplace_back(data_idx);
+      nodes.emplace_back(node_type{data_idx});
 
       return node_idx;
     }

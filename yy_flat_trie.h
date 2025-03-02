@@ -57,8 +57,8 @@ struct trie_node_traits final
     using node_type = trie_node<label_type>;
     using node_ptr = std::add_pointer_t<node_type>;
     using const_node_ptr = std::add_pointer_t<std::add_const_t<node_type>>;
-    using node_idx_type = std::size_t;
-    using data_idx_type = std::size_t;
+    using node_idx_type = size_type;
+    using data_idx_type = size_type;
     using node_edge = trie_node_edge<label_type>;
     using edges_type = std::vector<node_edge>;
     using edge_traits = find_util_detail::raw_traits_type<typename edges_type::value_type>;

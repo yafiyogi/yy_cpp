@@ -26,13 +26,12 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <limits>
 
 #include "yy_lower_bound.h"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_data {
 namespace bs_detail {
@@ -43,7 +42,7 @@ struct equal_val final
     using type = yy_traits::remove_cvr_t<T>;
     using value_type = yy_traits::remove_cvr_t<V>;
     using val_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
-    static constexpr size_t mask = std::numeric_limits<size_t>::max();
+    static constexpr size_type mask = std::numeric_limits<size_type>::max();
 
     constexpr equal_val() noexcept = default;
     constexpr equal_val(const equal_val &) noexcept = default;

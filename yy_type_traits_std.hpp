@@ -49,7 +49,7 @@ struct vector_traits<std::vector<T>>:
 };
 
 template<typename T,
-         std::size_t N>
+         size_type N>
 struct container_traits<std::vector<T, N>>:
       std::true_type
 {
@@ -57,7 +57,7 @@ struct container_traits<std::vector<T, N>>:
 };
 
 template<typename T,
-         std::size_t N>
+         size_type N>
 struct vector_traits<std::array<T, N>>:
       std::true_type
 {

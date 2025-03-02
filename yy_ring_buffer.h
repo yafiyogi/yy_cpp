@@ -26,14 +26,14 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <stop_token>
 #include <type_traits>
 
+#include "yy_types.hpp"
 #include "yy_type_traits.h"
 
 namespace yafiyogi::yy_data {
@@ -42,7 +42,7 @@ namespace yafiyogi::yy_data {
 // See https://www.youtube.com/watch?v=5uIsadq-nyk&t=1978s
 
 template<typename ValueType,
-         std::size_t Capacity>
+         size_type Capacity>
 class ring_buffer final
 {
   public:
@@ -142,21 +142,29 @@ class ring_buffer final
       return m_size;
     }
 
-    bool wait(const std::chrono::nanoseconds duration)
+    bool wait(const std::chrono::milliseconds duration)
     {
       std::unique_lock lck{m_mtx};
 
       return std::cv_status::no_timeout == m_cv.wait_for(lck, duration);
     }
 
-    template<typename Duration,
-             typename Pred>
-    bool wait(const Duration & duration,
-              Pred && pred)
+    template<typename Pred>
+    bool wait(Pred && pred,
+              const std::chrono::milliseconds duration)
     {
       std::unique_lock lck{m_mtx};
 
       return m_cv.wait_for(lck, duration, std::forward<Pred>(pred));
+    }
+
+    template<typename Pred>
+    bool wait(std::stop_token & p_stop_token,
+              Pred && pred)
+    {
+      std::unique_lock lck{m_mtx};
+
+      return m_cv.wait(lck, p_stop_token, std::forward<Pred>(pred));
     }
 
   private:
@@ -183,7 +191,7 @@ class ring_buffer final
     std::atomic<size_type> m_write_pos = 0;
 
     std::mutex m_mtx{};
-    std::condition_variable m_cv{};
+    std::condition_variable_any m_cv{};
 
     value_type m_read_value_tmp;
     value_type m_write_value_tmp;

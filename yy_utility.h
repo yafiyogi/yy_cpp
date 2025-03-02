@@ -122,7 +122,7 @@ constexpr auto make_range(Iterator && begin, Iterator && end) noexcept
 }
 
 template<typename T,
-         std::size_t N>
+         size_type N>
 constexpr auto make_range(T (&& array)[N]) noexcept
 {
   return Range<T *>{&array[0], &array[N]};
@@ -131,23 +131,23 @@ constexpr auto make_range(T (&& array)[N]) noexcept
 template<typename T>
 struct ArraySize final
 {
-    static constexpr std::size_t size = 0;
+    static constexpr size_type size = 0;
 };
 
-template<typename T, std::size_t Size>
+template<typename T, size_type Size>
 struct ArraySize<T[Size]> final
 {
-    static constexpr std::size_t size = Size;
+    static constexpr size_type size = Size;
 };
 
-template<typename T, std::size_t Size>
+template<typename T, size_type Size>
 struct ArraySize<std::array<T, Size>> final
 {
-    static constexpr std::size_t size = Size;
+    static constexpr size_type size = Size;
 };
 
 template<typename T>
-inline constexpr std::size_t array_size_v = ArraySize<T>::size;
+inline constexpr size_type array_size_v = ArraySize<T>::size;
 
 template<typename Return,
          typename T>

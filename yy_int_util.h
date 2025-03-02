@@ -26,24 +26,23 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-
 #include <limits>
+
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_util {
 namespace digits_detail {
 
-template<std::size_t num>
+template<size_type num>
 struct DigitsHelper final
 {
-    static constexpr const uint64_t digits = 1 + DigitsHelper<num / 10>::digits;
+    static constexpr const size_type digits = 1 + DigitsHelper<num / 10>::digits;
 };
 
 template<>
 struct DigitsHelper<0> final
 {
-    static constexpr const uint64_t digits = 0;
+    static constexpr const size_type digits = 0;
 };
 
 } // namespace digits_detail
@@ -51,7 +50,7 @@ struct DigitsHelper<0> final
 template<typename I>
 struct Digits final
 {
-    static constexpr const uint64_t digits = digits_detail::DigitsHelper<std::numeric_limits<I>::max()>::digits;
+    static constexpr const size_type digits = digits_detail::DigitsHelper<std::numeric_limits<I>::max()>::digits;
 };
 
 } // namespace yafiyogi::yy_util

@@ -26,14 +26,13 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <string_view>
 #include <type_traits>
 
 #include "yy_int_util.h"
 #include "yy_span.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_util {
 

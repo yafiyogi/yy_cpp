@@ -36,12 +36,12 @@
 namespace yafiyogi::yy_quad {
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 class static_vector;
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 class static_simple_vector;
 
@@ -50,7 +50,7 @@ class static_simple_vector;
 namespace yafiyogi::yy_traits::traits_detail {
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 struct vector_traits<yy_quad::static_vector<T, N, ct>>:
       std::true_type
@@ -58,7 +58,7 @@ struct vector_traits<yy_quad::static_vector<T, N, ct>>:
 };
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 struct container_traits<yy_quad::static_vector<T, N, ct>>:
       std::true_type
@@ -67,7 +67,7 @@ struct container_traits<yy_quad::static_vector<T, N, ct>>:
 };
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 struct vector_traits<yy_quad::static_simple_vector<T, N, ct>>:
       std::true_type
@@ -76,7 +76,7 @@ struct vector_traits<yy_quad::static_simple_vector<T, N, ct>>:
 };
 
 template<typename T,
-         std::size_t N,
+         size_type N,
          yy_data::ClearAction ct>
 struct container_traits<yy_quad::static_simple_vector<T, N, ct>>:
       std::true_type

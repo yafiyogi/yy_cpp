@@ -35,7 +35,7 @@ namespace yafiyogi::yy_data {
 // Adapted from https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3876.pdf
 
 template<typename T>
-constexpr std::size_t hash_combine(std::size_t & seed, const T & val) noexcept
+constexpr size_type hash_combine(size_type & seed, const T & val) noexcept
 {
   seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
@@ -43,7 +43,7 @@ constexpr std::size_t hash_combine(std::size_t & seed, const T & val) noexcept
 }
 
 template <typename T, typename... RestTypes>
-constexpr st::size_t hash_combine(std::size_t& seed,
+constexpr size_type hash_combine(size_type& seed,
                                   const T& val,
                                   const RestTypes & ...rest_args) noexcept
 {
@@ -53,15 +53,15 @@ constexpr st::size_t hash_combine(std::size_t& seed,
   return seed;
 }
 
-constexpr st::size_t hash_combine(std::size_t & seed) noexcept
+constexpr size_type hash_combine(size_type & seed) noexcept
 {
   return seed;
 }
 
 template <typename... Types>
-constexpr std::size_t hash_val(const Types&... args) noexcept
+constexpr size_type hash_val(const Types&... args) noexcept
 {
-  std::size_t seed = 0;
+  size_type seed = 0;
 
   return hash_combine(seed, args...);
 }

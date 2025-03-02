@@ -54,7 +54,7 @@ namespace static_vector_detail {
 enum class EmplaceResult:uint8_t {Ok, NotInserted, Full, Part};
 
 template<typename T,
-         std::size_t Capacity>
+         size_type Capacity>
 struct vector_traits final
 {
     using value_type = yy_traits::remove_cvr_t<T>;
@@ -74,7 +74,7 @@ struct vector_traits final
 } // namespace static_vector_detail
 
 template<typename T,
-         std::size_t Capacity,
+         size_type Capacity,
          ClearAction default_action = static_vector_detail::vector_traits<T, Capacity>::default_action>
 class static_vector
 {
@@ -675,7 +675,7 @@ class static_vector
 };
 
 template<typename T,
-         std::size_t Capacity,
+         size_type Capacity,
          ClearAction default_action = static_vector_detail::vector_traits<T, Capacity>::default_action>
 class static_simple_vector
 {

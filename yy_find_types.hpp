@@ -34,7 +34,7 @@
 namespace yafiyogi::yy_data {
 namespace find_util_detail {
 
-static constexpr std::size_t size_threshold_cache_line_size = 64;
+static constexpr size_type size_threshold_cache_line_size = 64;
 static constexpr size_type default_size_threshold = 16;
 
 } // namespace find_uti_detail

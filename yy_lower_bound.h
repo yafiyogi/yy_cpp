@@ -26,12 +26,11 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <limits>
 
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_data {
 namespace lb_detail {
@@ -42,7 +41,7 @@ struct less_val final
     using type = yy_traits::remove_cvr_t<T>;
     using value_type = yy_traits::remove_cvr_t<V>;
     using val_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
-    static constexpr std::size_t mask = std::numeric_limits<std::size_t>::max();
+    static constexpr size_type mask = std::numeric_limits<size_type>::max();
 
     constexpr less_val() noexcept = default;
     constexpr less_val(const less_val &) noexcept = default;
@@ -60,31 +59,31 @@ struct less_val final
     }
 
     [[nodiscard]]
-    constexpr std::size_t comp_bool(const type item,
+    constexpr size_type comp_bool(const type item,
                                     const value_type & val) const noexcept
     {
-      return static_cast<std::size_t>(*item < val);
+      return static_cast<size_type>(*item < val);
     }
 
     [[nodiscard]]
-    constexpr std::size_t comp_mask(const type item,
+    constexpr size_type comp_mask(const type item,
                                     const value_type & val) const noexcept
     {
-      static_assert(mask == (std::size_t{0} - std::size_t{1}), "Your platform/complier doesn't wrap unsigned integers. You are going to have to use std::lower_bound. Sorry!");
+      static_assert(mask == (size_type{0} - size_type{1}), "Your platform/complier doesn't wrap unsigned integers. You are going to have to use std::lower_bound. Sorry!");
 
-      return std::size_t{0} - comp_bool(item, val);
+      return size_type{0} - comp_bool(item, val);
     }
 
     [[nodiscard]]
-    constexpr std::size_t comp_mask(const type item,
+    constexpr size_type comp_mask(const type item,
                                     const value_type & val,
-                                    const std::size_t val_to_mask) const noexcept
+                                    const size_type val_to_mask) const noexcept
     {
       return val_to_mask & comp_mask(item, val);
     }
 };
 
-inline constexpr std::size_t loop_mask = std::numeric_limits<std::size_t>::max() - std::size_t{1};
+inline constexpr size_type loop_mask = std::numeric_limits<size_type>::max() - size_type{1};
 
 }
 
@@ -101,11 +100,11 @@ constexpr T lower_bound(T begin, T end, const V & val, Compare comp = Compare{})
     return begin;
   }
 
-  auto n = static_cast<std::size_t>(end - begin);
+  auto n = static_cast<size_type>(end - begin);
 
   while(0 != (n & lb_detail::loop_mask))
   {
-    std::size_t half = n >> 1;
+    size_type half = n >> 1;
 
     begin = begin + comp.comp_mask(begin + half, val, half);
 

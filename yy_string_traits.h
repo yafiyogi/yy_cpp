@@ -26,13 +26,12 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include <string>
 #include <string_view>
 #include <type_traits>
 
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_traits {
 namespace traits_detail {
@@ -81,14 +80,14 @@ struct container_traits<char8_t *>:
     using value_type = char8_t;
 };
 
-template<std::size_t N>
+template<size_type N>
 struct container_traits<char[N]>:
       std::true_type
 {
     using value_type = char;
 };
 
-template<std::size_t N>
+template<size_type N>
 struct container_traits<char8_t[N]>:
       std::true_type
 {
