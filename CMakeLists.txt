@@ -62,6 +62,7 @@ target_sources(yy_cpp
       yy_array_traits.h
       yy_assert.h
       yy_atomic_traits.hpp
+      yy_atomic_wrapper.hpp
       yy_binary_search.h
       yy_bit_twiddling.h
       yy_clear_action.h
