@@ -67,7 +67,6 @@ target_sources(yy_cpp
       yy_clear_action.h
       yy_compare_util.h
       yy_constants.hpp
-      yy_default_value_type.hpp
       yy_fast_atoi.h
       yy_find_iter_types.hpp
       yy_find_iter_util.hpp
