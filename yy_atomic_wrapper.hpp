@@ -61,7 +61,7 @@ class AtomicWrapper
       return *this;
     }
 
-    value_type load( std::memory_order order) const noexcept
+    value_type load(std::memory_order order) const noexcept
     {
       return m_value.load(order);
     }
