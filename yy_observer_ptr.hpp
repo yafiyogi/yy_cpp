@@ -78,12 +78,12 @@ class observer_ptr final
 
     constexpr bool operator<(const observer_ptr & other) const noexcept
     {
-      return other.m_raw_ptr < m_raw_ptr;
+      return m_raw_ptr < other.m_raw_ptr;
     }
 
     constexpr bool operator<(const pointer other) const noexcept
     {
-      return other == m_raw_ptr;
+      return m_raw_ptr < other;
     }
 
     constexpr pointer release() noexcept
