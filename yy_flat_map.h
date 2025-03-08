@@ -96,6 +96,12 @@ class flat_map final
     template<typename KeyParamType>
     using key_param_l_value_ref = typename key_param_traits<KeyParamType>::l_value_ref;
 
+    constexpr flat_map(size_type capacity) noexcept:
+      m_keys(capacity),
+      m_values(capacity)
+    {
+    }
+
     template<typename key_type,
              typename value_type>
     constexpr flat_map(std::initializer_list<std::tuple<key_type, value_type>> init)
@@ -388,6 +394,19 @@ class flat_map final
     {
       m_keys.clear();
       m_values.clear();
+    }
+
+    void clear(ClearAction p_clear_action) noexcept
+    {
+      m_keys.clear(p_clear_action);
+      m_values.clear(p_clear_action);
+    }
+
+    void clear(ClearAction p_key_clear_action,
+               ClearAction p_value_clear_action) noexcept
+    {
+      m_keys.clear(p_key_clear_action);
+      m_values.clear(p_value_clear_action);
     }
 
     [[nodiscard]]
