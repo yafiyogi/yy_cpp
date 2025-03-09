@@ -133,8 +133,8 @@ class ring_buffer final
 
     bool empty() const noexcept
     {
-      return m_write_pos.load(std::memory_order_relaxed)
-        == m_read_pos.load(std::memory_order_relaxed);
+      return m_write_pos.load(std::memory_order_acquire)
+        == m_read_pos.load(std::memory_order_acquire);
     }
 
     size_type size() const noexcept
