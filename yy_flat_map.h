@@ -509,6 +509,48 @@ class flat_map final
       }
     }
 
+    template<typename Visitor>
+    void visit(Visitor && visitor, size_type pos)
+    {
+      if(pos < size())
+      {
+        visitor(*key(pos), *value(pos));
+      }
+    }
+
+    template<typename Visitor>
+    void visit(Visitor && visitor, size_type pos) const
+    {
+      if(pos < size())
+      {
+        visitor(*key(pos), *value(pos));
+      }
+    }
+
+    [[nodiscard]]
+    constexpr key_ptr key(size_type idx) noexcept
+    {
+      return key_ptr{m_keys.data() + std::min(idx, size())};
+    }
+
+    [[nodiscard]]
+    constexpr const_key_ptr key(size_type idx) const noexcept
+    {
+      return const_key_ptr{m_keys.data() + std::min(idx, size())};
+    }
+
+    [[nodiscard]]
+    constexpr value_ptr value(size_type idx) noexcept
+    {
+      return value_ptr{m_values.data() + std::min(idx, size())};
+    }
+
+    [[nodiscard]]
+    constexpr const_value_ptr value(size_type idx) const noexcept
+    {
+      return const_value_ptr{m_values.data() + std::min(idx, size())};
+    }
+
   private:
     [[nodiscard]]
     constexpr std::tuple<key_iterator, value_iterator> add_empty(key_iterator p_pos)
@@ -526,30 +568,6 @@ class flat_map final
       }
 
       return std::make_tuple(key_pos, value_pos);
-    }
-
-    [[nodiscard]]
-    constexpr key_ptr key(size_type idx) noexcept
-    {
-      return key_ptr{m_keys.data() + idx};
-    }
-
-    [[nodiscard]]
-    constexpr const_key_ptr key(size_type idx) const noexcept
-    {
-      return const_key_ptr{m_keys.data() + idx};
-    }
-
-    [[nodiscard]]
-    constexpr value_ptr value(size_type idx) noexcept
-    {
-      return value_ptr{m_values.data() + idx};
-    }
-
-    [[nodiscard]]
-    constexpr const_value_ptr value(size_type idx) const noexcept
-    {
-      return const_value_ptr{m_values.data() + idx};
     }
 
     key_vector m_keys;
