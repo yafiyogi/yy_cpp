@@ -71,6 +71,11 @@ class AtomicWrapper
       m_value.store(value, order);
     }
 
+    value_type exchange(value_type value, std::memory_order order) noexcept
+    {
+      return m_value.exchange(value, order);
+    }
+
   private:
     void copy(const AtomicWrapper & other)
     {
