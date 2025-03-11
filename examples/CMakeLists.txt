@@ -91,20 +91,19 @@ target_link_libraries(subject_observer
   fmt::fmt
   spdlog::spdlog)
 
-add_executable(table
-  table.cpp )
-
-target_include_directories(table
-  PRIVATE
-    "${PROJECT_SOURCE_DIR}/.."
-  SYSTEM PRIVATE
-    "${YY_THIRD_PARTY_LIBRARY}/include" )
-
-target_compile_options(table
-  PRIVATE
-    "-DSPDLOG_COMPILED_LIB"
-    "-DSPDLOG_FMT_EXTERNAL")
-
-target_link_libraries(table
-  fmt::fmt
-  spdlog::spdlog)
+#add_executable(table
+#  table.cpp )
+#
+#target_include_directories(table
+#  SYSTEM PRIVATE
+#    ${PROJECT_SOURCE_DIR}/..
+#    "${YY_THIRD_PARTY_LIBRARY}/include" )
+#
+#target_compile_options(table
+#  PRIVATE
+#  "-DSPDLOG_COMPILED_LIB"
+#  "-DSPDLOG_FMT_EXTERNAL")
+#
+#target_link_libraries(table
+#  fmt::fmt
+#  spdlog::spdlog)
