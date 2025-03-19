@@ -33,6 +33,7 @@
 #include <stop_token>
 #include <type_traits>
 
+#include "yy_observer_ptr.hpp"
 #include "yy_types.hpp"
 #include "yy_type_traits.h"
 
@@ -48,6 +49,8 @@ class ring_buffer final
   public:
     using value_type = yy_traits::remove_cvr_t<ValueType>;
     using array_type = std::array<value_type, Capacity>;
+
+    static constexpr size_type g_size = Capacity;
 
     template<typename InputValueType>
     bool push(InputValueType && value) noexcept
@@ -139,23 +142,7 @@ class ring_buffer final
 
     size_type size() const noexcept
     {
-      return m_size;
-    }
-
-    bool wait(const std::chrono::milliseconds duration)
-    {
-      std::unique_lock lck{m_mtx};
-
-      return std::cv_status::no_timeout == m_cv.wait_for(lck, duration);
-    }
-
-    template<typename Pred>
-    bool wait(Pred && pred,
-              const std::chrono::milliseconds duration)
-    {
-      std::unique_lock lck{m_mtx};
-
-      return m_cv.wait_for(lck, duration, std::forward<Pred>(pred));
+      return g_size;
     }
 
     template<typename Pred>
@@ -177,7 +164,7 @@ class ring_buffer final
     {
       ++pos;
 
-      if(pos == m_size)
+      if(pos == g_size)
       {
         pos = 0;
       }
@@ -185,16 +172,95 @@ class ring_buffer final
       return pos;
     }
 
-    static constexpr size_type m_size = Capacity;
     array_type m_buffer{};
     std::atomic<size_type> m_read_pos = 0;
     std::atomic<size_type> m_write_pos = 0;
 
     std::mutex m_mtx{};
     std::condition_variable_any m_cv{};
+};
 
-    value_type m_read_value_tmp;
-    value_type m_write_value_tmp;
+template<typename RingBufferType>
+using ring_buffer_ptr = std::shared_ptr<RingBufferType>;
+
+template<typename RingBufferType>
+class ring_buffer_reader final
+{
+  public:
+    using queue_type = RingBufferType;
+    using queue_ptr = ring_buffer_ptr<queue_type>;
+    using value_type = queue_type::value_type;
+
+    constexpr ring_buffer_reader(queue_ptr p_queue) noexcept:
+      m_queue_anchor(std::move(p_queue)),
+      m_queue(m_queue_anchor.get())
+    {
+    }
+
+    constexpr ring_buffer_reader() noexcept = default;
+    constexpr ring_buffer_reader(const ring_buffer_reader &) noexcept = delete;
+    constexpr ring_buffer_reader(ring_buffer_reader &&) noexcept = default;
+    constexpr ~ring_buffer_reader() noexcept = default;
+
+    constexpr ring_buffer_reader & operator=(const ring_buffer_reader &) noexcept = delete;
+    constexpr ring_buffer_reader & operator=(ring_buffer_reader &&) noexcept = default;
+
+    bool QSwapOut(value_type & p_data)
+    {
+      return m_queue && m_queue->swap_out(p_data);
+    }
+
+    template<typename Pred>
+    bool QWait(std::stop_token & p_stop_token,
+              Pred && pred)
+    {
+      return m_queue && m_queue->wait(p_stop_token, std::forward<Pred>(pred));
+    }
+
+    bool QEmpty() const
+    {
+      return !m_queue || m_queue->empty();
+    }
+
+  private:
+    using queue_obs_ptr = yy_data::observer_ptr<queue_type>;
+
+    queue_ptr m_queue_anchor{};
+    queue_obs_ptr m_queue{};
+};
+
+template<typename RingBufferType>
+class ring_buffer_writer final
+{
+  public:
+    using queue_type = RingBufferType;
+    using queue_ptr = ring_buffer_ptr<queue_type>;
+    using value_type = queue_type::value_type;
+
+    constexpr ring_buffer_writer(queue_ptr p_queue) noexcept:
+      m_queue_anchor(std::move(p_queue)),
+      m_queue(m_queue_anchor.get())
+    {
+    }
+
+    constexpr ring_buffer_writer() noexcept = default;
+    constexpr ring_buffer_writer(const ring_buffer_writer &) noexcept = delete;
+    constexpr ring_buffer_writer(ring_buffer_writer &&) noexcept = default;
+    constexpr ~ring_buffer_writer() noexcept = default;
+
+    constexpr ring_buffer_writer & operator=(const ring_buffer_writer &) noexcept = delete;
+    constexpr ring_buffer_writer & operator=(ring_buffer_writer &&) noexcept = default;
+
+    bool QSwapIn(value_type & p_data)
+    {
+      return m_queue && m_queue->swap_in(p_data);
+    }
+
+  private:
+    using queue_obs_ptr = yy_data::observer_ptr<queue_type>;
+
+    queue_ptr m_queue_anchor{};
+    queue_obs_ptr m_queue{};
 };
 
 } // namespace yafiyogi::yy_data
