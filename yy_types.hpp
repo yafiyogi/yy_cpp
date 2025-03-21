@@ -27,10 +27,13 @@
 #pragma once
 
 #include <cstddef>
+#include <chrono>
 
 namespace yafiyogi {
 
 using size_type = std::size_t;
 using ssize_type = std::ptrdiff_t;
+
+using timestamp_type = std::chrono::nanoseconds;
 
 } // namespace yafiyogi
