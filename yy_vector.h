@@ -430,6 +430,28 @@ class vector
       return emplace(end(), std::forward<InputValueType>(value));
     }
 
+    template<typename InputValueType>
+    constexpr reference swap_back(InputValueType && value)
+    {
+      auto [iter, inserted] = swap(end(), std::forward<InputValueType>(value));
+
+      return *iter;
+    }
+
+    template<typename InputValueType>
+    constexpr insert_result swap(iterator pos,
+                                 InputValueType && value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        std::swap(*result.iter, std::forward<InputValueType>(value));
+      }
+
+      return result;
+    }
+
     constexpr void reserve(size_type new_capacity)
     {
       reserve_and_move(new_capacity, m_size);
@@ -1094,6 +1116,28 @@ class simple_vector
     constexpr void push_back(InputValueType && value)
     {
       emplace(end(), std::forward<InputValueType>(value));
+    }
+
+    template<typename InputValueType>
+    constexpr reference swap_data_back(InputValueType && value)
+    {
+      auto [iter, inserted] = swap_data(end(), std::forward<InputValueType>(value));
+
+      return *iter;
+    }
+
+    template<typename InputValueType>
+    constexpr insert_result swap_data(iterator pos,
+                                      InputValueType && value)
+    {
+      insert_result result{add_empty(pos)};
+
+      if(result.inserted)
+      {
+        std::swap(*result.iter, std::forward<InputValueType>(value));
+      }
+
+      return result;
     }
 
     constexpr void reserve(size_type new_capacity)
