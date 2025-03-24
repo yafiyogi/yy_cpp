@@ -36,30 +36,26 @@
 
 namespace yafiyogi::yy_util {
 
-inline bool yaml_is_scalar(const YAML::Node & node)
+inline bool yaml_is_scalar(const YAML::Node & node) noexcept
 {
   return node && node.IsScalar();
 }
 
 template<typename T,
          std::enable_if_t<!yy_traits::is_c_string_v<T>, bool> = true>
-inline auto yaml_get_value(const YAML::Node & node)
+inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node)
 {
-  using return_type = yy_traits::remove_cvr_t<T>;
-
-  return_type return_value{};
-
   if(yaml_is_scalar(node))
   {
-    return_value = node.as<return_type>();
+    return node.as<yy_traits::remove_cvr_t<T>>();
   }
 
-  return return_value;
+  return T{};
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
-inline auto yaml_get_value(const YAML::Node & node)
+inline std::string_view yaml_get_value(const YAML::Node & node)
 {
   return yaml_get_value<std::string_view>(node);
 }
@@ -67,24 +63,20 @@ inline auto yaml_get_value(const YAML::Node & node)
 template<typename T,
          std::enable_if_t<!yy_traits::is_std_string_v<T>
                           && !yy_traits::is_c_string_v<T>, bool> = true>
-inline auto yaml_get_value(const YAML::Node & node, T && value)
+inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node, T && value)
 {
-  using return_type = yy_traits::remove_cvr_t<T>;
-
-  return_type return_value{std::forward<T>(value)};
-
   if(yaml_is_scalar(node))
   {
-    return_value = node.as<return_type>();
+    return node.as<yy_traits::remove_cvr_t<T>>();
   }
 
-  return return_value;
+  return value;
 }
 
 template<typename T,
          std::enable_if_t<yy_traits::is_std_string_v<T>
                           || yy_traits::is_c_string_v<T>, bool> = true>
-inline auto yaml_get_value(const YAML::Node & node, T && value)
+inline std::string_view yaml_get_value(const YAML::Node & node, T && value)
 {
   return yaml_get_value(node, std::string_view{value});
 }
@@ -93,12 +85,10 @@ template<typename T,
          std::enable_if_t<!yy_traits::is_c_string_v<T>, bool> = true>
 inline std::optional<yy_traits::remove_cvr_t<T>> yaml_get_optional_value(const YAML::Node & node)
 {
-  using return_type = yy_traits::remove_cvr_t<T>;
-
-  std::optional<return_type> return_value{std::nullopt};
+  std::optional<T> return_value{std::nullopt};
   if(yaml_is_scalar(node))
   {
-    return_value = node.as<return_type>();
+    return_value = node.as<T>();
   }
 
   return return_value;
