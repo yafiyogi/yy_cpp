@@ -431,16 +431,16 @@ class vector
     }
 
     template<typename InputValueType>
-    constexpr reference swap_back(InputValueType && value)
+    constexpr reference swap_data_back(InputValueType && value)
     {
-      auto [iter, inserted] = swap(end(), std::forward<InputValueType>(value));
+      auto [iter, inserted] = swap_data(end(), std::forward<InputValueType>(value));
 
       return *iter;
     }
 
     template<typename InputValueType>
-    constexpr insert_result swap(iterator pos,
-                                 InputValueType && value)
+    constexpr insert_result swap_data(iterator pos,
+                                      InputValueType && value)
     {
       insert_result result{add_empty(pos)};
 
