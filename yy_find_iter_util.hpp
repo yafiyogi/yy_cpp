@@ -51,6 +51,26 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
   return end_type{key_iter, is_end};
 }
 
+template<typename Iterator,
+         typename KeyType,
+         typename Compare>
+[[nodiscard]]
+constexpr auto lower_bound_iter(const Iterator & p_begin,
+                                const Iterator & p_end,
+                                KeyType && p_key,
+                                Compare && compare) noexcept
+{
+  using traits = find_util_detail::iter_traits_type<KeyType,
+                                                    Iterator>;
+  using end_type = typename traits::end_type;
+
+  Iterator key_iter{std::lower_bound(p_begin, p_end, p_key, compare)};
+
+  auto is_end = p_end == key_iter;
+
+  return end_type{key_iter, is_end};
+}
+
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
@@ -93,6 +113,48 @@ constexpr inline auto find_iter(const KeyStore & p_key_store,
   auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key);
 
   bool found = !is_end && (*iter == p_key);
+
+  return found_type{iter, found};
+}
+
+template<typename KeyStore,
+         typename InputKeyType,
+         typename Compare>
+[[nodiscard]]
+constexpr inline auto find_iter(KeyStore & p_key_store,
+                                const InputKeyType & p_key,
+                                Compare && compare) noexcept
+{
+  using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
+                                                    typename KeyStore::iterator>;
+  using found_type = typename traits::found_type;
+
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key, [&compare](const auto & item, const auto & target) {
+    return compare(item, target) < 0;
+  });
+
+  bool found = !is_end && (0 == compare(*iter, p_key));
+
+  return found_type{iter, found};
+}
+
+template<typename KeyStore,
+         typename InputKeyType,
+         typename Compare>
+[[nodiscard]]
+constexpr inline auto find_iter(const KeyStore & p_key_store,
+                                const InputKeyType & p_key,
+                                Compare && compare) noexcept
+{
+  using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
+                                                    typename KeyStore::const_iterator>;
+  using found_type = typename traits::found_type;
+
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key, [&compare](const auto & item, const auto & target) {
+    return compare(item, target) < 0;
+  });
+
+  bool found = !is_end && (0 == compare(*iter, p_key));
 
   return found_type{iter, found};
 }
