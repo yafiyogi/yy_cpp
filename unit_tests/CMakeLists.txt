@@ -43,6 +43,7 @@ add_executable(test_yy_cpp
   bit_twiddling_tests.cpp
   compare_util_tests.cpp
   fast_atoi_tests.cpp
+  find_util_iter_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
   span_tests.cpp

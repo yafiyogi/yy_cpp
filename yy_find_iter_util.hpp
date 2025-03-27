@@ -117,14 +117,15 @@ constexpr auto range_iter(const Container & p_container,
                           KeyType && p_key) noexcept
 {
   auto end{p_container.end()};
-  auto begin{lower_bound_iter(p_container.begin(),
-                              end,
-                              p_key)};
-  end = upper_bound_iter(begin,
-                         end,
-                         p_key);
+  auto [range_begin, ignore_1] = lower_bound_iter(p_container.begin(),
+                                                  end,
+                                                  p_key);
 
-  return yy_util::make_range(std::move(begin), std::move(end));
+  auto [range_end, ignore_2] = upper_bound_iter(range_begin,
+                                                end,
+                                                p_key);
+
+  return yy_util::make_range(std::move(range_begin), std::move(range_end));
 }
 
 template<typename Container,
@@ -135,17 +136,26 @@ constexpr auto range_iter(const Container & p_container,
                           KeyType && p_key,
                           Compare && compare) noexcept
 {
-  auto end{p_container.end()};
-  auto begin{lower_bound_iter(p_container.begin(),
-                              end,
-                              p_key,
-                              compare)};
-  end = upper_bound_iter(begin,
-                         end,
-                         p_key,
-                         compare);
+  auto lower_bound_compare = [&compare](const auto & item, const KeyType & target) -> bool {
+    return compare(item, target) < 0;
+  };
 
-  return yy_util::make_range(std::move(begin), std::move(end));
+  auto end{p_container.end()};
+  auto [range_begin, ignore_1] = lower_bound_iter(p_container.begin(),
+                                                  end,
+                                                  p_key,
+                                                  lower_bound_compare);
+
+  auto upper_bound_compare = [&compare](const KeyType & target, const auto & item) -> bool {
+    return compare(item, target) > 0;
+  };
+
+  auto [range_end, ignore_2] = upper_bound_iter(range_begin,
+                                                end,
+                                                p_key,
+                                                upper_bound_compare);
+
+  return yy_util::make_range(std::move(range_begin), std::move(range_end));
 }
 
 template<typename KeyStore,
@@ -227,9 +237,14 @@ constexpr inline auto find_iter(const KeyStore & p_key_store,
                                                     typename KeyStore::const_iterator>;
   using found_type = typename traits::found_type;
 
-  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key, [&compare](const auto & item, const auto & target) {
+  auto less_than_compare = [&compare](const auto & item, const auto & target) -> bool {
     return compare(item, target) < 0;
-  });
+  };
+
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(),
+                                         p_key_store.end(),
+                                         p_key,
+                                         less_than_compare);
 
   bool found = !is_end && (0 == compare(*iter, p_key));
 
