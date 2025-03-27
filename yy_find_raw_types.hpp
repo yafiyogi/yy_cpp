@@ -27,6 +27,7 @@
 #pragma once
 
 #include "yy_find_types.hpp"
+#include "yy_range.hpp"
 #include "yy_ref_traits.h"
 #include "yy_types.hpp"
 #include "yy_type_traits.h"

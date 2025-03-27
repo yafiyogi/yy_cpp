@@ -97,6 +97,7 @@ target_sources(yy_cpp
       yy_observer_ptr.hpp
       yy_observer_ptr_fwd.hpp
       yy_radix_trie.h
+      yy_range.hpp
       yy_ref_traits.h
       yy_ring_buffer.h
       yy_span.h
