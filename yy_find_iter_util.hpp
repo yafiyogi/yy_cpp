@@ -30,6 +30,7 @@
 #include <type_traits>
 
 #include "yy_find_iter_types.hpp"
+#include "yy_range.hpp"
 
 namespace yafiyogi::yy_data {
 
@@ -69,6 +70,82 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
   auto is_end = p_end == key_iter;
 
   return end_type{key_iter, is_end};
+}
+
+template<typename Iterator,
+         typename KeyType>
+[[nodiscard]]
+constexpr auto upper_bound_iter(const Iterator & p_begin,
+                                const Iterator & p_end,
+                                KeyType && p_key) noexcept
+{
+  using traits = find_util_detail::iter_traits_type<KeyType,
+                                                    Iterator>;
+  using end_type = typename traits::end_type;
+
+  Iterator key_iter{std::upper_bound(p_begin, p_end, p_key)};
+
+  auto is_end = p_end == key_iter;
+
+  return end_type{key_iter, is_end};
+}
+
+template<typename Iterator,
+         typename KeyType,
+         typename Compare>
+[[nodiscard]]
+constexpr auto upper_bound_iter(const Iterator & p_begin,
+                                const Iterator & p_end,
+                                KeyType && p_key,
+                                Compare && compare) noexcept
+{
+  using traits = find_util_detail::iter_traits_type<KeyType,
+                                                    Iterator>;
+  using end_type = typename traits::end_type;
+
+  Iterator key_iter{std::upper_bound(p_begin, p_end, p_key, compare)};
+
+  auto is_end = p_end == key_iter;
+
+  return end_type{key_iter, is_end};
+}
+
+template<typename Container,
+         typename KeyType>
+[[nodiscard]]
+constexpr auto range_iter(const Container & p_container,
+                          KeyType && p_key) noexcept
+{
+  auto end{p_container.end()};
+  auto begin{lower_bound_iter(p_container.begin(),
+                              end,
+                              p_key)};
+  end = upper_bound_iter(begin,
+                         end,
+                         p_key);
+
+  return yy_util::make_range(std::move(begin), std::move(end));
+}
+
+template<typename Container,
+         typename KeyType,
+         typename Compare>
+[[nodiscard]]
+constexpr auto range_iter(const Container & p_container,
+                          KeyType && p_key,
+                          Compare && compare) noexcept
+{
+  auto end{p_container.end()};
+  auto begin{lower_bound_iter(p_container.begin(),
+                              end,
+                              p_key,
+                              compare)};
+  end = upper_bound_iter(begin,
+                         end,
+                         p_key,
+                         compare);
+
+  return yy_util::make_range(std::move(begin), std::move(end));
 }
 
 template<typename KeyStore,
