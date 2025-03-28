@@ -307,4 +307,80 @@ TEST_F(TestFindIterUtil, range_compare)
   }
 }
 
+TEST_F(TestFindIterUtil, find_iter_simple)
+{
+  std::vector<int> vec = {2, 3, 4, 5, 7, 8};
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 1);
+
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 2);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(2, *iter);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 4);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(4, *iter);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 8);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(8, *iter);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 9);
+
+    EXPECT_FALSE(found);
+  }
+}
+
+TEST_F(TestFindIterUtil, find_iter_compare)
+{
+  std::vector<val> vec = {val{2, 1}, val{3, 1}, val{4, 1}, val{5, 1}, val{7, 1}, val{8, 1}};
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 1, val::compare);
+
+    EXPECT_FALSE(found);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 2, val::compare);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(2, iter->k);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 4, val::compare);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(4, iter->k);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 8, val::compare);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(8, iter->k);
+  }
+
+  {
+    auto [iter, found] = yy_data::find_iter(vec, 9, val::compare);
+
+    EXPECT_FALSE(found);
+  }
+}
+
 } // namespace yafiyogi::yy_cpp::tests
