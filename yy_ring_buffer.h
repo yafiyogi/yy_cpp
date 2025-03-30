@@ -212,7 +212,7 @@ class ring_buffer_reader final
 
     template<typename Pred>
     bool QWait(std::stop_token & p_stop_token,
-              Pred && pred)
+               Pred && pred)
     {
       return m_queue && m_queue->wait(p_stop_token, std::forward<Pred>(pred));
     }

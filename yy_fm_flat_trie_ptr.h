@@ -593,14 +593,14 @@ class fm_flat_trie_ptr final
 
     [[nodiscard]]
     static constexpr idx_value_type & get_data(idx_data_vector & data,
-                                           const value_idx_type idx) noexcept
+                                               const value_idx_type idx) noexcept
     {
       return *get_data_ptr(data, idx);
     }
 
     [[nodiscard]]
     static constexpr const idx_value_type & get_data(const idx_data_vector & data,
-                                                 const value_idx_type idx) noexcept
+                                                     const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
@@ -615,7 +615,7 @@ class fm_flat_trie_ptr final
 
     [[nodiscard]]
     static constexpr idx_value_ptr get_data_ptr(idx_data_vector & data,
-                                            const value_idx_type idx) noexcept
+                                                const value_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 

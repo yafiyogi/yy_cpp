@@ -44,8 +44,8 @@ constexpr size_type hash_combine(size_type & seed, const T & val) noexcept
 
 template <typename T, typename... RestTypes>
 constexpr size_type hash_combine(size_type& seed,
-                                  const T& val,
-                                  const RestTypes & ...rest_args) noexcept
+                                 const T& val,
+                                 const RestTypes & ...rest_args) noexcept
 {
   hash_combine(seed, val);
   (..., hash_combine(seed, rest_args));
