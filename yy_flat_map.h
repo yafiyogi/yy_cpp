@@ -376,6 +376,11 @@ class flat_map final
       }
     }
 
+    friend constexpr void swap(flat_map & lhs, flat_map & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {

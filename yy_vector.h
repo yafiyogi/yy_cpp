@@ -687,6 +687,11 @@ class vector
       move(std::move(other));
     }
 
+    friend constexpr void swap(vector & lhs, vector & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
   private:
     constexpr void move(vector && p_other) noexcept
     {
@@ -1326,6 +1331,11 @@ class simple_vector
     constexpr void swap(simple_vector && other) noexcept
     {
       move(std::move(other));
+    }
+
+    friend constexpr void swap(simple_vector & lhs, simple_vector & rhs) noexcept
+    {
+      lhs.swap(rhs);
     }
 
   private:

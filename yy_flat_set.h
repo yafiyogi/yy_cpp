@@ -291,7 +291,7 @@ class flat_set final
       return iter_inserted_type{iter, !found};
     }
 
-    constexpr void swap(flat_set & other)
+    constexpr void swap(flat_set & other) noexcept
     {
       if(this != &other)
       {
@@ -299,12 +299,17 @@ class flat_set final
       }
     }
 
-    constexpr void swap(flat_set && other)
+    constexpr void swap(flat_set && other) noexcept
     {
       if(this != &other)
       {
         m_values = std::move(other.m_values);
       }
+    }
+
+    friend constexpr void swap(flat_set & lhs, flat_set & rhs) noexcept
+    {
+      lhs.swap(rhs);
     }
 
     [[nodiscard]]

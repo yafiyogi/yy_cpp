@@ -351,6 +351,11 @@ class static_flat_map final
       }
     }
 
+    friend constexpr void swap(static_flat_map & lhs, static_flat_map & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {

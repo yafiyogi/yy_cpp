@@ -591,6 +591,11 @@ class static_vector
       move(std::move(other), action);
     }
 
+    friend constexpr void swap(static_vector & lhs, static_vector & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
   private:
     constexpr void move(static_vector && p_other,
                         ClearAction action = default_action) noexcept
@@ -1226,6 +1231,11 @@ class static_simple_vector
                         ClearAction action = default_action) noexcept
     {
       move(std::move(other), action);
+    }
+
+    friend constexpr void swap(static_simple_vector & lhs, static_simple_vector & rhs) noexcept
+    {
+      lhs.swap(rhs);
     }
 
   private:

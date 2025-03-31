@@ -260,6 +260,11 @@ class trie_node
       m_edges.swap(other.m_edges);
     }
 
+    friend constexpr void swap(trie_node & lhs, trie_node & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
   private:
     edges_type m_edges{};
 };

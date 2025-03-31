@@ -264,6 +264,11 @@ class observer_ptr final
       std::swap(m_raw_ptr, other.m_raw_ptr);
     }
 
+    friend constexpr void swap(observer_ptr & lhs, observer_ptr & rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
   private:
     pointer m_raw_ptr = nullptr;
 };
