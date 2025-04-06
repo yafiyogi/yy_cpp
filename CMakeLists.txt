@@ -36,7 +36,6 @@ set(YY_ROOT "${PROJECT_SOURCE_DIR}/..")
 set(YY_CMAKE "${YY_ROOT}/yy_cmake")
 
 include(${YY_CMAKE}/cmake_common.txt)
-
 include(${YY_CMAKE}/cmake_clang_tidy.txt)
 
 add_library(yy_cpp STATIC)
