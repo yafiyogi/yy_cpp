@@ -54,7 +54,7 @@ target_sources(yy_cpp
     yy_locale.cpp
     yy_string_case.cpp
     yy_string_util.cpp
-  PRIVATE FILE_SET HEADERS
+  PUBLIC FILE_SET HEADERS
     FILES
       yy_aho_corasick.h
       yy_arg_traits.h
@@ -121,14 +121,11 @@ target_sources(yy_cpp
       yy_vector_util.h
       yy_yaml_util.h )
 
-#install(FILES $<TARGET_FILE_NAME:yy_cpp> DESTINATION lib)
+install(TARGETS yy_cpp
+  EXPORT yy_cppTargets
+  FILE_SET HEADERS DESTINATION include/yy_cpp)
 
-get_target_property(yy_headers yy_cpp HEADER_SET)
-install(FILES ${yy_headers} DESTINATION include/yy_cpp)
-
-install(TARGETS yy_cpp EXPORT yy_cppTargets)
 install(EXPORT yy_cppTargets
-  #FILE yy_cppTargets.cmake
   NAMESPACE yy_cpp::
   DESTINATION lib/cmake/yy_cpp)
 
