@@ -35,6 +35,7 @@
 
 #include "yy_assert.h"
 #include "yy_clear_action.h"
+#include "yy_compare_util.h"
 #include "yy_find_iter_util.hpp"
 #include "yy_observer_ptr.hpp"
 #include "yy_ref_traits.h"
@@ -344,6 +345,31 @@ class flat_map final
       return pos_inserted_type{static_cast<size_type>(pos), !found};
     }
 
+    template<typename InputKeyType,
+             typename InputValueType>
+    constexpr pos_inserted_type swap_in(InputKeyType && p_key,
+                                        InputValueType && p_value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "p_value is of an incompatible type.");
+
+      auto [key_iter, found] = find_iter(m_keys, p_key);
+      auto pos = (key_iter - m_keys.begin());
+      auto value_iter = m_values.begin() + pos;
+
+      if(!found)
+      {
+        std::tie(key_iter, value_iter) = add_empty(key_iter);
+
+        key_iter->swap(std::forward<InputKeyType>(p_key));
+      }
+
+      value_iter->swap(std::forward<InputValueType>(p_value));
+
+      return pos_inserted_type{static_cast<size_type>(pos), !found};
+    }
+
     template<typename InputKeyType>
     constexpr void erase(InputKeyType && p_key)
     {
@@ -389,6 +415,20 @@ class flat_map final
       return m_keys.size();
     }
 
+    struct capacity_type
+    {
+        size_type keys = 0;
+        size_type values = 0;
+    };
+
+    [[nodiscard]]
+    constexpr capacity_type capacity() const noexcept
+    {
+      YY_ASSERT(m_keys.size() == m_values.size());
+
+      return capacity_type{m_keys.capacity(), m_values.capacity()};
+    }
+
     constexpr void reserve(size_type size)
     {
       m_keys.reserve(size);
@@ -421,73 +461,78 @@ class flat_map final
     }
 
     [[nodiscard]]
-    constexpr bool operator<(const flat_map & other) const noexcept
+    constexpr bool operator<(const flat_map & p_other) const noexcept
     {
       if(empty())
       {
-        return !other.empty();
+        return !p_other.empty();
       }
 
-      if(!empty() && other.empty())
+      if(!empty() && p_other.empty())
       {
         return false;
       }
 
-      const auto max = std::min(size(), other.size());
+      const auto max = std::min(size(), p_other.size());
       for(size_type idx = 0; idx < max; ++idx)
       {
-        if(m_keys[idx] < other.m_keys[idx])
+        const auto & key_lhs = m_keys[idx];
+        const auto & key_rhs = p_other.m_keys[idx];
+
+        if(yy_util::less_than(key_lhs, key_rhs))
         {
           return true;
         }
 
-        if(!(m_keys[idx] == other.m_keys[idx]))
+        if(!yy_util::equal(key_lhs, key_rhs))
         {
           return false;
         }
 
-        if(m_values[idx] < other.m_values[idx])
+        const auto & value_lhs = m_values[idx];
+        const auto & value_rhs = p_other.m_values[idx];
+        if(yy_util::less_than(value_lhs, value_rhs))
         {
           return true;
         }
 
-        if(!(m_values[idx] == other.m_values[idx]))
+        if(!yy_util::equal(value_lhs, value_rhs))
         {
           return false;
         }
       }
 
-      return size() < other.size();
+      return size() < p_other.size();
     }
 
     [[nodiscard]]
-    constexpr bool operator==(const flat_map & other) const noexcept
+    constexpr bool operator==(const flat_map & p_other) const noexcept
     {
       if(empty())
       {
-        return other.empty();
+        return p_other.empty();
       }
 
-      if(!empty() && other.empty())
+      if(!empty() && p_other.empty())
       {
         return false;
       }
 
-      const auto max = std::min(size(), other.size());
+      const auto max = std::min(size(), p_other.size());
       for(size_type idx = 0; idx < max; ++idx)
       {
-        if(!(m_keys[idx] == other.m_keys[idx]))
+        if(!yy_util::equal(m_keys[idx], p_other.m_keys[idx]))
         {
           return false;
         }
 
-        if(!(m_values[idx] == other.m_values[idx]))
+        if(!yy_util::equal(m_values[idx], p_other.m_values[idx]))
         {
           return false;
         }
       }
 
-      return size() == other.size();
+      return size() == p_other.size();
     }
 
     template<typename Visitor>
