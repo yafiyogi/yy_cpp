@@ -36,9 +36,19 @@
 
 namespace yafiyogi::yy_util {
 
+inline bool yaml_is_map(const YAML::Node & node) noexcept
+{
+  return node && node.IsMap();
+}
+
 inline bool yaml_is_scalar(const YAML::Node & node) noexcept
 {
   return node && node.IsScalar();
+}
+
+inline bool yaml_is_sequence(const YAML::Node & node) noexcept
+{
+  return node && node.IsSequence();
 }
 
 template<typename T,
