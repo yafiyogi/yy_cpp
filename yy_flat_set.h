@@ -34,6 +34,7 @@
 #include <type_traits>
 
 #include "yy_clear_action.h"
+#include "yy_compare_util.h"
 #include "yy_find_iter_util.hpp"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
@@ -291,6 +292,25 @@ class flat_set final
       return iter_inserted_type{iter, !found};
     }
 
+    template<typename InputValueType>
+    constexpr iter_inserted_type swap_in(InputValueType && p_value)
+    {
+      static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>, value_type>
+                    || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
+                    "p_value is of an incompatible type.");
+
+      auto [iter, found] = find_iter(m_values, p_value);
+
+      if(!found)
+      {
+        iter = add_empty(iter);
+      }
+
+      iter->swap(std::forward<InputValueType>(p_value));
+
+      return iter_inserted_type{iter, !found};
+    }
+
     constexpr void swap(flat_set & other) noexcept
     {
       if(this != &other)
@@ -318,6 +338,12 @@ class flat_set final
       return m_values.size();
     }
 
+    [[nodiscard]]
+    constexpr size_type capacity() const noexcept
+    {
+      return m_values.capacity();
+    }
+
     constexpr void reserve(size_type size)
     {
       m_values.reserve(size);
@@ -337,13 +363,13 @@ class flat_set final
     [[nodiscard]]
     constexpr bool operator<(const flat_set & other) const noexcept
     {
-      return m_values < other.m_values;
+      return yy_util::less_than(m_values, other.m_values);
     }
 
     [[nodiscard]]
     constexpr bool operator==(const flat_set & other) const noexcept
     {
-      return m_values == other.m_values;
+      return yy_util::equal(m_values, other.m_values);
     }
 
     template<typename Visitor>
