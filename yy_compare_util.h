@@ -34,32 +34,32 @@
 namespace yafiyogi::yy_util {
 namespace compare_util_detail {
 
-template<typename A,
-         typename B,
+template<typename Lhs,
+         typename Rhs,
          typename Enable = void>
 struct is_string:
       std::false_type
 {
 };
 
-template<typename A,
-         typename B>
-struct is_string<A, B,
-                 typename std::enable_if_t<(yy_traits::is_std_string_v<A>
-                                            || yy_traits::is_std_string_view_v<A>)
-                                           && (yy_traits::is_std_string_v<B>
-                                               || yy_traits::is_std_string_view_v<B>)>>:
+template<typename Lhs,
+         typename Rhs>
+struct is_string<Lhs, Rhs,
+                 typename std::enable_if_t<(yy_traits::is_std_string_v<Lhs>
+                                            || yy_traits::is_std_string_view_v<Lhs>)
+                                           && (yy_traits::is_std_string_v<Rhs>
+                                               || yy_traits::is_std_string_view_v<Rhs>)>>:
       std::true_type
 {
 };
 
-template<typename A,
-         typename B>
-inline constexpr bool is_string_v = is_string<A, B>::value;
+template<typename Lhs,
+         typename Rhs>
+inline constexpr bool is_string_v = is_string<Lhs, Rhs>::value;
 
-template<typename A,
-         typename B>
-using is_string_t = typename is_string<A, B>::type;
+template<typename Lhs,
+         typename Rhs>
+using is_string_t = typename is_string<Lhs, Rhs>::type;
 
 } // namespace compare_util_detail
 
@@ -74,6 +74,7 @@ struct Compare final
     static_assert(std::is_same_v<typename lhs_type::value_type, typename rhs_type::value_type>,
                   "Must be comparing the same value_type!");
 
+    [[nodiscard]]
     static constexpr bool equal(const lhs_type & lhs,
                                 const rhs_type & rhs) noexcept
     {
@@ -84,6 +85,7 @@ struct Compare final
         && std::equal(lhs_begin, lhs_begin + lhs_size, rhs.data());
     }
 
+    [[nodiscard]]
     static constexpr bool less_than(const lhs_type & lhs,
                                     const rhs_type & rhs) noexcept
     {
@@ -94,6 +96,44 @@ struct Compare final
 
       return std::lexicographical_compare(lhs_begin, lhs_begin + lhs_size,
                                           rhs_begin, rhs_begin + rhs_size);
+    }
+
+    [[nodiscard]]
+    static constexpr int compare(const lhs_type & lhs,
+                                 const rhs_type & rhs) noexcept
+    {
+      const auto lhs_size{lhs.size()};
+      const auto lhs_begin{lhs.data()};
+      const auto lhs_end{lhs_begin + lhs_size};
+      const auto rhs_size{rhs.size()};
+      const auto rhs_begin{rhs.data()};
+      const auto rhs_end{rhs_begin + rhs_size};
+
+      auto [lhs_first, rhs_first] = std::mismatch(lhs_begin, lhs_end,
+                                                  rhs_begin, rhs_end);
+
+      bool rhs_is_end = rhs_first == rhs_end;
+      if(lhs_first != lhs_end)
+      {
+         if(rhs_is_end)
+         {
+           return 1;
+         }
+
+         if(*lhs_first < *rhs_first)
+         {
+           return -1;
+         }
+
+         return 1;
+      }
+
+      if(!rhs_is_end)
+      {
+        return -1;
+      }
+
+      return 0;
     }
 };
 
@@ -109,81 +149,123 @@ struct Compare<Lhs, Rhs,
     static_assert(std::is_same_v<lhs_type, rhs_type>,
                   "Must be comparing the same value_type!");
 
-    static constexpr bool equal(const lhs_type & a, const rhs_type & b) noexcept
+    [[nodiscard]]
+    static constexpr bool equal(const lhs_type & lhs, const rhs_type & rhs) noexcept
     {
-      return a == b;
+      return lhs == rhs;
     }
 
-    static constexpr bool less_than(const lhs_type & a, const rhs_type & b) noexcept
+    [[nodiscard]]
+    static constexpr bool less_than(const lhs_type & a, const rhs_type & rhs) noexcept
     {
-      return a < b;
-    }
-};
-
-template<typename A,
-         typename B>
-struct Compare<A, B,
-               std::enable_if_t<compare_util_detail::is_string_v<A, B>>> final
-{
-    using a_type = yy_traits::remove_cvr_t<A>;
-    using b_type = yy_traits::remove_cvr_t<B>;
-
-    static constexpr bool equal(const a_type & a, const b_type & b) noexcept
-    {
-      return 0 == a.compare(b);
-    }
-
-    static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
-    {
-      return a.compare(b) < 0;
+      return a < rhs;
     }
 };
 
-template<typename A,
-         typename B>
-struct Compare<A, B,
-               std::enable_if_t<!compare_util_detail::is_string_v<A, B>
-                                && std::is_same_v<typename yy_traits::remove_cvr_t<A>::value_type,
-                                                  typename yy_traits::remove_cvr_t<B>::value_type>
-                                && (std::is_same_v<char, typename yy_traits::remove_cvr_t<A>::value_type>
-                                    || std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<A>::value_type>)>> final
+template<typename Lhs,
+         typename Rhs>
+struct Compare<Lhs, Rhs,
+               std::enable_if_t<compare_util_detail::is_string_v<Lhs, Rhs>>> final
 {
-    using a_type = yy_traits::remove_cvr_t<A>;
-    using b_type = yy_traits::remove_cvr_t<B>;
-    using char_type = yy_traits::remove_cvr_t<typename a_type::value_type>;
+    using lhs_type = yy_traits::remove_cvr_t<Lhs>;
+    using rhs_type = yy_traits::remove_cvr_t<Rhs>;
 
-    static constexpr bool equal(const a_type & a, const b_type & b) noexcept
+    [[nodiscard]]
+    static constexpr bool equal(const lhs_type & lhs, const rhs_type & rhs) noexcept
     {
-      const auto a_size{a.size()};
-
-      return (a_size == b.size())
-        && (0 == std::char_traits<char_type>::compare(a.data(), b.data(), a_size));
+      return compare(lhs, rhs) == 0;
     }
 
-    static constexpr bool less_than(const a_type & a, const b_type & b) noexcept
+    [[nodiscard]]
+    static constexpr bool less_than(const lhs_type & lhs, const rhs_type & rhs) noexcept
     {
-      const auto a_size{a.size()};
-      const auto b_size{b.size()};
-      const auto size{std::min(a_size, b_size)};
+      return compare(lhs, rhs) < 0;
+    }
 
-      auto comp{std::char_traits<char_type>::compare(a.data(), b.data(), size)};
-
-      return (comp < 0) || ((0 == comp) && (a_size < b_size));
+    [[nodiscard]]
+    static constexpr int compare(const lhs_type & lhs,
+                                 const rhs_type & rhs) noexcept
+    {
+      return lhs.compare(rhs);
     }
 };
 
-template<typename A,
-         typename B>
-constexpr bool equal(const A & a, const B & b) noexcept
+template<typename Lhs,
+         typename Rhs>
+struct Compare<Lhs, Rhs,
+               std::enable_if_t<!compare_util_detail::is_string_v<Lhs, Rhs>
+                                && std::is_same_v<typename yy_traits::remove_cvr_t<Lhs>::value_type,
+                                                  typename yy_traits::remove_cvr_t<Rhs>::value_type>
+                                && (std::is_same_v<char, typename yy_traits::remove_cvr_t<Lhs>::value_type>
+                                    || std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<Lhs>::value_type>)>> final
 {
-  return Compare<A, B>::equal(a, b);
+    using lhs_type = yy_traits::remove_cvr_t<Lhs>;
+    using rhs_type = yy_traits::remove_cvr_t<Rhs>;
+    using char_type = yy_traits::remove_cvr_t<typename lhs_type::value_type>;
+
+    [[nodiscard]]
+    static constexpr bool equal(const lhs_type & lhs, const rhs_type & rhs) noexcept
+    {
+      return compare(lhs, rhs) == 0;
+    }
+
+    [[nodiscard]]
+    static constexpr bool less_than(const lhs_type & lhs,
+                                    const rhs_type & rhs) noexcept
+    {
+      return compare(lhs, rhs) < 0;
+    }
+
+    [[nodiscard]]
+    static constexpr int compare(const lhs_type & lhs,
+                                 const rhs_type & rhs) noexcept
+    {
+      const auto lhs_size{lhs.size()};
+      const auto rhs_size{rhs.size()};
+      const auto size = std::min(lhs_size, rhs_size);
+
+      if(auto comp = std::char_traits<char_type>::compare(lhs.data(), rhs.data(), size);
+         comp != 0)
+      {
+        return comp;
+      }
+
+      if(lhs_size != rhs_size)
+      {
+        if(lhs_size < rhs_size)
+        {
+          return -1;
+        }
+
+        return 1;
+      }
+
+      return 0;
+    }
+};
+
+template<typename Lhs,
+         typename Rhs>
+[[nodiscard]]
+constexpr bool equal(const Lhs & lhs, const Rhs & rhs) noexcept
+{
+  return Compare<Lhs, Rhs>::equal(lhs, rhs);
 }
 
-template<typename A,
-         typename B>
-constexpr bool less_than(const A & a, const B & b) noexcept
+template<typename Lhs,
+         typename Rhs>
+[[nodiscard]]
+constexpr bool less_than(const Lhs & lhs, const Rhs & rhs) noexcept
 {
-  return Compare<A, B>::less_than(a, b);
+  return Compare<Lhs, Rhs>::less_than(lhs, rhs);
+}
+
+template<typename Lhs,
+         typename Rhs>
+[[nodiscard]]
+constexpr int compare(const Lhs & lhs, const Rhs & rhs) noexcept
+{
+  return Compare<Lhs, Rhs>::compare(lhs, rhs);
 }
 
 

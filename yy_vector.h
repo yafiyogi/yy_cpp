@@ -218,6 +218,12 @@ class vector
     }
 
     [[nodiscard]]
+    constexpr int compare(const vector & p_other) const noexcept
+    {
+      return yy_util::compare(*this, p_other);
+    }
+
+    [[nodiscard]]
     constexpr iterator begin() noexcept
     {
       return iterator{this, 0};
@@ -925,6 +931,12 @@ class simple_vector
                                      const simple_vector & b) noexcept
     {
       return yy_util::equal(a, b);
+    }
+
+    [[nodiscard]]
+    constexpr int compare(const simple_vector & p_other) const noexcept
+    {
+      return yy_util::compare(*this, p_other);
     }
 
     [[nodiscard]]

@@ -463,14 +463,30 @@ class flat_map final
     [[nodiscard]]
     constexpr bool operator<(const flat_map & p_other) const noexcept
     {
+      return compare(p_other) < 0;
+    }
+
+    [[nodiscard]]
+    constexpr bool operator==(const flat_map & p_other) const noexcept
+    {
+      return compare(p_other) == 0;
+    }
+
+    [[nodiscard]]
+    constexpr int compare(const flat_map & p_other) const noexcept
+    {
       if(empty())
       {
-        return !p_other.empty();
-      }
+        if(p_other.empty())
+        {
+          return 0;
+        }
 
-      if(!empty() && p_other.empty())
+        return -1;
+      }
+      else if(p_other.empty())
       {
-        return false;
+        return 1;
       }
 
       const auto max = std::min(size(), p_other.size());
@@ -479,60 +495,39 @@ class flat_map final
         const auto & key_lhs = m_keys[idx];
         const auto & key_rhs = p_other.m_keys[idx];
 
-        if(yy_util::less_than(key_lhs, key_rhs))
-        {
-          return true;
-        }
-
         if(!yy_util::equal(key_lhs, key_rhs))
         {
-          return false;
+          if(yy_util::less_than(key_lhs, key_rhs))
+          {
+            return -1;
+          }
+          return 1;
         }
 
         const auto & value_lhs = m_values[idx];
         const auto & value_rhs = p_other.m_values[idx];
-        if(yy_util::less_than(value_lhs, value_rhs))
-        {
-          return true;
-        }
 
         if(!yy_util::equal(value_lhs, value_rhs))
         {
-          return false;
+          if(yy_util::less_than(value_lhs, value_rhs))
+          {
+            return -1;
+          }
+          return 1;
         }
       }
 
-      return size() < p_other.size();
-    }
-
-    [[nodiscard]]
-    constexpr bool operator==(const flat_map & p_other) const noexcept
-    {
-      if(empty())
+      if(size() != p_other.size())
       {
-        return p_other.empty();
-      }
-
-      if(!empty() && p_other.empty())
-      {
-        return false;
-      }
-
-      const auto max = std::min(size(), p_other.size());
-      for(size_type idx = 0; idx < max; ++idx)
-      {
-        if(!yy_util::equal(m_keys[idx], p_other.m_keys[idx]))
+        if(size() < p_other.size())
         {
-          return false;
+          return -1;
         }
 
-        if(!yy_util::equal(m_values[idx], p_other.m_values[idx]))
-        {
-          return false;
-        }
+        return 1;
       }
 
-      return size() == p_other.size();
+      return 0;
     }
 
     template<typename Visitor>

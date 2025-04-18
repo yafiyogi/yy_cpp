@@ -361,15 +361,21 @@ class flat_set final
     }
 
     [[nodiscard]]
-    constexpr bool operator<(const flat_set & other) const noexcept
+    constexpr bool operator<(const flat_set & p_other) const noexcept
     {
-      return yy_util::less_than(m_values, other.m_values);
+      return compare(p_other) < 0;
     }
 
     [[nodiscard]]
-    constexpr bool operator==(const flat_set & other) const noexcept
+    constexpr bool operator==(const flat_set & p_other) const noexcept
     {
-      return yy_util::equal(m_values, other.m_values);
+      return compare(p_other) == 0;
+    }
+
+    [[nodiscard]]
+    constexpr int compare(const flat_set & p_other) const noexcept
+    {
+      return m_values.compare(p_other.m_values);
     }
 
     template<typename Visitor>
