@@ -690,7 +690,10 @@ class vector
 
     constexpr void swap(vector && other) noexcept
     {
-      move(std::move(other));
+      if(this != &other)
+      {
+        move(std::move(other));
+      }
     }
 
     friend constexpr void swap(vector & lhs, vector & rhs) noexcept

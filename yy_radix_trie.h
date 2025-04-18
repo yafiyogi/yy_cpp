@@ -257,7 +257,10 @@ class trie_node
 
     constexpr void swap(trie_node & other) noexcept
     {
-      m_edges.swap(other.m_edges);
+      if(this != &other)
+      {
+        m_edges.swap(other.m_edges);
+      }
     }
 
     friend constexpr void swap(trie_node & lhs, trie_node & rhs) noexcept

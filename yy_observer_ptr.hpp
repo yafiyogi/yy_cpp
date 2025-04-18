@@ -261,7 +261,10 @@ class observer_ptr final
 
     constexpr void swap(observer_ptr & other) noexcept
     {
-      std::swap(m_raw_ptr, other.m_raw_ptr);
+      if(this != &other)
+      {
+        std::swap(m_raw_ptr, other.m_raw_ptr);
+      }
     }
 
     friend constexpr void swap(observer_ptr & lhs, observer_ptr & rhs) noexcept
