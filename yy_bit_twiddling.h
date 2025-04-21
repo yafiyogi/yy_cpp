@@ -27,6 +27,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 
 namespace yafiyogi::yy_bit_twiddling {
 
@@ -76,7 +77,7 @@ constexpr uint64_t nlz(uint64_t val)
   return pop(~val);
 }
 
-inline constexpr uint64_t all_bits{uint64_t{0} - uint64_t{1}};
+inline constexpr uint64_t all_bits{std::numeric_limits<uint64_t>::max()};
 
 constexpr uint64_t ntz(uint64_t val)
 {
