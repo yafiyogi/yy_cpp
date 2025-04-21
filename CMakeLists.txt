@@ -111,6 +111,7 @@ target_sources(yy_cpp
       yy_tokenizer.h
       yy_trie.h
       yy_trie_common.h
+      yy_trie_node_idx.hpp
       yy_type_traits.h
       yy_type_traits_std.hpp
       yy_types.hpp
