@@ -214,9 +214,9 @@ class fm_subject final
                                      const void * p_data,
                                      OtherArgs && ...p_args)
     {
-      auto [key, obj, pos] = m_observers.find(p_key);
+      auto [obj, pos, found] = m_observers.find(p_key);
 
-      if(obj)
+      if(found)
       {
         return value_valid_type{(*obj)->event(p_data,
                                               std::forward<OtherArgs>(p_args)...),
@@ -302,15 +302,15 @@ class fm_subject<KeyType,
                          const void * p_data,
                          OtherArgs && ...p_args)
     {
-      auto [key, obj, pos] = m_observers.find(p_key);
+      auto [obj, pos, found] = m_observers.find(p_key);
 
-      if(obj)
+      if(found)
       {
         (*obj)->event(p_data,
                       std::forward<OtherArgs>(p_args)...);
       }
 
-      return nullptr != obj;
+      return found;
     }
 
     // Add object method.
