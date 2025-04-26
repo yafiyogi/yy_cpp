@@ -216,9 +216,14 @@ constexpr inline auto find_iter(KeyStore & p_key_store,
                                                     typename KeyStore::iterator>;
   using found_type = typename traits::found_type;
 
-  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(), p_key_store.end(), p_key, [&compare](const auto & item, const auto & target) {
+  auto less_than_compare = [&compare](const auto & item, const auto & target) -> bool {
     return compare(item, target) < 0;
-  });
+  };
+
+  auto [iter, is_end] = lower_bound_iter(p_key_store.begin(),
+                                         p_key_store.end(),
+                                         p_key,
+                                         less_than_compare);
 
   bool found = !is_end && (0 == compare(*iter, p_key));
 
