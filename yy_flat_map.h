@@ -36,8 +36,7 @@
 #include "yy_assert.h"
 #include "yy_clear_action.h"
 #include "yy_compare_util.h"
-#include "yy_find_iter_util.hpp"
-#include "yy_observer_ptr.hpp"
+#include "yy_find_raw_util.hpp"
 #include "yy_ref_traits.h"
 #include "yy_type_traits.h"
 #include "yy_types.hpp"
@@ -56,14 +55,14 @@ struct traits_type final
     using key_l_value_ref = typename yy_traits::ref_traits<key_type>::l_value_ref;
     using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
     using key_vector = yy_quad::simple_vector<key_type, KeyClearAction>;
-    using key_ptr = observer_ptr<typename key_vector::value_type>;
-    using const_key_ptr = observer_ptr<std::add_const_t<typename key_vector::value_type>>;
+    using key_ptr =  std::add_pointer_t<typename key_vector::value_type>;
+    using const_key_ptr =  std::add_pointer_t<std::add_const_t<typename key_vector::value_type>>;
     using value_type = yy_traits::remove_cvr_t<Value>;
     using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
     using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
-    using value_ptr = observer_ptr<typename value_vector::value_type>;
-    using const_value_ptr = observer_ptr<std::add_const_t<typename value_vector::value_type>>;
+    using value_ptr = std::add_pointer_t<typename value_vector::value_type>;
+    using const_value_ptr = std::add_pointer_t<std::add_const_t<typename value_vector::value_type>>;
 };
 
 } // namespace flat_map_detail
@@ -126,7 +125,7 @@ class flat_map final
     [[nodiscard]]
     constexpr pos_end_type lower_bound_pos(const KeyParamType & p_key) const noexcept
     {
-      return lower_bound_iter_pos(m_keys, p_key);
+      return lower_bound_raw_pos(m_keys, p_key);
     }
 
     template<typename KeyParamType,
@@ -135,7 +134,7 @@ class flat_map final
     constexpr bool lower_bound(Visitor && visitor,
                                const KeyParamType & p_key) noexcept
     {
-      auto [pos, is_end] = lower_bound_iter_pos(m_keys, p_key);
+      auto [pos, is_end] = lower_bound_raw_pos(m_keys, p_key);
       if(!is_end)
       {
         visitor(key(pos), value(pos), pos);
@@ -150,7 +149,7 @@ class flat_map final
     constexpr bool lower_bound(Visitor && visitor,
                                const KeyParamType & p_key) const noexcept
     {
-      auto [pos, is_end] = lower_bound_iter_pos(m_keys, p_key);
+      auto [pos, is_end] = lower_bound_raw_pos(m_keys, p_key);
 
       if(!is_end)
       {
@@ -160,46 +159,36 @@ class flat_map final
       return is_end;
     }
 
-    struct key_value_pos_type final
+    struct value_pos_type final
     {
-        key_ptr key{};
-        value_ptr value{};
+        value_ptr value = nullptr;
         size_type pos = 0;
+        bool found = false;
     };
 
     template<typename KeyParamType>
     [[nodiscard]]
-    constexpr key_value_pos_type find(const KeyParamType & p_key) noexcept
+    constexpr value_pos_type find(const KeyParamType & p_key) noexcept
     {
-      auto [pos, found] = find_iter_pos<SearchSizeThreshold>(m_keys, p_key);
+      auto [pos, found] = find_raw_pos<SearchSizeThreshold>(m_keys, p_key);
 
-      if(found)
-      {
-        return key_value_pos_type{key(pos), value(pos), pos};
-      }
-
-      return key_value_pos_type{.pos = pos};
+      return value_pos_type{value(pos), pos, found};
     }
 
-    struct const_key_value_pos_type final
+    struct const_value_pos_type final
     {
-        const_key_ptr key{};
-        const_value_ptr value{};
+        const_value_ptr value = nullptr;
         size_type pos = 0;
+        bool found = false;
     };
 
     template<typename KeyParamType>
     [[nodiscard]]
-    constexpr const_key_value_pos_type find(const KeyParamType & p_key) const noexcept
+    constexpr const_value_pos_type find(const KeyParamType & p_key) const noexcept
     {
-      auto [pos, found] = find_iter_pos<SearchSizeThreshold>(m_keys, p_key);
+      auto [pos, found] = find_raw_pos<SearchSizeThreshold>(m_keys, p_key);
 
-      if(found)
-      {
-        return const_key_value_pos_type{key(pos), value(pos), pos};
-      }
-
-      return const_key_value_pos_type{.pos = pos};
+      return value_pos_type{value(pos), pos, found};
     }
 
     template<typename KeyParamType,
@@ -208,7 +197,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) noexcept
     {
-      pos_found_type pos_found{find_iter_pos<SearchSizeThreshold>(m_keys, p_key)};
+      pos_found_type pos_found{find_raw_pos<SearchSizeThreshold>(m_keys, p_key)};
 
       if(pos_found.found)
       {
@@ -224,7 +213,7 @@ class flat_map final
     constexpr pos_found_type find_value(Visitor && visitor,
                                         const KeyParamType & p_key) const noexcept
     {
-      pos_found_type pos_found{find_iter_pos<SearchSizeThreshold>(m_keys, p_key)};
+      pos_found_type pos_found{find_raw_pos<SearchSizeThreshold>(m_keys, p_key)};
 
       if(pos_found.found)
       {
@@ -238,7 +227,7 @@ class flat_map final
     [[nodiscard]]
     constexpr pos_found_type find_pos(const KeyParamType & p_key) const noexcept
     {
-      return find_iter_pos<SearchSizeThreshold>(m_keys, p_key);
+      return find_raw_pos<SearchSizeThreshold>(m_keys, p_key);
     }
 
     struct ref_type final
@@ -283,15 +272,15 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto keys_begin{m_keys.begin()};
-      auto [key_iter, found] = find_iter(m_keys, p_key);
+      auto keys_begin{m_keys.data()};
+      auto [key_iter, found] = find_raw(m_keys, p_key);
       auto pos = static_cast<size_type>(key_iter - keys_begin);
 
       if(!found)
       {
         auto [key, value] = add_empty(key_iter);
 
-        pos = static_cast<size_type>(key - m_keys.begin());
+        pos = static_cast<size_type>(key - m_keys.data());
         *key = std::forward<InputKeyType>(p_key);
         *value = std::forward<InputValueType>(p_value);
       }
@@ -312,12 +301,12 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [key, value] = add_empty(m_keys.begin() + static_cast<ssize_type>(p_pos));
+      auto [key, value] = add_empty(m_keys.data() + static_cast<ssize_type>(p_pos));
 
       *key = std::forward<InputKeyType>(p_key);
       *value = std::forward<InputValueType>(p_value);
 
-      return static_cast<size_type>(key - m_keys.begin());
+      return static_cast<size_type>(key - m_keys.data());
     }
 
     template<typename InputKeyType,
@@ -329,9 +318,9 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [key_iter, found] = find_iter(m_keys, p_key);
-      auto pos = (key_iter - m_keys.begin());
-      auto value_iter = m_values.begin() + pos;
+      auto [key_iter, found] = find_raw(m_keys, p_key);
+      auto pos = (key_iter - m_keys.data());
+      auto value_iter = m_values.data() + pos;
 
       if(!found)
       {
@@ -354,9 +343,9 @@ class flat_map final
                     || (std::is_pointer_v<InputValueType> && std::is_base_of_v<value_type, yy_traits::remove_cvr_t<std::remove_pointer<InputValueType>>>),
                     "p_value is of an incompatible type.");
 
-      auto [key_iter, found] = find_iter(m_keys, p_key);
-      auto pos = (key_iter - m_keys.begin());
-      auto value_iter = m_values.begin() + pos;
+      auto [key_iter, found] = find_raw(m_keys, p_key);
+      auto pos = (key_iter - m_keys.data());
+      auto value_iter = m_values.data() + pos;
 
       if(!found)
       {
@@ -373,14 +362,14 @@ class flat_map final
     template<typename InputKeyType>
     constexpr void erase(InputKeyType && p_key)
     {
-      if(auto [key_iter, found] = find_iter(m_keys, p_key);
+      if(auto [key_iter, found] = find_raw(m_keys, p_key);
          found)
       {
         m_keys.erase(key_iter);
 
-        ssize_type pos = key_iter - m_keys.begin();
+        ssize_type pos = key_iter - m_keys.data();
 
-        m_values.erase(m_values.begin() + pos);
+        m_values.erase(m_values.data() + pos);
       }
     }
 
@@ -533,7 +522,7 @@ class flat_map final
     template<typename Visitor>
     void visit(Visitor && visitor)
     {
-      auto value_iter{m_values.begin()};
+      auto value_iter{m_values.data()};
 
       for(auto & key : m_keys)
       {
@@ -545,7 +534,7 @@ class flat_map final
     template<typename Visitor>
     void visit(Visitor && visitor) const
     {
-      auto value_iter{m_values.begin()};
+      auto value_iter{m_values.data()};
 
       for(const auto & key : m_keys)
       {
@@ -606,7 +595,7 @@ class flat_map final
         throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
       }
 
-      auto [value_pos, value_inserted] = m_values.add_empty(m_values.begin() + (key_pos - m_keys.begin()));
+      auto [value_pos, value_inserted] = m_values.add_empty(m_values.data() + (key_pos - m_keys.data()));
       if(!value_inserted)
       {
         throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
