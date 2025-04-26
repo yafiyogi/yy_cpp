@@ -349,9 +349,15 @@ class vector
         return insert_result{end(), false};
       }
 
-      if(m_size == m_capacity)
+      if((0 == distance) && (m_offset != 0))
       {
-        if(m_offset != 0)
+        // Trying to insert at begining of vector when offset > 0
+        --m_offset;
+        --m_size;
+      }
+      else if(m_size == m_capacity)
+      {
+        if(0 != m_offset)
         {
           std::move(begin(), begin() + distance, raw_data());
           if(distance != m_size)
