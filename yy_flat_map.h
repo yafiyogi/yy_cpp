@@ -587,21 +587,22 @@ class flat_map final
 
   private:
     [[nodiscard]]
-    constexpr std::tuple<key_iterator, value_iterator> add_empty(key_iterator p_pos)
+    constexpr std::tuple<key_ptr, value_ptr> add_empty(key_iterator p_pos)
     {
-      auto [key_pos, key_inserted] = m_keys.add_empty(p_pos);
+      auto [key_iter, key_inserted] = m_keys.add_empty(p_pos);
       if(!key_inserted)
       {
         throw std::runtime_error("flat_map::add_empty() key add_empty() failed!");
       }
 
-      auto [value_pos, value_inserted] = m_values.add_empty(m_values.data() + (key_pos - m_keys.data()));
+      auto insert_pos = key_iter - m_keys.begin();
+      auto [_, value_inserted] = m_values.add_empty(m_values.begin() + insert_pos);
       if(!value_inserted)
       {
         throw std::runtime_error("flat_map::add_empty() value add_empty() failed!");
       }
 
-      return std::make_tuple(key_pos, value_pos);
+      return std::make_tuple(m_keys.data() + insert_pos, m_values.data() + insert_pos);
     }
 
     key_vector m_keys;
