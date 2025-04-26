@@ -24,8 +24,6 @@
 
 */
 
-#include "fmt/format.h"
-
 #include "bench_trie_lookup.h"
 
 namespace yafiyogi::benchmark {

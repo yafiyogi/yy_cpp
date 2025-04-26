@@ -24,13 +24,11 @@
 
 */
 
-#include "fmt/format.h"
-
 #include "bench_trie_lookup.h"
 
 namespace yafiyogi::benchmark {
 
-BENCHMARK_F(TrieLookup, lookup)(::benchmark::State & state)
+BENCHMARK_F(TrieLookup, trie_lookup)(::benchmark::State & state)
 {
   auto automaton = trie.create_automaton();
   assert(!automaton.empty());

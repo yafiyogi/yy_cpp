@@ -30,7 +30,6 @@
 
 #include "benchmark/benchmark.h"
 
-
 struct CompareUtil:
       public ::benchmark::Fixture
 {
