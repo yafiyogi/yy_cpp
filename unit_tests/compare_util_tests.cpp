@@ -76,7 +76,7 @@ TEST_F(TestCompareUtil, equal_different_data)
   EXPECT_FALSE(yafiyogi::yy_util::equal(a, b));
 }
 
-TEST_F(TestCompareUtil, equal_char_is_equal)
+TEST_F(TestCompareUtil, char_equal_is_equal)
 {
   char_data_type a{'1', '2', '3', '4'};
   char_data_type b{a};
@@ -84,7 +84,7 @@ TEST_F(TestCompareUtil, equal_char_is_equal)
   EXPECT_TRUE(yafiyogi::yy_util::equal(a, b));
 }
 
-TEST_F(TestCompareUtil, equal_char_different_size)
+TEST_F(TestCompareUtil, char_equal_different_size)
 {
   char_data_type a{'1', '2', '3', '4'};
   char_data_type b{a};
@@ -94,7 +94,7 @@ TEST_F(TestCompareUtil, equal_char_different_size)
   EXPECT_FALSE(yafiyogi::yy_util::equal(a, b));
 }
 
-TEST_F(TestCompareUtil, equal_char_different_data)
+TEST_F(TestCompareUtil, char_equal_different_data)
 {
   char_data_type a{'1', '2', '3', '4'};
   char_data_type b{'1', '2', '4', '3'};
@@ -146,7 +146,7 @@ TEST_F(TestCompareUtil, less_than_greater)
   }
 }
 
-TEST_F(TestCompareUtil, less_than_char)
+TEST_F(TestCompareUtil, char_less_than)
 {
   {
     char_data_type a{1, 2, 3, 4};
@@ -163,7 +163,7 @@ TEST_F(TestCompareUtil, less_than_char)
   }
 }
 
-TEST_F(TestCompareUtil, less_than_char_equal)
+TEST_F(TestCompareUtil, char_less_than_equal)
 {
   char_data_type a{1, 2, 3, 4};
   char_data_type b{a};
@@ -171,7 +171,7 @@ TEST_F(TestCompareUtil, less_than_char_equal)
   EXPECT_FALSE(yafiyogi::yy_util::less_than(a, b));
 }
 
-TEST_F(TestCompareUtil, less_than_char_greater)
+TEST_F(TestCompareUtil, char_less_than_greater)
 {
   {
     char_data_type a{1, 2, 3, 5};
