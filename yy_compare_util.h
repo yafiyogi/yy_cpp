@@ -26,42 +26,13 @@
 
 #pragma once
 
+#include <string>
 #include <algorithm>
 #include <type_traits>
 
 #include "yy_string_traits.h"
 
 namespace yafiyogi::yy_util {
-namespace compare_util_detail {
-
-template<typename Lhs,
-         typename Rhs,
-         typename Enable = void>
-struct is_string:
-      std::false_type
-{
-};
-
-template<typename Lhs,
-         typename Rhs>
-struct is_string<Lhs, Rhs,
-                 typename std::enable_if_t<(yy_traits::is_std_string_v<Lhs>
-                                            || yy_traits::is_std_string_view_v<Lhs>)
-                                           && (yy_traits::is_std_string_v<Rhs>
-                                               || yy_traits::is_std_string_view_v<Rhs>)>>:
-      std::true_type
-{
-};
-
-template<typename Lhs,
-         typename Rhs>
-inline constexpr bool is_string_v = is_string<Lhs, Rhs>::value;
-
-template<typename Lhs,
-         typename Rhs>
-using is_string_t = typename is_string<Lhs, Rhs>::type;
-
-} // namespace compare_util_detail
 
 template<typename Lhs,
          typename Rhs,
@@ -78,62 +49,52 @@ struct Compare final
     static constexpr bool equal(const lhs_type & lhs,
                                 const rhs_type & rhs) noexcept
     {
-      const auto lhs_size{lhs.size()};
-      const auto lhs_begin{lhs.data()};
-
-      return (lhs_size == rhs.size())
-        && std::equal(lhs_begin, lhs_begin + lhs_size, rhs.data());
+      return compare(lhs, rhs) == 0;
     }
 
     [[nodiscard]]
     static constexpr bool less_than(const lhs_type & lhs,
                                     const rhs_type & rhs) noexcept
     {
-      const auto lhs_size{lhs.size()};
-      const auto lhs_begin{lhs.data()};
-      const auto rhs_size{rhs.size()};
-      const auto rhs_begin{rhs.data()};
-
-      return std::lexicographical_compare(lhs_begin, lhs_begin + lhs_size,
-                                          rhs_begin, rhs_begin + rhs_size);
+      return compare(lhs, rhs) < 0;
     }
 
     [[nodiscard]]
     static constexpr int compare(const lhs_type & lhs,
                                  const rhs_type & rhs) noexcept
     {
-      const auto lhs_size{lhs.size()};
       const auto lhs_begin{lhs.data()};
-      const auto lhs_end{lhs_begin + lhs_size};
-      const auto rhs_size{rhs.size()};
+      const auto lhs_end{lhs_begin + lhs.size()};
       const auto rhs_begin{rhs.data()};
-      const auto rhs_end{rhs_begin + rhs_size};
+      const auto rhs_end{rhs_begin + rhs.size()};
 
       auto [lhs_first, rhs_first] = std::mismatch(lhs_begin, lhs_end,
                                                   rhs_begin, rhs_end);
 
-      bool rhs_is_end = rhs_first == rhs_end;
-      if(lhs_first != lhs_end)
+      auto lhs_rest = lhs_end - lhs_first;
+      auto rhs_rest = rhs_end - rhs_first;
+
+      if(0 == lhs_rest)
       {
-         if(rhs_is_end)
-         {
-           return 1;
-         }
+        if(0 == rhs_rest)
+        {
+          return 0;
+        }
 
-         if(*lhs_first < *rhs_first)
-         {
-           return -1;
-         }
-
-         return 1;
+        return -1;
       }
 
-      if(!rhs_is_end)
+      if(0 == rhs_rest)
+      {
+        return 1;
+      }
+
+      if(*lhs_first < *rhs_first)
       {
         return -1;
       }
 
-      return 0;
+      return 1;
     }
 };
 
@@ -152,27 +113,6 @@ struct Compare<Lhs, Rhs,
     [[nodiscard]]
     static constexpr bool equal(const lhs_type & lhs, const rhs_type & rhs) noexcept
     {
-      return lhs == rhs;
-    }
-
-    [[nodiscard]]
-    static constexpr bool less_than(const lhs_type & a, const rhs_type & rhs) noexcept
-    {
-      return a < rhs;
-    }
-};
-
-template<typename Lhs,
-         typename Rhs>
-struct Compare<Lhs, Rhs,
-               std::enable_if_t<compare_util_detail::is_string_v<Lhs, Rhs>>> final
-{
-    using lhs_type = yy_traits::remove_cvr_t<Lhs>;
-    using rhs_type = yy_traits::remove_cvr_t<Rhs>;
-
-    [[nodiscard]]
-    static constexpr bool equal(const lhs_type & lhs, const rhs_type & rhs) noexcept
-    {
       return compare(lhs, rhs) == 0;
     }
 
@@ -182,22 +122,18 @@ struct Compare<Lhs, Rhs,
       return compare(lhs, rhs) < 0;
     }
 
-    [[nodiscard]]
-    static constexpr int compare(const lhs_type & lhs,
-                                 const rhs_type & rhs) noexcept
+    static constexpr lhs_type compare(const lhs_type & lhs, const rhs_type & rhs) noexcept
     {
-      return lhs.compare(rhs);
+      return lhs - rhs;
     }
 };
 
 template<typename Lhs,
          typename Rhs>
 struct Compare<Lhs, Rhs,
-               std::enable_if_t<!compare_util_detail::is_string_v<Lhs, Rhs>
-                                && std::is_same_v<typename yy_traits::remove_cvr_t<Lhs>::value_type,
-                                                  typename yy_traits::remove_cvr_t<Rhs>::value_type>
-                                && (std::is_same_v<char, typename yy_traits::remove_cvr_t<Lhs>::value_type>
-                                    || std::is_same_v<char8_t, typename yy_traits::remove_cvr_t<Lhs>::value_type>)>> final
+               std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<Lhs>::value_type,
+                                               typename yy_traits::remove_cvr_t<Rhs>::value_type>
+                                && std::is_same_v<char, typename yy_traits::remove_cvr_t<Lhs>::value_type>>> final
 {
     using lhs_type = yy_traits::remove_cvr_t<Lhs>;
     using rhs_type = yy_traits::remove_cvr_t<Rhs>;
@@ -222,25 +158,25 @@ struct Compare<Lhs, Rhs,
     {
       const auto lhs_size{lhs.size()};
       const auto rhs_size{rhs.size()};
-      const auto size = std::min(lhs_size, rhs_size);
+      const auto size{std::min(lhs_size, rhs_size)};
 
-      if(auto comp = std::char_traits<char_type>::compare(lhs.data(), rhs.data(), size);
+      if(int comp = std::char_traits<char_type>::compare(lhs.data(), rhs.data(), size);
          comp != 0)
       {
         return comp;
       }
 
-      if(lhs_size != rhs_size)
+      if(lhs_size == rhs_size)
       {
-        if(lhs_size < rhs_size)
-        {
-          return -1;
-        }
-
-        return 1;
+        return 0;
       }
 
-      return 0;
+      if(lhs_size < rhs_size)
+      {
+        return -1;
+      }
+
+      return 1;
     }
 };
 
