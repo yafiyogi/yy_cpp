@@ -336,25 +336,22 @@ TEST_F(TestFlatMap, find)
   vec.emplace(3, 3);
 
   {
-    auto [key, value, pos] = vec.find(2);
-    ASSERT_NE(nullptr, key);
-    EXPECT_EQ(2, *key);
+    auto [value, pos, found] = vec.find(2);
+    ASSERT_TRUE(found);
     ASSERT_NE(nullptr, value);
     EXPECT_EQ(2, *value);
     EXPECT_EQ(1, pos);
   }
 
   {
-    auto [key, value, pos] = vec.find(0);
-    ASSERT_EQ(nullptr, key);
-    ASSERT_EQ(nullptr, value);
+    auto [value, pos, found] = vec.find(0);
+    ASSERT_FALSE(found);
     EXPECT_EQ(0, pos);
   }
 
   {
-    auto [key, value, pos] = vec.find(4);
-    ASSERT_EQ(nullptr, key);
-    ASSERT_EQ(nullptr, value);
+    auto [value, pos, found] = vec.find(4);
+    ASSERT_FALSE(found);
     EXPECT_EQ(3, pos);
   }
 }
@@ -362,32 +359,28 @@ TEST_F(TestFlatMap, find)
 TEST_F(TestFlatMap, const_find)
 {
   yy_data::flat_map<int, int> vec{};
-  const yy_data::flat_map<int, int> & const_vec = vec;
 
   vec.emplace(1, 1);
   vec.emplace(2, 2);
   vec.emplace(3, 3);
 
   {
-    auto [key, value, pos] = const_vec.find(2);
-    ASSERT_NE(nullptr, key);
-    EXPECT_EQ(2, *key);
+    auto [value, pos, found] = vec.find(2);
+    ASSERT_TRUE(found);
     ASSERT_NE(nullptr, value);
     EXPECT_EQ(2, *value);
     EXPECT_EQ(1, pos);
   }
 
   {
-    auto [key, value, pos] = const_vec.find(0);
-    ASSERT_EQ(nullptr, key);
-    ASSERT_EQ(nullptr, value);
+    auto [value, pos, found] = vec.find(0);
+    ASSERT_FALSE(found);
     EXPECT_EQ(0, pos);
   }
 
   {
-    auto [key, value, pos] = const_vec.find(10);
-    ASSERT_EQ(nullptr, key);
-    ASSERT_EQ(nullptr, value);
+    auto [value, pos, found] = vec.find(10);
+    ASSERT_FALSE(found);
     EXPECT_EQ(3, pos);
   }
 }
