@@ -33,6 +33,7 @@
 #include "yy_find_raw_util.hpp"
 #include "yy_span.h"
 #include "yy_ref_traits.h"
+#include "yy_trie_common.h"
 #include "yy_type_traits.h"
 #include "yy_utility.h"
 
@@ -51,14 +52,20 @@ template<typename LabelType,
          typename ValueType>
 struct trie_node_traits final
 {
-    using label_type = yy_traits::remove_cvr_t<LabelType>;
-    using label_l_value_ref = typename yy_traits::ref_traits<label_type>::l_value_ref;
-    using label_const_l_value_ref = typename yy_traits::ref_traits<label_type>::const_l_value_ref;
-    using label_r_value_ref = typename yy_traits::ref_traits<label_type>::r_value_ref;
-    using value_type = yy_traits::remove_cvr_t<ValueType>;
+    using label_traits = yy_trie::label_traits<LabelType>;
+    using value_traits = yy_trie::value_traits<ValueType>;
+
+    using label_type = typename label_traits::label_type;
+    using label_l_value_ref = typename label_traits::label_l_value_ref;
+    using label_const_l_value_ref = typename label_traits::label_const_l_value_ref;
+    using label_r_value_ref = typename label_traits::label_r_value_ref;
+
+    using value_type = typename value_traits::value_type;
+
     using node_type = trie_node<label_type, value_type>;
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
+
     using node_edge = trie_node_edge<label_type, value_type>;
     using edges_type = std::vector<node_edge>;
     using edge_traits = find_util_detail::raw_traits_type<typename edges_type::value_type>;
@@ -351,7 +358,7 @@ class Automaton final
 
       for(label_const_l_value_ref label_part : label)
       {
-        auto [edge_iter, found] = node->find_edge(label_part);
+        auto [edge, found] = node->find_edge(label_part);
 
         if(!found)
         {
@@ -359,7 +366,7 @@ class Automaton final
           return false;
         }
 
-        node= edge_iter->m_node.get();
+        node = edge->m_node.get();
       }
 
       m_state = node;
