@@ -418,7 +418,7 @@ class fm_trie final
         node_ptr * edge_node = nullptr;
 
         auto do_find = [&edge_node](auto node, size_type) {
-          edge_node = node.get();
+          edge_node = node;
         };
 
         auto [edge_pos, found] = parent->find_edge(do_find, last);

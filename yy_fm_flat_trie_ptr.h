@@ -140,7 +140,7 @@ class trie_node_ptr final
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return m_data.empty();
+      return nullptr == m_data;
     }
 
     constexpr void data(value_ptr p_data) noexcept
@@ -157,7 +157,7 @@ class trie_node_ptr final
     [[nodiscard]]
     constexpr const_value_ptr data() const noexcept
     {
-      return const_value_ptr{m_data.get()};
+      return const_value_ptr{m_data};
     }
 
   private:
@@ -572,7 +572,7 @@ class fm_flat_trie_ptr final
         node_idx_type * edge_node_idx = nullptr;
         auto do_find_edge = [&edge_node_idx]
                             (auto idx, size_type) {
-          edge_node_idx = idx.get();
+          edge_node_idx = idx;
         };
 
         auto payload_label{l_tokenizer.token()};

@@ -71,7 +71,6 @@ struct trie_node_traits final
     using node_ptr = std::unique_ptr<node_type>;
     using root_node_ptr = std::shared_ptr<node_type>;
     using edges_type = flat_map<label_type, node_ptr>;
-    using key_value_pos_type = typename edges_type::key_value_pos_type;
     using edge_found_type = edge_found<LabelElemType, ValueType>;
     using edge_part_found_type = edge_part_found<LabelElemType, ValueType>;
 };
@@ -155,8 +154,8 @@ class trie_node
       edge_found_type edge{nullptr, nullptr, m_edges.size(), 0, label.size()};
 
       auto egde_getter = [label, &edge](auto key, auto node, size_type pos) {
-        edge.edge_label = key.get();
-        edge.edge_node = node.get();
+        edge.edge_label = key;
+        edge.edge_node = node;
         edge.edge_pos = pos;
 
         auto [target_first, edge_first] = std::mismatch(label.begin(),

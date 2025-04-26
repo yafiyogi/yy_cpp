@@ -431,7 +431,7 @@ class fm_flat_trie_idx final
         node_idx_type * edge_node_idx = nullptr;
         auto do_find_edge = [&edge_node_idx]
                             (auto idx, size_type) {
-          edge_node_idx = idx.get();
+          edge_node_idx = idx;
         };
 
         auto payload_label{l_tokenizer.token()};
