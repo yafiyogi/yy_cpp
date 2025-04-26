@@ -47,7 +47,7 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
 
   Iterator key_iter{std::lower_bound(p_begin, p_end, p_key)};
 
-  auto is_end = p_end == key_iter;
+  bool is_end = p_end == key_iter;
 
   return end_type{key_iter, is_end};
 }
@@ -67,7 +67,7 @@ constexpr auto lower_bound_iter(const Iterator & p_begin,
 
   Iterator key_iter{std::lower_bound(p_begin, p_end, p_key, compare)};
 
-  auto is_end = p_end == key_iter;
+  bool is_end = p_end == key_iter;
 
   return end_type{key_iter, is_end};
 }
@@ -85,7 +85,7 @@ constexpr auto upper_bound_iter(const Iterator & p_begin,
 
   Iterator key_iter{std::upper_bound(p_begin, p_end, p_key)};
 
-  auto is_end = p_end == key_iter;
+  bool is_end = p_end == key_iter;
 
   return end_type{key_iter, is_end};
 }
@@ -105,7 +105,7 @@ constexpr auto upper_bound_iter(const Iterator & p_begin,
 
   Iterator key_iter{std::upper_bound(p_begin, p_end, p_key, compare)};
 
-  auto is_end = p_end == key_iter;
+  bool is_end = p_end == key_iter;
 
   return end_type{key_iter, is_end};
 }
