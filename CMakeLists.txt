@@ -78,11 +78,13 @@ target_sources(yy_cpp
       yy_flat_radix_trie.h
       yy_flat_set.h
       yy_flat_trie.h
+      yy_flat_trie_idx.h
       yy_fm_flat_trie_idx.h
       yy_fm_flat_trie_ptr.h
       yy_fm_radix_trie.h
       yy_fm_subject_observer.h
       yy_fm_trie.h
+      yy_fm_trie_node_idx.hpp
       yy_func_traits.h
       yy_hash.h
       yy_init.h
