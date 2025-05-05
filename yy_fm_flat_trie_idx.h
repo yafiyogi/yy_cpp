@@ -26,7 +26,8 @@
 
 #pragma once
 
-#include "yy_trie_node_idx.hpp"
+#include "yy_assert.h"
+#include "yy_fm_trie_node_idx.hpp"
 
 namespace yafiyogi::yy_data {
 namespace fm_flat_trie_idx_detail {
@@ -35,7 +36,7 @@ template<typename LabelType,
          typename ValueType>
 struct trie_idx_traits final
 {
-    using traits = trie_node_idx_detail::trie_node_idx_traits<LabelType, ValueType>;
+    using traits = fm_trie_node_idx_detail::fm_trie_node_idx_traits<LabelType, ValueType>;
     using label_traits = typename traits::label_traits;
     using value_traits = typename traits::value_traits;
 
@@ -113,7 +114,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool has_payload() const noexcept
     {
-      return !empty() && !get_node(m_state)->empty();
+      return !empty() && !get_node(m_nodes.data(), m_state)->empty();
     }
 
     template<typename Visitor>
@@ -121,33 +122,21 @@ class Automaton final
     {
       if(has_payload())
       {
-        visitor(get_data(get_node(m_state)->data()));
+        visitor(get_data(get_node(m_nodes.data(), m_state)->data()));
       }
     }
 
   private:
     [[nodiscard]]
-    constexpr node_type * get_node(const node_idx_type idx) noexcept
-    {
-      return get_node(m_nodes.data(), idx);
-    }
-
-    [[nodiscard]]
-    constexpr const node_type * get_node(const node_idx_type idx) const noexcept
-    {
-      return get_node(m_nodes.data(), idx);
-    }
-
-    [[nodiscard]]
-    static constexpr node_type * get_node(node_type * raw_nodes,
-                                          const node_idx_type idx) noexcept
+    static inline constexpr node_type * get_node(node_type * raw_nodes,
+                                                 const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    static constexpr const node_type * get_node(const node_type * raw_nodes,
-                                                const node_idx_type idx) noexcept
+    static inline constexpr const node_type * get_node(const node_type * raw_nodes,
+                                                       const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -185,25 +174,24 @@ class Automaton final
     {
       reset();
 
-      auto node_idx = m_state;
-      auto next_node_do = [&node_idx](auto edge_idx, size_type)
+      auto node = m_state;
+      auto next_node_do = [&node](auto edge, size_type)
       {
-        node_idx = *edge_idx;
+        node = *edge;
       };
 
       tokenizer_type tokenizer{label};
 
       while(!tokenizer.empty())
       {
-        if(const auto label_part{tokenizer.scan()};
-           !get_node(node_idx)->find_edge(next_node_do, label_part).found)
+        if(!get_node(m_nodes.data(), node)->find_edge(next_node_do, tokenizer.scan()).found)
         {
           m_state = node_type::root_idx;
           return false;
         }
       }
 
-      m_state = node_idx;
+      m_state = node;
 
       return has_payload();
     }
@@ -213,7 +201,7 @@ class Automaton final
     node_idx_type m_state = node_type::root_idx;
 };
 
-} // namespace detail
+} // namespace fm_flat_trie_idx_detail
 
 template<typename LabelType,
          typename ValueType,
@@ -368,35 +356,35 @@ class fm_flat_trie_idx final
     }
 
     [[nodiscard]]
-    static constexpr node_idx_type add_node(trie_vector & nodes,
-                                            node_type * node,
-                                            size_type pos,
-                                            label_type label,
-                                            const data_idx_type data_idx)
+    static constexpr node_idx_type add_node(trie_vector & p_nodes,
+                                            node_type * p_parent_node,
+                                            size_type p_edge,
+                                            label_type p_label,
+                                            const data_idx_type p_data_idx)
     {
-      node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
-      node->add_edge(pos, std::move(label), node_idx);
+      node_idx_type node_idx{static_cast<node_idx_type>(p_nodes.size())};
+      p_parent_node->add_edge(p_edge, std::move(p_label), node_idx);
 
-      nodes.emplace_back(node_type{data_idx});
+      p_nodes.emplace_back(node_type{p_data_idx});
 
       return node_idx;
     }
 
     [[nodiscard]]
-    constexpr node_idx_type add_empty_nodes(trie_vector & nodes,
+    constexpr node_idx_type add_empty_nodes(trie_vector & p_nodes,
                                             tokenizer_type & p_tokenizer)
     {
       node_idx_type node_idx = node_type::root_idx;
-      auto next_node_do = [&node_idx](auto edge_node_idx,
-                                      size_type /* pos */) {
-        node_idx = *edge_node_idx;
+      auto next_node_do = [&node_idx](auto * p_edge,
+                                  size_type /* p_pos */) {
+        node_idx = *p_edge;
       };
 
       token_type token{p_tokenizer.scan()};
       // Skip exising nodes.
       while(!p_tokenizer.empty())
       {
-        if(!get_node(nodes.data(), node_idx)->find_edge(next_node_do, token).found)
+        if(!get_node(p_nodes.data(), node_idx)->find_edge(next_node_do, token).found)
         {
           break;
         }
@@ -406,10 +394,10 @@ class fm_flat_trie_idx final
       // Add new nodes;
       while(!p_tokenizer.empty())
       {
-        auto node = get_node(nodes.data(), node_idx);
-        auto [edge_pos, ignore] = node->find_edge_pos(token);
+        auto node = get_node(p_nodes.data(), node_idx);
+        auto [edge, ignore] = node->find_edge_pos(token);
 
-        node_idx = add_node(nodes, node, edge_pos, tokenizer_type::create(token), no_data);
+        node_idx = add_node(p_nodes, node, edge, tokenizer_type::create(token), no_data);
 
         token = p_tokenizer.scan();
       }
@@ -428,19 +416,19 @@ class fm_flat_trie_idx final
         node_idx_type node_idx = add_empty_nodes(m_nodes, l_tokenizer);
         auto node = get_node(m_nodes.data(), node_idx);
 
-        node_idx_type * edge_node_idx = nullptr;
-        auto do_find_edge = [&edge_node_idx]
-                            (auto idx, size_type) {
-          edge_node_idx = idx;
+        node_idx_type * edge_pos = nullptr;
+        auto do_find_edge = [&edge_pos]
+                            (auto p_edge, size_type) {
+          edge_pos = p_edge;
         };
 
         auto payload_label{l_tokenizer.token()};
-        auto [edge_pos, found] = node->find_edge(do_find_edge, payload_label);
+        auto [edge, found] = node->find_edge(do_find_edge, payload_label);
 
         if(found)
         {
           // Overwrite an existing node.
-          auto & edge_node = *get_node(m_nodes.data(), *edge_node_idx);
+          auto & edge_node = *get_node(m_nodes.data(), *edge_pos);
           if(!edge_node.empty())
           {
             // Data node exists.
@@ -459,7 +447,7 @@ class fm_flat_trie_idx final
         // Add data node.
         auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
         label_type node_label{tokenizer_type::create(payload_label)};
-        std::ignore = add_node(m_nodes, node, edge_pos, std::move(node_label), data_idx);
+        std::ignore = add_node(m_nodes, node, edge, std::move(node_label), data_idx);
 
         return data_added_type{get_data_ptr(data_idx), true};
       }

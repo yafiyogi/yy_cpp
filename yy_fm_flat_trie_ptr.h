@@ -32,7 +32,7 @@
 #include "yy_observer_ptr.hpp"
 #include "yy_span.h"
 #include "yy_trie_common.h"
-#include "yy_trie_node_idx.hpp"
+#include "yy_fm_trie_node_idx.hpp"
 #include "yy_type_traits.h"
 #include "yy_vector.h"
 
@@ -170,7 +170,7 @@ template<typename LabelType,
          template<typename L> class TokenizerType>
 struct trie_traits final
 {
-    using idx_traits = trie_node_idx_detail::trie_node_idx_traits<LabelType, ValueType>;
+    using idx_traits = fm_trie_node_idx_detail::fm_trie_node_idx_traits<LabelType, ValueType>;
     using label_type = typename idx_traits::label_type;
     using idx_value_type = typename idx_traits::value_type;
     using idx_value_ptr = typename idx_traits::value_traits::value_ptr;
@@ -290,8 +290,7 @@ class Automaton final
 
       while(!tokenizer.empty())
       {
-        if(token_type label_part{tokenizer.scan()};
-           !m_state->find_edge(next_node_do, label_part))
+        if(!m_state->find_edge(next_node_do, tokenizer.scan()))
         {
           m_state.reset();
           return false;
