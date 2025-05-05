@@ -71,6 +71,7 @@ add_executable(test_yy_cpp
   fm_trie_tests.cpp
   fm_radix_trie_tests.cpp
 
+  flat_trie_idx_tests.cpp
   fm_flat_trie_idx_tests.cpp
   fm_flat_trie_idx_word_tests.cpp
   fm_flat_trie_ptr_tests.cpp
