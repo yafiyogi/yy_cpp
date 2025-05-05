@@ -707,6 +707,26 @@ class vector
       lhs.swap(rhs);
     }
 
+    template<typename Visitor>
+    constexpr void visit(Visitor && visitor) noexcept
+    {
+      for(auto range{yy_util::make_range(data(), data() + size())};
+          auto & item : range)
+      {
+        visitor(item);
+      }
+    }
+
+    template<typename Visitor>
+    constexpr void visit(Visitor && visitor) const noexcept
+    {
+      for(auto range{yy_util::make_range(data(), data() + size())};
+          const auto & item : range)
+      {
+        visitor(item);
+      }
+    }
+
   private:
     constexpr void move(vector && p_other) noexcept
     {
@@ -1357,6 +1377,26 @@ class simple_vector
     friend constexpr void swap(simple_vector & lhs, simple_vector & rhs) noexcept
     {
       lhs.swap(rhs);
+    }
+
+    template<typename Visitor>
+    constexpr void visit(Visitor && visitor) noexcept
+    {
+      for(auto range{yy_util::make_range(data(), data() + size())};
+          auto & item : range)
+      {
+        visitor(item);
+      }
+    }
+
+    template<typename Visitor>
+    constexpr void visit(Visitor && visitor) const noexcept
+    {
+      for(auto range{yy_util::make_range(data(), data() + size())};
+          const auto & item : range)
+      {
+        visitor(item);
+      }
     }
 
   private:
