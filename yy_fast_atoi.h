@@ -75,7 +75,7 @@ struct fast_atoi final
         return val_valid_type{};
       }
 
-      value_type val = value_type{0};
+      value_type val = value_type{};
       FastFloat state = FastFloat::NoValue;
 
       auto add = [&val, p_str]() mutable {
