@@ -40,9 +40,9 @@
 #include "yy_compare_util.h"
 #include "yy_iterator_ptr.hpp"
 #include "yy_ref_traits.h"
-#include "yy_span_traits.h"
-#include "yy_static_vector_traits.hpp"
 #include "yy_type_traits.h"
+#include "yy_traits_span.hpp"
+#include "yy_traits_static_vector.hpp"
 #include "yy_utility.h"
 
 namespace yafiyogi::yy_quad {

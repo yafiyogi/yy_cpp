@@ -36,9 +36,9 @@
 #include "yy_iterator_ptr.hpp"
 #include "yy_range.hpp"
 #include "yy_ref_traits.h"
-#include "yy_span_traits.h"
+#include "yy_traits_span.hpp"
+#include "yy_traits_vector.hpp"
 #include "yy_type_traits.h"
-#include "yy_vector_traits.h"
 
 
 namespace yafiyogi::yy_quad {

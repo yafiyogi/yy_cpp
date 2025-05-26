@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "yy_string_traits.h"
+#include "yy_traits_string.hpp"
 
 namespace yafiyogi::yy_util {
 

@@ -32,10 +32,10 @@
 #include <tuple>
 #include <type_traits>
 
-#include "yy_array_traits.h"
-#include "yy_string_traits.h"
 #include "yy_type_traits.h"
-#include "yy_vector_traits.h"
+#include "yy_traits_array.hpp"
+#include "yy_traits_string.hpp"
+#include "yy_traits_vector.hpp"
 
 namespace yafiyogi::yy_util {
 
