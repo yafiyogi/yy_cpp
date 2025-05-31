@@ -30,9 +30,6 @@
 
 #include <optional>
 
-#include "fmt/format.h"
-#include "fmt/ranges.h"
-
 #include "yy_fast_atoi.h"
 #include "yy_int_util.h"
 #include "yy_span.h"
