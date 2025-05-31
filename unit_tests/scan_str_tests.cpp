@@ -76,6 +76,16 @@ TEST_F(TestScanStr, scan_str_simple_c_array_out)
     EXPECT_EQ(1, yy_util::scan_str(str_in_2, "%5s", str_out));
     EXPECT_EQ(str_expect, std::string_view{str_out});
   }
+
+  {
+    std::string_view str_expect_1{"123456"};
+    std::string_view str_expect_2{"7890"};
+    char str_out_2[64];
+
+    EXPECT_EQ(2, yy_util::scan_str(str_in_1, "%s %s", str_out, str_out_2));
+    EXPECT_EQ(str_expect_1, std::string_view{str_out});
+    EXPECT_EQ(str_expect_2, std::string_view{str_out_2});
+  }
 }
 
 TEST_F(TestScanStr, scan_str_simple_char_vector_out)
@@ -140,6 +150,112 @@ TEST_F(TestScanStr, scan_str_std_string_out)
 
     EXPECT_EQ(1, yy_util::scan_str(str_in_2, "%5s", str_out));
     EXPECT_EQ(str_expect, std::string_view{str_out});
+  }
+
+}
+
+TEST_F(TestScanStr, scan_str_std_string_view_out)
+{
+  std::string_view str_out;
+
+  {
+    std::string_view str_expect{"123456"};
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_1, "%s", str_out));
+    EXPECT_EQ(str_expect, str_out);
+  }
+
+  {
+    std::string_view str_expect{str_in_2};
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_2, "%s", str_out));
+    EXPECT_EQ(str_expect, str_out);
+  }
+
+  {
+    std::string_view str_expect{"12345"};
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_2, "%5s", str_out));
+    EXPECT_EQ(str_expect, str_out);
+  }
+}
+
+
+TEST_F(TestScanStr, scan_str_simple_int_out)
+{
+  {
+    int int_out_1 = 0;
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_1, "%d", int_out_1));
+    EXPECT_EQ(123456, int_out_1);
+  }
+
+  {
+    int int_out_1 = 0;
+    int int_out_2 = 0;
+
+    EXPECT_EQ(2, yy_util::scan_str(str_in_1, "%d %d", int_out_1, int_out_2));
+    EXPECT_EQ(123456, int_out_1);
+    EXPECT_EQ(7890, int_out_2);
+  }
+}
+
+TEST_F(TestScanStr, scan_str_int_signed)
+{
+  {
+    std::string_view str{"-123456"};
+    int int_out_1 = 0;
+
+    EXPECT_EQ(1, yy_util::scan_str(str, "%d", int_out_1));
+    EXPECT_EQ(-123456, int_out_1);
+  }
+
+  {
+    std::string_view str{"-123456"};
+    unsigned int int_out_1 = 0;
+
+    EXPECT_EQ(0, yy_util::scan_str(str, "%d", int_out_1));
+  }
+}
+
+TEST_F(TestScanStr, scan_str_combo)
+{
+  {
+    std::string_view str_expect{"123456"};
+    std::string_view sv_out{};
+    int int_out = 0;
+
+    EXPECT_EQ(2, yy_util::scan_str(str_in_1, "%s %d", sv_out, int_out));
+    EXPECT_EQ(str_expect, sv_out);
+    EXPECT_EQ(7890, int_out);
+  }
+
+  {
+    std::string_view str_expect{"123456"};
+    std::string_view sv_out{};
+    int int_out = 0;
+
+    EXPECT_EQ(2, yy_util::scan_str(str_in_1, "%s 78%d", sv_out, int_out));
+    EXPECT_EQ(str_expect, sv_out);
+    EXPECT_EQ(90, int_out);
+  }
+}
+
+TEST_F(TestScanStr, scan_str_param_width)
+{
+  {
+    std::string_view str_expect{"12"};
+    std::string_view sv_out{};
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_1, "%*s", 2, sv_out));
+    EXPECT_EQ(str_expect, sv_out);
+  }
+
+  {
+    int int_out = 0;
+
+    EXPECT_EQ(1, yy_util::scan_str(str_in_1, "%*d", 2, int_out));
+    EXPECT_EQ(12, int_out);
   }
 }
 
