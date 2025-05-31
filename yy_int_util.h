@@ -29,6 +29,7 @@
 #include <limits>
 
 #include "yy_types.hpp"
+#include "yy_type_traits.h"
 
 namespace yafiyogi::yy_util {
 namespace digits_detail {
@@ -50,7 +51,10 @@ struct DigitsHelper<0> final
 template<typename I>
 struct Digits final
 {
-    static constexpr const size_type digits = digits_detail::DigitsHelper<std::numeric_limits<I>::max()>::digits;
+    using int_type = yy_traits::remove_cvr_t<I>;
+    static_assert(std::is_integral_v<int_type>, "Type must be integer type!");
+
+    static constexpr const size_type digits = digits_detail::DigitsHelper<std::numeric_limits<int_type>::max()>::digits;
 };
 
 } // namespace yafiyogi::yy_util
