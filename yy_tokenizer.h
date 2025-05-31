@@ -27,7 +27,6 @@
 #pragma once
 
 #include <string>
-
 #include "yy_type_traits.h"
 #include "yy_ref_traits.h"
 #include "yy_span.h"
@@ -40,6 +39,7 @@ class traits final
 {
   public:
     using value_type = yy_traits::remove_cvr_t<T>;
+    using value_ptr = std::add_pointer_t<value_type>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
     using const_l_value_ref = typename yy_traits::ref_traits<value_type>::const_l_value_ref;
     using token_type = yy_quad::const_span<value_type>;
@@ -76,13 +76,7 @@ class tokenizer
     static constexpr token_type scan(const token_type p_source) noexcept
     {
       const auto source_begin{p_source.begin()};
-      const auto source_end{p_source.end()};
-      auto token_end{std::find(source_begin, source_end, t_delim)};
-
-      if(source_end == token_end)
-      {
-        token_end = source_end;
-      }
+      auto token_end{std::find(source_begin, p_source.end(), t_delim)};
 
       return token_type{source_begin, token_end};
     }
@@ -138,6 +132,7 @@ class tokenizer<T,
   public:
     using traits = tokenizer_detail::traits<char>;
     using value_type = typename traits::value_type;
+    using value_ptr = typename traits::value_ptr;
     using const_value_ptr = typename traits::const_value_ptr;
     using const_l_value_ref = typename traits::const_l_value_ref;
     using token_type = typename traits::token_type;
@@ -159,14 +154,16 @@ class tokenizer<T,
     [[nodiscard]]
     static constexpr token_type scan(const token_type p_source) noexcept
     {
-      token_type::iterator token_end{char_traits::find(p_source.data(), p_source.size(), t_delim)};
+      const_value_ptr l_source_begin = p_source.data();
+      size_type l_size = p_source.size();
 
-      if(not_found == token_end)
+      const_value_ptr token_end{char_traits::find(l_source_begin, l_size, t_delim)};
+      if(nullptr == token_end)
       {
-        token_end = p_source.end();
+        token_end = l_source_begin + l_size;
       }
 
-      return token_type{p_source.begin(), token_end};
+      return token_type{l_source_begin, token_end};
     }
 
     [[nodiscard]]
@@ -208,7 +205,6 @@ class tokenizer<T,
   private:
     token_type m_source{};
     token_type m_token{};
-    static constexpr const token_type::iterator not_found{};
 };
 
 template<typename T,
