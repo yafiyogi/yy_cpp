@@ -24,8 +24,6 @@
 
 */
 
-#include "yy_fast_atoi.h"
-#include "yy_range.hpp"
 #include "yy_scan_str.hpp"
 
 namespace yafiyogi::yy_util::scan_str_detail {
