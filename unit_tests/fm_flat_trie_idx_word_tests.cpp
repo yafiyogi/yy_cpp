@@ -129,7 +129,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieAddThreeThirdOverlap_R_Value)
   ASSERT_FALSE(automaton.find("ab"sv));
 
   // Add 'ab/cd' with value 668.
-  trie.add("ab/cd", 668);
+  trie.add("ab/cd"sv, 668);
 
   // Check 'ab/cd' exists & value correct.
   automaton = trie.create_automaton();
@@ -139,7 +139,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieAddThreeThirdOverlap_R_Value)
   });
 
   // Add 'ab/ef' with value 777.
-  trie.add("ab/ef", 777);
+  trie.add("ab/ef"sv, 777);
 
   // Check 'ab/ef' exists & value correct.
   automaton = trie.create_automaton();
@@ -193,7 +193,7 @@ TEST_F(TestFMFlatTrieIdxWord, Trie_R_Value)
   ASSERT_FALSE(automaton.find("123"sv));
 
   // Add '12345' with value 2
-  trie.add("12345", 777);
+  trie.add("12345"sv, 777);
 
   // Check '12345' exists & value correct.
   automaton = trie.create_automaton();
@@ -226,7 +226,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieAddThreeThirdOverlap_L_Value)
 
   // Add 'abcd' with value 668.
   auto value_668 = 668;
-  trie.add("abcd", value_668);
+  trie.add("abcd"sv, value_668);
 
   // Check 'abcd' exists & value correct.
   automaton = trie.create_automaton();
@@ -235,7 +235,7 @@ TEST_F(TestFMFlatTrieIdxWord, TrieAddThreeThirdOverlap_L_Value)
 
   // Add 'abef' with value 777.
   auto value_777 = 777;
-  trie.add("abef", value_777);
+  trie.add("abef"sv, value_777);
 
   // Check 'abef' exists & value correct.
   automaton = trie.create_automaton();
