@@ -120,7 +120,7 @@ struct capture_type final
       return more;
     }
 
-    capture_type & operator+=(const capture_type & p_other) noexcept
+    constexpr capture_type & operator+=(const capture_type & p_other) noexcept
     {
       count += p_other.count;
       more = more && p_other.more;
