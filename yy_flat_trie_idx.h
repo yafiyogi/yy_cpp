@@ -47,7 +47,10 @@ struct trie_idx_traits final
     using value_type = typename traits::value_type;
 
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
+    using node_idx_ptr = std::add_pointer_t<node_idx_type>;
     using data_idx_type = typename traits::data_idx_type;
     using data_idx_ptr = typename traits::data_idx_ptr;
 
@@ -67,6 +70,8 @@ class Automaton final
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
+    using const_node_ptr = typename traits::const_node_ptr;
     using node_idx_type = typename traits::node_idx_type;
     using value_type = typename traits::value_type;
     using data_idx_type = typename traits::data_idx_type;
@@ -129,15 +134,15 @@ class Automaton final
 
   private:
     [[nodiscard]]
-    static inline constexpr node_type * get_node(node_type * raw_nodes,
-                                          const node_idx_type idx) noexcept
+    static inline constexpr node_ptr get_node(node_type * raw_nodes,
+                                              const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    static inline constexpr const node_type * get_node(const node_type * raw_nodes,
-                                                const node_idx_type idx) noexcept
+    static inline constexpr const_node_ptr get_node(const node_type * raw_nodes,
+                                                    const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -217,7 +222,9 @@ class flat_trie_idx final
     using label_l_value_ref = typename traits::label_l_value_ref;
     using label_r_value_ref = typename traits::label_r_value_ref;
     using node_type = typename traits::node_type;
+    using node_ptr = typename traits::node_ptr;
     using node_idx_type = typename traits::node_idx_type;
+    using node_idx_ptr = typename traits::node_idx_ptr;
     using value_type = typename traits::value_type;
     using value_ptr = typename traits::value_traits::value_ptr;
     using data_idx_type = typename traits::data_idx_type;
@@ -253,14 +260,14 @@ class flat_trie_idx final
 
     template<typename InputType,
              typename InputValueType>
-    constexpr data_added_type add(InputType && label,
-                                  InputValueType && value)
+    constexpr data_added_type add(InputType && p_label,
+                                  InputValueType && p_value)
     {
       static_assert(std::is_convertible_v<yy_traits::remove_cvr_t<InputValueType>,
                     yy_traits::remove_cvr_t<value_type>>,
                     "The value provided is not the correct type.");
 
-      return add_span(yy_quad::make_const_span(label), std::forward<InputValueType>(value));
+      return add_span(yy_quad::make_const_span(p_label), std::forward<InputValueType>(p_value));
     }
 
     [[nodiscard]]
@@ -406,18 +413,17 @@ class flat_trie_idx final
     }
 
     template<typename InputValueType>
-    constexpr data_added_type add_span(label_span_type label,
-                                       InputValueType && value)
+    constexpr data_added_type add_span(label_span_type p_label,
+                                       InputValueType && p_value)
     {
-      if(!label.empty())
+      if(!p_label.empty())
       {
-        tokenizer_type l_tokenizer{label};
+        tokenizer_type l_tokenizer{p_label};
 
         node_idx_type node_idx = add_empty_nodes(m_nodes, l_tokenizer);
-        auto node = get_node(m_nodes.data(), node_idx);
+        node_ptr node = get_node(m_nodes.data(), node_idx);
 
         auto payload_label{l_tokenizer.token()};
-
         auto [edge, found] = node->find_edge(payload_label);
 
         if(found)
@@ -432,7 +438,7 @@ class flat_trie_idx final
           }
 
           // Add new data item, & update node data idx
-          auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
+          auto data_idx = add_data(m_data, std::forward<InputValueType>(p_value));
           edge_node.data(data_idx);
 
           return data_added_type{get_data_ptr(edge_node.data()), true};
@@ -440,7 +446,7 @@ class flat_trie_idx final
 
         // No data node exists.
         // Add data node.
-        auto data_idx = add_data(m_data, std::forward<InputValueType>(value));
+        auto data_idx = add_data(m_data, std::forward<InputValueType>(p_value));
         label_type node_label{tokenizer_type::create(payload_label)};
         std::ignore = add_node(m_nodes, node, edge, std::move(node_label), data_idx);
 

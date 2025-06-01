@@ -46,8 +46,9 @@ add_executable(test_yy_cpp
   find_util_iter_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
-  span_tests.cpp
+  scan_str_tests.cpp
   span_iter_tests.cpp
+  span_tests.cpp
   string_case_tests.cpp
   string_util_tests.cpp
   tokenizer_tests.cpp
@@ -63,6 +64,9 @@ add_executable(test_yy_cpp
   flat_set_tests.cpp
 
   trie_tests.cpp
+  trie_n1_tests.cpp
+  trie_n2_tests.cpp
+  trie_n3_tests.cpp
   radix_trie_tests.cpp
 
   flat_trie_tests.cpp
@@ -72,6 +76,7 @@ add_executable(test_yy_cpp
   fm_radix_trie_tests.cpp
 
   flat_trie_idx_tests.cpp
+  flat_trie_ptr_tests.cpp
   fm_flat_trie_idx_tests.cpp
   fm_flat_trie_idx_word_tests.cpp
   fm_flat_trie_ptr_tests.cpp

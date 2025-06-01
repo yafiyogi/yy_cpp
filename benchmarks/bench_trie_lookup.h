@@ -35,6 +35,9 @@
 #include "benchmark/benchmark.h"
 
 #include "yy_trie.h"
+#include "yy_trie_n1.h"
+#include "yy_trie_n2.h"
+#include "yy_trie_n3.h"
 #include "yy_radix_trie.h"
 
 #include "yy_flat_trie.h"
@@ -43,6 +46,8 @@
 #include "yy_fm_trie.h"
 #include "yy_fm_radix_trie.h"
 
+#include "yy_flat_trie_idx.h"
+#include "yy_flat_trie_ptr.h"
 #include "yy_fm_flat_trie_idx.h"
 #include "yy_fm_flat_trie_ptr.h"
 
@@ -50,6 +55,9 @@
 
 
 using Trie = yafiyogi::yy_data::trie<char, int>;
+using TrieN1 = yafiyogi::yy_data::trie_n1<char, int>;
+using TrieN2 = yafiyogi::yy_data::trie_n2<char, int>;
+using TrieN3 = yafiyogi::yy_data::trie_n3<char, int>;
 using RadixTrie = yafiyogi::yy_data::radix_trie<char, int>;
 
 using FlatTrie = yafiyogi::yy_data::flat_trie<char, int>;
@@ -58,11 +66,21 @@ using FlatRadixTrie = yafiyogi::yy_data::flat_radix_trie<char, int>;
 using FMTrie = yafiyogi::yy_data::fm_trie<char, int>;
 using FMRadixTrie = yafiyogi::yy_data::fm_radix_trie<char, int>;
 
+using FlatTrieIdx = yafiyogi::yy_data::flat_trie_idx<char, int>;
+using FlatTriePtr = yafiyogi::yy_data::flat_trie_ptr<char, int>;
 using FMFlatTrieIdx = yafiyogi::yy_data::fm_flat_trie_idx<char, int>;
 using FMFlatTriePtr = yafiyogi::yy_data::fm_flat_trie_ptr<char, int>;
 
 template<typename LabelType>
 using tokenizer_type_word = yafiyogi::yy_trie::label_word_tokenizer<LabelType, '/'>;
+
+using FlatTrieIdxWord = yafiyogi::yy_data::flat_trie_idx<std::string, int,
+                                                         yafiyogi::yy_data::flat_trie_idx_detail::Automaton,
+                                                         tokenizer_type_word>;
+
+using FlatTriePtrWord = yafiyogi::yy_data::flat_trie_ptr<std::string, int,
+                                                         yafiyogi::yy_data::flat_trie_ptr_detail::Automaton,
+                                                         tokenizer_type_word>;
 
 using FMFlatTrieIdxWord = yafiyogi::yy_data::fm_flat_trie_idx<std::string, int,
                                                               yafiyogi::yy_data::fm_flat_trie_idx_detail::Automaton,
@@ -94,6 +112,9 @@ struct TrieLookup:
     static size_t topics_size();
 
     static Trie trie;
+    static TrieN1 trie_n1;
+    static TrieN2 trie_n2;
+    static TrieN3 trie_n3;
     static RadixTrie radix_trie;
 
     static FlatTrie flat_trie;
@@ -102,6 +123,10 @@ struct TrieLookup:
     static FMTrie fm_trie;
     static FMRadixTrie fm_radix_trie;
 
+    static FlatTrieIdx::automaton_type flat_trie_idx;
+    static FlatTrieIdxWord::automaton_type flat_trie_idx_word;
+    static FlatTriePtr::automaton_type flat_trie_ptr;
+    static FlatTriePtrWord::automaton_type flat_trie_ptr_word;
     static FMFlatTrieIdx::automaton_type fm_flat_trie_idx;
     static FMFlatTrieIdxWord::automaton_type fm_flat_trie_idx_word;
 

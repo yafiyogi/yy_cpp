@@ -31,8 +31,6 @@
 #include <random>
 #include <vector>
 
-#include "fmt/format.h"
-
 #include "yy_assert.h"
 
 #include "bench_trie_lookup.h"
@@ -479,6 +477,9 @@ auto topics = shuffle_array<std::string_view>({
 } // anonymous namespace
 
 Trie TrieLookup::trie;
+TrieN1 TrieLookup::trie_n1;
+TrieN2 TrieLookup::trie_n2;
+TrieN3 TrieLookup::trie_n3;
 FlatTrie TrieLookup::flat_trie;
 
 RadixTrie TrieLookup::radix_trie;
@@ -487,11 +488,14 @@ FlatRadixTrie TrieLookup::flat_radix_trie;
 FMTrie TrieLookup::fm_trie;
 FMRadixTrie TrieLookup::fm_radix_trie;
 
+FlatTrieIdx::automaton_type TrieLookup::flat_trie_idx;
+FlatTrieIdxWord::automaton_type TrieLookup::flat_trie_idx_word;
+FlatTriePtr::automaton_type TrieLookup::flat_trie_ptr;
+FlatTriePtrWord::automaton_type TrieLookup::flat_trie_ptr_word;
 FMFlatTrieIdx::automaton_type TrieLookup::fm_flat_trie_idx;
 FMFlatTrieIdxWord::automaton_type TrieLookup::fm_flat_trie_idx_word;
 FMFlatTriePtr::automaton_type TrieLookup::fm_flat_trie_ptr;
 FMFlatTriePtrWord::automaton_type TrieLookup::fm_flat_trie_ptr_word;
-
 
 Map TrieLookup::map;
 FlatMap TrieLookup::flat_map;
@@ -511,6 +515,10 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
 
   if(!done)
   {
+    FlatTrieIdx flat_trie_idx_builder;
+    FlatTrieIdxWord flat_trie_idx_word_builder;
+    FlatTriePtr flat_trie_ptr_builder;
+    FlatTriePtrWord flat_trie_ptr_word_builder;
     FMFlatTrieIdx fm_flat_trie_idx_builder;
     FMFlatTrieIdxWord fm_flat_trie_idx_word_builder;
     FMFlatTriePtr fm_flat_trie_ptr_builder;
@@ -523,6 +531,9 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
       ++count;
 
       trie.add(topic, count);
+      trie_n1.add(topic, count);
+      trie_n2.add(topic, count);
+      trie_n3.add(topic, count);
       radix_trie.add(topic, count);
 
       flat_trie.add(topic, count);
@@ -531,10 +542,14 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
       fm_trie.add(topic, count);
       fm_radix_trie.add(topic, count);
 
+      flat_trie_idx_builder.add(topic, count);
+      flat_trie_ptr_builder.add(topic, count);
+      flat_trie_idx_word_builder.add(topic, count);
+      flat_trie_ptr_word_builder.add(topic, count);
       fm_flat_trie_idx_builder.add(topic, count);
-      fm_flat_trie_ptr_builder.add(topic, count);
-
       fm_flat_trie_idx_word_builder.add(topic, count);
+
+      fm_flat_trie_ptr_builder.add(topic, count);
       fm_flat_trie_ptr_word_builder.add(topic, count);
 
       map.emplace(topic, count);
@@ -546,9 +561,13 @@ void TrieLookup::SetUp(const ::benchmark::State & /* st */)
       uo_map.emplace(topic, count);
     }
 
+    flat_trie_idx = flat_trie_idx_builder.create_automaton();
+    flat_trie_ptr = flat_trie_ptr_builder.create_automaton();
     fm_flat_trie_idx = fm_flat_trie_idx_builder.create_automaton();
     fm_flat_trie_ptr = fm_flat_trie_ptr_builder.create_automaton();
 
+    flat_trie_idx_word = flat_trie_idx_word_builder.create_automaton();
+    flat_trie_ptr_word = flat_trie_ptr_word_builder.create_automaton();
     fm_flat_trie_idx_word = fm_flat_trie_idx_word_builder.create_automaton();
     fm_flat_trie_ptr_word = fm_flat_trie_ptr_word_builder.create_automaton();
   }

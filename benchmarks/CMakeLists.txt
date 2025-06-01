@@ -39,6 +39,9 @@ pkg_check_modules(icu IMPORTED_TARGET icu-i18n icu-io icu-uc REQUIRED)
 
 add_executable(benchmark_yy_cpp
   bench_trie.cpp
+  bench_trie_n1.cpp
+  bench_trie_n2.cpp
+  bench_trie_n3.cpp
   bench_radix_trie.cpp
 
   bench_flat_trie.cpp
@@ -47,6 +50,10 @@ add_executable(benchmark_yy_cpp
   bench_fm_trie.cpp
   bench_fm_radix_trie.cpp
 
+  bench_flat_trie_idx.cpp
+  bench_flat_trie_idx_word.cpp
+  bench_flat_trie_ptr.cpp
+  bench_flat_trie_ptr_word.cpp
   bench_fm_flat_trie_idx.cpp
   bench_fm_flat_trie_idx_word.cpp
   bench_fm_flat_trie_ptr.cpp
@@ -62,6 +69,8 @@ add_executable(benchmark_yy_cpp
   bench_trie_lookup.cpp
   bench_bit_twiddling.cpp
   bench_compare_util.cpp
+
+  bench_string_copy.cpp
 
   bench_yy_cpp.cpp )
 

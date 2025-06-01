@@ -54,11 +54,11 @@ target_sources(yy_cpp
     yy_locale.cpp
     yy_string_case.cpp
     yy_string_util.cpp
+    yy_scan_str.cpp
   PUBLIC FILE_SET HEADERS
     FILES
       yy_aho_corasick.h
       yy_arg_traits.h
-      yy_array_traits.h
       yy_assert.h
       yy_atomic_traits.hpp
       yy_atomic_wrapper.hpp
@@ -85,6 +85,7 @@ target_sources(yy_cpp
       yy_fm_subject_observer.h
       yy_fm_trie.h
       yy_fm_trie_node_idx.hpp
+      yy_fm_trie_node_ptr.hpp
       yy_func_traits.h
       yy_hash.h
       yy_init.h
@@ -101,26 +102,29 @@ target_sources(yy_cpp
       yy_range.hpp
       yy_ref_traits.h
       yy_ring_buffer.h
+      yy_scan_str.hpp
       yy_span.h
-      yy_span_traits.h
       yy_static_flat_map.h
       yy_static_vector.h
-      yy_static_vector_traits.hpp
       yy_string_case.h
-      yy_string_traits.h
       yy_string_util.h
       yy_subject_observer.h
       yy_tokenizer.h
+      yy_traits_array.hpp
+      yy_traits_span.hpp
+      yy_traits_std.hpp
+      yy_traits_static_vector.hpp
+      yy_traits_string.hpp
+      yy_traits_vector.hpp
       yy_trie.h
       yy_trie_common.h
       yy_trie_node_idx.hpp
+      yy_trie_node_ptr.hpp
       yy_type_traits.h
-      yy_type_traits_std.hpp
       yy_types.hpp
       yy_utility.h
       yy_variant_util.h
       yy_vector.h
-      yy_vector_traits.h
       yy_vector_util.h
       yy_yaml_util.h )
 
