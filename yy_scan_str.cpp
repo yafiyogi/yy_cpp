@@ -29,7 +29,7 @@
 namespace yafiyogi::yy_util::scan_str_detail {
 
 size_type find_first_of(scan_type p_source,
-                        const scan_type p_chars)
+                        const scan_type p_chars) noexcept
 {
   const char * src = p_source.data();
   size_type str_size = p_source.size();
@@ -47,7 +47,7 @@ size_type find_first_of(scan_type p_source,
 }
 
 size_type find_first_not_of(scan_type p_source,
-                            const scan_type p_chars)
+                            const scan_type p_chars) noexcept
 {
   size_type size = p_source.size();
 
@@ -63,7 +63,7 @@ size_type find_first_not_of(scan_type p_source,
   return p_source.size() - size;
 }
 
-size_type get_width(scan_type & p_format)
+size_type get_width(scan_type & p_format) noexcept
 {
   size_type width = default_width;
   size_type width_width = std::min(max_width_width, p_format.size());
@@ -87,7 +87,7 @@ size_type get_width(scan_type & p_format)
 }
 
 bool scan_leading(scan_type & p_source,
-                  scan_type & p_format)
+                  scan_type & p_format) noexcept
 {
   for(const char src : p_source)
   {
@@ -133,7 +133,7 @@ bool scan_leading(scan_type & p_source,
 }
 
 void scan_span(scan_type & p_source,
-               span_type p_value)
+               span_type p_value) noexcept
 {
   size_type copy_size = std::min(p_value.size() - 1, p_source.size());
 
@@ -145,7 +145,7 @@ void scan_span(scan_type & p_source,
 }
 
 size_type scan_string(scan_type & p_source,
-                      std::string & p_dest)
+                      std::string & p_dest) noexcept
 {
   size_type copy_size = p_source.size();
 

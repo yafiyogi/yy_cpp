@@ -91,10 +91,10 @@ using is_string_param_t = typename is_string_param<T>::type;
 
 
 size_type find_first_of(scan_type p_source,
-                        const scan_type p_chars);
+                        const scan_type p_chars) noexcept;
 
 size_type find_first_not_of(scan_type p_source,
-                            const scan_type p_chars);
+                            const scan_type p_chars) noexcept;
 
 struct capture_type final
 {
@@ -129,19 +129,19 @@ struct capture_type final
     }
 };
 
-size_type get_width(scan_type & p_format);
+size_type get_width(scan_type & p_format) noexcept;
 bool scan_leading(scan_type & p_source,
-                  scan_type & p_format);
+                  scan_type & p_format) noexcept;
 
 void scan_span(scan_type & p_source,
-               span_type p_dest);
+               span_type p_dest) noexcept;
 
 size_type scan_string(scan_type & p_source,
-                      std::string & p_dest);
+                      std::string & p_dest) noexcept;
 
 template<size_type N>
 inline size_type scan_string(scan_type & p_source,
-                             char (&p_dest)[N])
+                             char (&p_dest)[N]) noexcept
 {
   if constexpr (N > 0)
   {
@@ -156,7 +156,7 @@ template<typename T,
          std::enable_if_t<yy_traits::is_vector_v<T>
                           && std::is_same_v<char, typename T::value_type>, bool> = true>
 inline size_type scan_string(scan_type & p_source,
-                             T & p_dest)
+                             T & p_dest) noexcept
 {
   if(p_dest.size() > 0)
   {
@@ -172,7 +172,7 @@ template<typename T,
          std::enable_if_t<yy_traits::is_std_string_view_v<T>
                           || std::is_same_v<const_span_type, T>, bool> = true>
 inline size_type scan_string(scan_type & p_source,
-                             T & p_dest)
+                             T & p_dest) noexcept
 {
   size_type copy_size = p_source.size();
 
@@ -186,7 +186,7 @@ template<typename T,
 inline capture_type scan(scan_type & p_source,
                          scan_type & p_format,
                          width_type & p_width,
-                         T && p_value)
+                         T && p_value) noexcept
 {
   size_type captured = 0;
 
@@ -223,7 +223,7 @@ template<typename T,
 inline capture_type scan(scan_type & p_source,
                          scan_type & p_format,
                          width_type & p_width,
-                         T && p_value)
+                         T && p_value) noexcept
 {
   using int_type = std::remove_reference_t<T>;
   using digits_type = yy_util::Digits<int_type>;
@@ -291,12 +291,12 @@ inline capture_type scan(scan_type & p_source,
 template<typename... Args>
 inline size_type scan_str(scan_str_detail::scan_type p_source,
                           scan_str_detail::scan_type p_format,
-                          Args && ...p_args)
+                          Args && ...p_args) noexcept
 {
   scan_str_detail::width_type l_width;
   scan_str_detail::capture_type captured{};
 
-  (..., (captured && (captured += scan_str_detail::scan(p_source, p_format, l_width, p_args)).more));
+  (..., (captured && (captured += scan_str_detail::scan(p_source, p_format, l_width, p_args))));
 
   return captured.count;
 }
@@ -304,7 +304,7 @@ inline size_type scan_str(scan_str_detail::scan_type p_source,
 template<typename... Args>
 inline size_type scan_str(std::string_view p_source,
                           std::string_view p_format,
-                          Args && ...p_args)
+                          Args && ...p_args) noexcept
 {
   return scan_str(yy_quad::make_const_span(p_source),
                   yy_quad::make_const_span(p_format),
