@@ -32,7 +32,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "yy_cpp/yy_type_traits.h"
-#include "yy_cpp/yy_string_traits.h"
+#include "yy_cpp/yy_traits_string.h"
 
 namespace yafiyogi::yy_util {
 
