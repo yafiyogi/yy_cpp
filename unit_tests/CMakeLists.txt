@@ -36,7 +36,7 @@ find_package(GTest REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yy_test REQUIRED)
 
-pkg_check_modules(icu IMPORTED_TARGET icu-i18n icu-io icu-uc REQUIRED)
+find_package(ICU 77.1 COMPONENTS data i18n io uc REQUIRED)
 
 add_executable(test_yy_cpp
   binary_search_tests.cpp
@@ -110,7 +110,11 @@ target_link_libraries(test_yy_cpp
   fmt::fmt
   spdlog::spdlog
   GTest::gtest
-  GTest::gtest_main)
+  GTest::gtest_main
+  ICU::i18n
+  ICU::io
+  ICU::uc
+  ICU::data)
 
 # Test target
 add_custom_target(test
