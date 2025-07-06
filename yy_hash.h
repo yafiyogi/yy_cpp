@@ -42,28 +42,21 @@ constexpr size_type hash_combine(size_type & seed, const T & val) noexcept
   return seed;
 }
 
-template <typename T, typename... RestTypes>
-constexpr size_type hash_combine(size_type& seed,
-                                 const T& val,
-                                 const RestTypes & ...rest_args) noexcept
+template <typename... Args>
+constexpr size_type hash_combine(size_type & seed,
+                                 const Args & ...args) noexcept
 {
-  hash_combine(seed, val);
-  (..., hash_combine(seed, rest_args));
+  (..., hash_combine(seed, args));
 
-  return seed;
-}
-
-constexpr size_type hash_combine(size_type & seed) noexcept
-{
   return seed;
 }
 
 template <typename... Types>
-constexpr size_type hash_val(const Types&... args) noexcept
+constexpr size_type hash_val(const Types &... args) noexcept
 {
   size_type seed = 0;
 
-  return hash_combine(seed, args...);
+  return hash_combine(seed, args);
 }
 
 } // namespace yafiyogi::yy_data

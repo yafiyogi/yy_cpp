@@ -33,10 +33,8 @@
 namespace yafiyogi::yy_util {
 
 template<typename T>
-inline size_type hash_combine<std::optional<T>(size_type & seed, const std::optional<T> & v)
+inline size_type hash_combine<std::optional<T>>(size_type & seed, const std::optional<T> & v)
 {
-  Std::hash<T> hasher;
-
   bool has_value = v.has_value();
 
   hash_combine(seed, has_value);
