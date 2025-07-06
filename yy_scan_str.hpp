@@ -47,14 +47,17 @@ using span_type = yy_quad::span<char>;
 using const_span_type = yy_quad::const_span<char>;
 using width_type = std::optional<size_type>;
 
-inline constexpr const size_type default_width = 9999;
-inline constexpr const size_type max_width_width = 4;
+constexpr inline const size_type default_width = 9999;
+constexpr inline const size_type max_width_width = 4;
 
-inline constexpr const char g_digits_raw[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-inline constexpr const scan_type g_digits{yy_quad::make_const_span(g_digits_raw)};
+constexpr inline const char g_digits_raw[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+constexpr inline const scan_type g_digits{yy_quad::make_const_span(g_digits_raw)};
 
-static constexpr const char g_whitespace_raw[] = {'\000', ' ', '\t', '\n'};
-static constexpr const scan_type g_whitespace{yy_quad::make_const_span(g_whitespace_raw)};
+constexpr inline const char g_whitespace_raw[] = {'\000', ' ', '\t', '\n'};
+constexpr inline const scan_type g_whitespace{yy_quad::make_const_span(g_whitespace_raw)};
+
+template<typename T>
+constexpr inline bool is_char_array_v = std::is_array_v<T> && std::is_same_v<char, std::remove_all_extents_t<T>>;
 
 template<typename T,
          typename Enable = void>
@@ -66,7 +69,7 @@ struct is_string_param_traits:
 template<typename T>
 struct is_string_param_traits<T,
                               std::enable_if_t<(yy_traits::is_vector_v<T>
-                                                && std::is_same_v<char, typename T::value_type>)
+                                                  && std::is_same_v<char, typename T::value_type>)
                                                || yy_traits::is_std_string_v<T>
                                                || yy_traits::is_std_string_view_v<T>
                                                || std::is_same_v<const_span_type, T>>>:
@@ -74,8 +77,9 @@ struct is_string_param_traits<T,
 {
 };
 
-template<size_type N>
-struct is_string_param_traits<char[N]>:
+template<typename T>
+struct is_string_param_traits<T,
+                              std::enable_if_t<is_char_array_v<T>>>:
       std::true_type
 {
 };
@@ -296,7 +300,7 @@ inline size_type scan_str(scan_str_detail::scan_type p_source,
   scan_str_detail::width_type l_width;
   scan_str_detail::capture_type captured{};
 
-  (..., (captured && (captured += scan_str_detail::scan(p_source, p_format, l_width, p_args))));
+  ((captured && (captured += scan_str_detail::scan(p_source, p_format, l_width, p_args))), ...);
 
   return captured.count;
 }
