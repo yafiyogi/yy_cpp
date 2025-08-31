@@ -283,6 +283,7 @@ inline capture_type scan(scan_type & p_source,
             return capture_type{1, true};
           }
         }
+        break;
       }
     }
   }
