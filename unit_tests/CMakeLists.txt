@@ -33,10 +33,11 @@ include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
 find_package(Boost CONFIG 1.84.0 REQUIRED COMPONENTS locale)
 find_package(fmt REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Iconv REQUIRED)
+find_package(ICU 77.1 COMPONENTS data i18n io uc REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yy_test REQUIRED)
 
-find_package(ICU 77.1 COMPONENTS data i18n io uc REQUIRED)
 
 add_executable(test_yy_cpp
   binary_search_tests.cpp
@@ -101,9 +102,10 @@ target_include_directories(test_yy_cpp
 
 target_link_directories(test_yy_cpp
   PUBLIC
+    "${YY_THIRD_PARTY_LIBRARY}/lib"
     "/opt/local/lib")
 
-target_link_directories(test_yy_cpp BEFORE PRIVATE ${YY_THIRD_PARTY_LIBRARY}/lib)
+#target_link_directories(test_yy_cpp BEFORE PRIVATE ${YY_THIRD_PARTY_LIBRARY}/lib)
 
 target_link_libraries(test_yy_cpp
   yy_cpp
@@ -116,7 +118,8 @@ target_link_libraries(test_yy_cpp
   ICU::i18n
   ICU::io
   ICU::uc
-  ICU::data)
+  ICU::data
+  Iconv::Iconv)
 
 # Test target
 add_custom_target(test
