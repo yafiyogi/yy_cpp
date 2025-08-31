@@ -722,7 +722,7 @@ template<typename T,
          std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
 constexpr auto make_span(T p_sv)
 {
-  static_assert(false, "Can't create a 'span<>' from std::string_view!");
+  static_assert(!yy_traits::is_std_string_view_v<T>, "Can't create a 'span<>' from std::string_view!");
   //return typename span_traits_helper<T>::const_span_type{p_sv.data(), p_sv.size()};
 }
 
@@ -731,7 +731,8 @@ template<typename T,
                           && yy_traits::is_c_string_v<T>, bool> = true>
 constexpr auto make_span(T /* p_str */)
 {
-  static_assert(false, "Can't create a 'span<>' from 'char *' or 'char[]'!");
+  static_assert(std::is_array_v<T>
+                || !yy_traits::is_c_string_v<T>, "Can't create a 'span<>' from 'char *' or 'char[]'!");
   // std::string_view str{p_str};
   // return make_span(str);
 }
