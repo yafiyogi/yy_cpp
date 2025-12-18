@@ -33,9 +33,9 @@ include(${YY_CMAKE}/cmake_boost-1.84.0.txt)
 find_package(Boost CONFIG 1.84.0 REQUIRED COMPONENTS locale)
 find_package(benchmark REQUIRED)
 find_package(fmt REQUIRED)
+find_package(ICU 77.1 COMPONENTS data i18n io uc REQUIRED)
+find_package(Iconv REQUIRED)
 find_package(spdlog REQUIRED)
-
-pkg_check_modules(icu IMPORTED_TARGET icu-i18n icu-io icu-uc REQUIRED)
 
 add_executable(benchmark_yy_cpp
   bench_trie.cpp
@@ -84,7 +84,7 @@ target_include_directories(benchmark_yy_cpp
   SYSTEM PRIVATE
     "${YY_THIRD_PARTY_LIBRARY}/include" )
 
-target_compile_options(yy_cpp
+target_compile_options(benchmark_yy_cpp
   PRIVATE
     "-DSPDLOG_COMPILED_LIB"
     "-DSPDLOG_FMT_EXTERNAL")
@@ -101,8 +101,11 @@ target_link_libraries(benchmark_yy_cpp
   spdlog::spdlog
   benchmark::benchmark
   #profiler
-  )
-
+  ICU::i18n
+  ICU::io
+  ICU::uc
+  ICU::data
+  Iconv::Iconv)
 
 # Test target
 add_custom_target(benchmark

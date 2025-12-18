@@ -148,4 +148,4 @@ add_subdirectory(unit_tests)
 add_subdirectory(examples)
 add_subdirectory(benchmarks)
 
-add_yy_tidy_all(yy_cpp)
+add_yy_tidy_targets(yy_cpp)
