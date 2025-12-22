@@ -1,26 +1,26 @@
 #
 #
-#  MIT License
+# MIT License
 #
-#  Copyright (c) 2024-2025 Yafiyogi
+# Copyright(c) 2024 - 2025 Yafiyogi
 #
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files(the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/ or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 #
 #
 
@@ -37,7 +37,6 @@ find_package(Iconv REQUIRED)
 find_package(ICU 77.1 COMPONENTS data i18n io uc REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yy_test REQUIRED)
-
 
 add_executable(test_yy_cpp
   binary_search_tests.cpp
@@ -82,7 +81,8 @@ add_executable(test_yy_cpp
   fm_flat_trie_idx_word_tests.cpp
   fm_flat_trie_ptr_tests.cpp
   fm_flat_trie_ptr_word_tests.cpp
-)
+
+  utf8_tests.cpp)
 
 add_dependencies(test_yy_cpp yy_cpp)
 
@@ -94,18 +94,19 @@ target_compile_options(test_yy_cpp
 target_include_directories(test_yy_cpp
   PRIVATE
     "${PROJECT_SOURCE_DIR}/.."
-    "${CMAKE_INSTALL_PREFIX}/include" )
+    "${CMAKE_INSTALL_PREFIX}/include")
 
 target_include_directories(test_yy_cpp
-  SYSTEM PRIVATE
-    "${YY_THIRD_PARTY_LIBRARY}/include" )
+  SYSTEM
+    PRIVATE
+      "${YY_THIRD_PARTY_LIBRARY}/include")
 
 target_link_directories(test_yy_cpp
   PUBLIC
     "${YY_THIRD_PARTY_LIBRARY}/lib"
     "/opt/local/lib")
 
-#target_link_directories(test_yy_cpp BEFORE PRIVATE ${YY_THIRD_PARTY_LIBRARY}/lib)
+#target_link_directories(test_yy_cpp BEFORE PRIVATE ${YY_THIRD_PARTY_LIBRARY} /lib)
 
 target_link_libraries(test_yy_cpp
   yy_cpp
@@ -121,7 +122,7 @@ target_link_libraries(test_yy_cpp
   ICU::data
   Iconv::Iconv)
 
-# Test target
+#Test target
 add_custom_target(test
   COMMAND
     ./test_yy_cpp)
