@@ -34,8 +34,10 @@
 namespace yafiyogi::yy_util {
 namespace tokenizer_detail {
 
+enum class ScanType { SkipBlank, All};
+
 template<typename T>
-class traits final
+struct traits final
 {
   public:
     using value_type = yy_traits::remove_cvr_t<T>;
@@ -45,32 +47,12 @@ class traits final
     using token_type = yy_quad::const_span<value_type>;
 };
 
-} // namespace tokenizer_detail
-
 template<typename T,
          T t_delim,
          typename Enable = void>
-class tokenizer
+struct default_scanner final
 {
-  public:
-    using traits = tokenizer_detail::traits<T>;
-    using value_type = typename traits::value_type;
-    using const_value_ptr = typename traits::const_value_ptr;
-    using const_l_value_ref = typename traits::const_l_value_ref;
-    using token_type = typename traits::token_type;
-
-    constexpr explicit tokenizer(token_type p_source) noexcept:
-      m_source(p_source),
-      m_token(p_source.begin(), p_source.begin())
-    {
-    }
-
-    constexpr tokenizer() noexcept = default;
-    constexpr tokenizer(const tokenizer &) noexcept = default;
-    constexpr tokenizer(tokenizer &&) noexcept = default;
-
-    constexpr tokenizer & operator=(const tokenizer &) noexcept = default;
-    constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
+    using token_type = typename traits<T>::token_type;
 
     [[nodiscard]]
     static constexpr token_type scan(const token_type p_source) noexcept
@@ -80,76 +62,18 @@ class tokenizer
 
       return token_type{source_begin, token_end};
     }
-
-    [[nodiscard]]
-    constexpr token_type scan() noexcept
-    {
-      m_token = scan(m_source);
-      m_source = token_type{m_token.end(), m_source.end()};
-      m_source.inc_begin();
-
-      return token();
-    }
-
-    [[nodiscard]]
-    constexpr token_type token() const noexcept
-    {
-      return m_token;
-    }
-
-    [[nodiscard]]
-    constexpr bool has_more() const noexcept
-    {
-      return m_token.end() != m_source.end();
-    }
-
-    [[nodiscard]]
-    constexpr bool empty() const noexcept
-    {
-      return m_source.empty();
-    }
-
-    [[nodiscard]]
-    constexpr token_type source() const noexcept
-    {
-      return m_source;
-    }
-
-    static constexpr value_type delim = t_delim;
-
-  private:
-    token_type m_source{};
-    token_type m_token{};
 };
 
 template<typename T,
          T t_delim>
-class tokenizer<T,
-                t_delim,
-                std::enable_if_t<std::is_same_v<char, yy_traits::remove_cvr_t<T>>
-                                 || std::is_same_v<char8_t, yy_traits::remove_cvr_t<T>>>>
+struct default_scanner<T,
+                       t_delim,
+                       std::enable_if_t<yy_traits::is_char_type<T>>> final
 {
-  public:
-    using traits = tokenizer_detail::traits<char>;
-    using value_type = typename traits::value_type;
-    using value_ptr = typename traits::value_ptr;
-    using const_value_ptr = typename traits::const_value_ptr;
-    using const_l_value_ref = typename traits::const_l_value_ref;
-    using token_type = typename traits::token_type;
+    using token_type = typename traits<T>::token_type;
+    using const_value_ptr = typename traits<T>::const_value_ptr;
+    using value_type = typename traits<T>::value_type;
     using char_traits = std::char_traits<value_type>;
-
-    constexpr explicit tokenizer(token_type p_source) noexcept:
-      m_source(p_source),
-      m_token(p_source.begin(), p_source.begin())
-    {
-    }
-
-    constexpr tokenizer() noexcept = default;
-    constexpr tokenizer(const tokenizer &) noexcept = default;
-    constexpr tokenizer(tokenizer &&) noexcept = default;
-
-    constexpr tokenizer & operator=(const tokenizer &) noexcept = default;
-    constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
 
     [[nodiscard]]
     static constexpr token_type scan(const token_type p_source) noexcept
@@ -165,15 +89,54 @@ class tokenizer<T,
 
       return token_type{l_source_begin, token_end};
     }
+};
+
+template<typename T,
+         T t_delim,
+         ScanType t_scan_type,
+         typename Scanner = default_scanner<T, t_delim>>
+class tokenizer
+{
+  public:
+    using tokenizer_traits = traits<T>;
+    using value_type = typename tokenizer_traits::value_type;
+    using const_value_ptr = typename tokenizer_traits::const_value_ptr;
+    using const_l_value_ref = typename tokenizer_traits::const_l_value_ref;
+    using token_type = typename tokenizer_traits::token_type;
+    using scanner = Scanner;
+
+    constexpr explicit tokenizer(token_type p_source) noexcept:
+      m_source(p_source),
+      m_token(p_source.begin(), p_source.begin())
+    {
+    }
+
+    constexpr tokenizer() noexcept = default;
+    constexpr tokenizer(const tokenizer &) noexcept = default;
+    constexpr tokenizer(tokenizer &&) noexcept = default;
+
+    constexpr tokenizer & operator=(const tokenizer &) noexcept = default;
+    constexpr tokenizer & operator=(tokenizer &&) noexcept = default;
 
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      m_token = scan(m_source);
-      m_source = token_type{m_token.end(), m_source.end()};
-      m_source.inc_begin();
+      do_scan();
 
-      return token();
+      if constexpr (ScanType::SkipBlank == t_scan_type)
+      {
+        while(m_token.empty())
+        {
+          if(!has_more())
+          {
+            break;
+          }
+
+          do_scan();
+        }
+      }
+
+      return m_token;
     }
 
     [[nodiscard]]
@@ -203,32 +166,51 @@ class tokenizer<T,
     static constexpr value_type delim = t_delim;
 
   private:
+    void do_scan()
+    {
+      m_token = Scanner::scan(m_source);
+      m_source = token_type{m_token.end(), m_source.end()};
+      m_source.inc_begin();
+    }
+
     token_type m_source{};
     token_type m_token{};
 };
 
 template<typename T,
-         T t_delim>
+         T t_delim,
+         ScanType t_scan_type,
+         typename Scanner = default_scanner<T, t_delim>,
+         typename Base = tokenizer<T, t_delim, t_scan_type, Scanner>>
 class tokenizer_first:
-      public tokenizer<T, t_delim>
+      public Base
 {
   public:
-    using traits = tokenizer_detail::traits<char>;
-    using value_type = typename traits::value_type;
-    using const_l_value_ref = typename traits::const_l_value_ref;
-    using token_type = typename traits::token_type;
-    using base = tokenizer<T, t_delim>;
+    using base_traits = Base::tokenizer_traits;
+    using value_type = typename base_traits::value_type;
+    using const_l_value_ref = typename base_traits::const_l_value_ref;
+    using token_type = typename base_traits::token_type;
 
     constexpr explicit tokenizer_first(token_type p_source) noexcept:
-      base(p_source)
+      Base(p_source)
     {
-      if(auto src{base::source()};
+      if(auto src{Base::source()};
          !src.empty() && (t_delim == src[0]))
       {
         // Remove delim at begining if present.
-        std::ignore = base::scan();
+        std::ignore = Base::scan();
       }
     }
 };
+
+} // namespace tokenizer_detail
+
+template<typename T,
+         T t_delim>
+using tokenizer = tokenizer_detail::tokenizer<T, t_delim, tokenizer_detail::ScanType::All>;
+
+template<typename T,
+         T t_delim>
+using tokenizer_first = tokenizer_detail::tokenizer_first<T, t_delim, tokenizer_detail::ScanType::All>;
 
 } // namespace yafiyogi::yy_util
