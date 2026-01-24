@@ -26,18 +26,20 @@
 
 #pragma once
 
-#include "yy_types.hpp"
 #include "yy_span.h"
 #include "yy_traits_string.hpp"
+#include "yy_types.hpp"
 
 namespace yafiyogi::yy_util {
 
 template<typename SpanType,
          typename span_type = yy_traits::remove_cvr_t<SpanType>,
          std::enable_if_t<yy_traits::is_span_v<span_type>
-                          || yy_traits::is_std_string_v<span_type>
-                          || yy_traits::is_std_string_view_v<span_type>, bool> = true>
-inline span_type skip_not_char(const span_type src, const typename span_type::value_type c)
+                            || yy_traits::is_std_string_v<span_type>
+                            || yy_traits::is_std_string_view_v<span_type>,
+                          bool> = true>
+inline span_type skip_not_char(const span_type src,
+                               const typename span_type::value_type c)
 {
   const char * src_data = src.data();
   size_type src_size = src.size();
@@ -67,13 +69,14 @@ inline const T * skip_not_char(const T * begin, const T * end, T c)
   return skip_not_char(yy_quad::const_span<T>(begin, end), c).data();
 }
 
-
 template<typename SpanType,
          typename span_type = yy_traits::remove_cvr_t<SpanType>,
          std::enable_if_t<yy_traits::is_span_v<span_type>
-                          || yy_traits::is_std_string_v<span_type>
-                          || yy_traits::is_std_string_view_v<span_type>, bool> = true>
-inline span_type skip_char(const span_type src, typename span_type::value_type c)
+                            || yy_traits::is_std_string_v<span_type>
+                            || yy_traits::is_std_string_view_v<span_type>,
+                          bool> = true>
+inline span_type skip_char(const span_type src,
+                           typename span_type::value_type c)
 {
   const char * src_data = src.data();
   size_type src_size = src.size();
