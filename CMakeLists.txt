@@ -55,7 +55,6 @@ target_sources(yy_cpp
     yy_string_case.cpp
     yy_string_util.cpp
     yy_scan_str.cpp
-    yy_utf8.cpp
   PUBLIC FILE_SET HEADERS
     FILES
       yy_aho_corasick.h
