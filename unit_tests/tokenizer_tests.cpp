@@ -24,7 +24,6 @@
 
 */
 
-
 #include "gtest/gtest.h"
 
 #include "yy_tokenizer.h"
@@ -42,13 +41,14 @@ class TestTokenizer:
     void TearDown() override
     {
     }
+
     static constexpr char delim{'/'};
 };
 
 TEST_F(TestTokenizer, TokenizeEmpty)
 {
   std::string_view str{};
-  yy_util::tokenizer<std::string_view::value_type,delim> tokenizer{yy_quad::make_const_span(str)};
+  yy_util::tokenizer<std::string_view::value_type, delim> tokenizer{yy_quad::make_const_span(str)};
   auto span = tokenizer.scan();
   EXPECT_TRUE(tokenizer.empty());
   EXPECT_TRUE(span.empty());
@@ -56,27 +56,52 @@ TEST_F(TestTokenizer, TokenizeEmpty)
   EXPECT_EQ(span, std::string_view{""});
 }
 
-TEST_F(TestTokenizer, TokenizeSimple)
+TEST_F(TestTokenizer, TokenizeAllSimple)
 {
   std::string_view str{"/abc"};
-  yy_util::tokenizer<std::string_view::value_type,delim> tokenizer{yy_quad::make_const_span(str)};
-  yy_quad::const_span<char> span{tokenizer.scan()};
+  yy_util::tokenizer<std::string_view::value_type, delim> tokenizer{yy_quad::make_const_span(str)};
+  yy_quad::const_span<char> token{tokenizer.scan()};
   EXPECT_FALSE(tokenizer.empty());
-  EXPECT_TRUE(span.empty());
-  EXPECT_EQ(span.size(), 0);
-  EXPECT_EQ(span, std::string_view{""});
+  EXPECT_TRUE(token.empty());
+  EXPECT_EQ(token.size(), 0);
+  EXPECT_EQ(token, std::string_view{""});
 
-  span = tokenizer.scan();
+  token = tokenizer.scan();
   EXPECT_TRUE(tokenizer.empty());
-  EXPECT_FALSE(span.empty());
-  EXPECT_EQ(span.size(), 3);
-  EXPECT_EQ(span, std::string_view{"abc"});
+  EXPECT_FALSE(token.empty());
+  EXPECT_EQ(token.size(), 3);
+  EXPECT_EQ(token, std::string_view{"abc"});
 
-  span = tokenizer.scan();
+  token = tokenizer.scan();
   EXPECT_TRUE(tokenizer.empty());
-  EXPECT_TRUE(span.empty());
-  EXPECT_EQ(span.size(), 0);
-  EXPECT_EQ(span, std::string_view{""});
+  EXPECT_TRUE(token.empty());
+  EXPECT_EQ(token.size(), 0);
+  EXPECT_EQ(token, std::string_view{""});
 }
 
+TEST_F(TestTokenizer, TokenizeSkipBlankSimple)
+{
+  std::string_view str{"/abc///def"};
+  yy_util::tokenizer_detail::
+    tokenizer<std::string_view::value_type, delim, yy_util::tokenizer_detail::ScanType::SkipBlank>
+      tokenizer{yy_quad::make_const_span(str)};
+  yy_quad::const_span<char> token{tokenizer.scan()};
+  EXPECT_FALSE(tokenizer.empty());
+  EXPECT_TRUE(token.empty());
+  EXPECT_EQ(token.size(), 0);
+  EXPECT_EQ(token, std::string_view{""});
+
+  token = tokenizer.scan();
+  EXPECT_FALSE(tokenizer.empty());
+  EXPECT_FALSE(token.empty());
+  EXPECT_EQ(token.size(), 3);
+  EXPECT_EQ(token, std::string_view{"abc"});
+
+  token = tokenizer.scan();
+  EXPECT_TRUE(tokenizer.empty());
+  EXPECT_FALSE(token.empty());
+  EXPECT_EQ(token.size(), 3);
+  EXPECT_EQ(token, std::string_view{"def"});
 }
+
+} // namespace yafiyogi::yy_cpp::tests
