@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <string_view>
 
+#include "yy_types.hpp"
+
 namespace yafiyogi::yy_util {
 namespace utf8_detail {
 
@@ -49,9 +51,9 @@ constexpr char utf8_4_mask = static_cast<char>(0xF8);
 
 } // namespace utf8_detail
 
-inline size_t utf8_len(const char ch) noexcept
+inline size_type utf8_len(const char ch) noexcept
 {
-  size_t size = (utf8_detail::utf8_bits & ch) == 0;
+  size_type size = (utf8_detail::utf8_bits & ch) == 0;
 
   if((utf8_detail::utf8_start_mask & ch) == utf8_detail::utf8_start)
   {
@@ -65,9 +67,20 @@ inline size_t utf8_len(const char ch) noexcept
   return size;
 }
 
-std::string_view find(std::string_view sv, std::string_view delim) noexcept;
-std::string_view find_first_of(std::string_view sv,
-                               std::string_view delim) noexcept;
-size_t utf8_find_last(std::string_view sv) noexcept;
+struct utf8_result final
+{
+    size_type pos{};
+    size_type size{};
+
+    bool operator==(const utf8_result & other) const noexcept
+    {
+      return std::tie(pos, size) == std::tie(other.pos, other.size);
+    }
+};
+
+utf8_result utf8_find(std::string_view sv, std::string_view delim) noexcept;
+utf8_result utf8_find_first_of(std::string_view sv, std::string_view delim) noexcept;
+utf8_result
+utf8_find_last_ch(std::string_view sv) noexcept; // Find start of last utf8 multi byte char
 
 } // namespace yafiyogi::yy_util

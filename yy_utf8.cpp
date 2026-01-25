@@ -29,10 +29,11 @@
 namespace yafiyogi::yy_util {
 namespace {
 
-inline bool match_ch(std::string_view ch, std::string_view delim) noexcept
+inline bool match_ch(std::string_view ch,
+                     std::string_view delim) noexcept
 {
   const char * delim_data = delim.data();
-  const size_t delim_size = delim.size();
+  const size_type delim_size = delim.size();
   const char * ch_data = ch.data();
   bool found = ch.size() == delim_size;
 
@@ -58,27 +59,29 @@ inline bool match_ch(std::string_view ch, std::string_view delim) noexcept
   return found;
 }
 
-bool find_ch(std::string_view ch, std::string_view delim) noexcept
+bool find_ch(std::string_view ch,
+             std::string_view delim) noexcept
 {
-  const char * delim_data = delim.data();
-  const char * delim_end = delim_data + delim.size();
-  size_t delim_len;
+  const char * data = delim.data();
+  size_type size = delim.size();
+  size_type delim_len;
 
-  while(delim_data != delim_end)
+  while(size != 0)
   {
-    delim_len = utf8_len(*delim_data);
+    delim_len = utf8_len(*data);
 
-    if(delim_len > static_cast<size_t>(delim_end - delim_data))
+    if((delim_len == 0) || (delim_len > size))
     {
       return false;
     }
 
-    if(match_ch(ch, std::string_view{delim_data, delim_len}))
+    if(match_ch(ch, std::string_view{data, delim_len}))
     {
       return true;
     }
 
-    delim_data += delim_len;
+    data += delim_len;
+    size -= delim_len;
   }
 
   return false;
@@ -86,55 +89,57 @@ bool find_ch(std::string_view ch, std::string_view delim) noexcept
 
 } // anonymous namespace
 
-std::string_view find(std::string_view sv, std::string_view delim) noexcept
+utf8_result utf8_find(std::string_view sv,
+                      std::string_view delim) noexcept
 {
   const char * data = sv.data();
+  size_type data_size = sv.size();
+  const char * data_new;
   const char * end = data + sv.size();
-  size_t size;
-  std::string_view ch;
-  size_t ch_size;
+  const char * delim_data = delim.data();
+  size_type ch_size{};
 
-  while(data != end)
+  while(data_size != 0)
   {
-    size = static_cast<size_t>(end - data);
-    data = std::char_traits<char>::find(data, size, *data);
+    data_new = std::char_traits<char>::find(data, data_size, *delim_data);
 
-    if(!data)
+    if(nullptr == data_new)
     {
       break;
     }
 
-    ch_size = utf8_len(*data);
+    ch_size = utf8_len(*data_new);
 
-    if(ch_size > size)
+    if((0 == ch_size) || (ch_size > static_cast<size_type>(end - data_new)))
     {
       break;
     }
 
-    ch = std::string_view{data, ch_size};
-    if(match_ch(ch, delim))
+    if(match_ch(std::string_view{data_new, ch_size}, delim))
     {
-      return ch;
+      return utf8_result{static_cast<size_type>(data_new - data), ch_size};
     }
 
-    data += ch_size;
+    data = data_new + ch_size;
+    data_size -= ch_size;
   }
 
-  return std::string_view{end, 0};
+  return utf8_result{sv.size(), 0};
 }
 
-std::string_view find_first_of(std::string_view sv, std::string_view delim) noexcept
+utf8_result utf8_find_first_of(std::string_view sv,
+                               std::string_view delim) noexcept
 {
   const char * data = sv.data();
-  const char * end = data + sv.size();
+  size_type size = sv.size();
   std::string_view ch;
-  size_t ch_size;
+  size_type ch_size{};
 
-  while(data != end)
+  while(size != 0)
   {
     ch_size = utf8_len(*data);
 
-    if(ch_size > static_cast<size_t>(end - data))
+    if((ch_size == 0) || (ch_size > size))
     {
       break;
     }
@@ -143,36 +148,41 @@ std::string_view find_first_of(std::string_view sv, std::string_view delim) noex
 
     if(find_ch(ch, delim))
     {
-      return ch;
+      return utf8_result{sv.size() - size, ch_size};
     }
+
     data += ch_size;
+    size -= ch_size;
   }
 
-  return std::string_view{end, 0};
+  return utf8_result{sv.size(), ch_size};
 }
 
-size_t utf8_find_last(std::string_view sv) noexcept
+utf8_result utf8_find_last_ch(std::string_view sv) noexcept
 {
   if(sv.empty())
   {
-    return std::string_view::npos;
+    return yy_util::utf8_result{sv.size(), 0};
   }
 
-  const char * start = sv.data();
-  const char * data = start + sv.size();
-  char ch{};
+  size_type size = sv.size();
+  const char * data = sv.begin() + size;
+  char ch;
 
-  while(data-- != start)
+  while(size != 0)
   {
+    --size;
+    --data;
+
     ch = *data;
-    if (((ch & utf8_detail::utf8_bits_mask) != utf8_detail::utf8_bits)
-        || ((ch & utf8_detail::utf8_start_mask) == utf8_detail::utf8_start))
+    if(((ch & utf8_detail::utf8_bits_mask) != utf8_detail::utf8_bits)
+       || ((ch & utf8_detail::utf8_start_mask) == utf8_detail::utf8_start))
     {
-      return static_cast<size_t>(data - start);
+      return utf8_result{size, utf8_len(*data)};
     }
   }
 
-  return std::string_view::npos;
+  return utf8_result{sv.size(), 0};
 }
 
 } // namespace yafiyogi::yy_util

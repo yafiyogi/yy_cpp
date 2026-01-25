@@ -42,8 +42,7 @@ constexpr std::string_view utf8_3_end{"\xEf\xBf\xBf"};
 constexpr std::string_view utf8_4_start{"\xF1\x80\x80\x80"};
 constexpr std::string_view utf8_4_end{"\xF4\xBf\xBf\xBf"};
 
-class TestUTF8:
-      public testing::Test
+class TestUTF8: public testing::Test
 {
   public:
     void SetUp() override
@@ -67,16 +66,26 @@ TEST_F(TestUTF8, test_utf8_len)
   EXPECT_EQ(yy_util::utf8_len(utf8_4_end[0]), 4);
 }
 
-TEST_F(TestUTF8, test_utf8_find_last)
+TEST_F(TestUTF8, test_utf8_find)
 {
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_1_start), std::string_view::npos);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_1_end), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_2_start), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_2_end), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_3_start), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_3_end), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_4_start), 0);
-  EXPECT_EQ(yy_util::utf8_find_last(utf8_4_end), 0);
+  std::string_view delim{"\xC2\x80"};
+  std::string_view str{"12345\xC2\x80"
+                       "6789"};
+
+  EXPECT_EQ(yy_util::utf8_find(str, delim), (yy_util::utf8_result{5, 2}));
+}
+
+TEST_F(TestUTF8, test_utf8_find_last_ch)
+{
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_1_start),
+            (yy_util::utf8_result{utf8_1_start.size(), 0}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_1_end), (yy_util::utf8_result{0, 1}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_2_start), (yy_util::utf8_result{0, 2}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_2_end), (yy_util::utf8_result{0, 2}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_3_start), (yy_util::utf8_result{0, 3}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_3_end), (yy_util::utf8_result{0, 3}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_4_start), (yy_util::utf8_result{0, 4}));
+  EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_4_end), (yy_util::utf8_result{0, 4}));
 }
 
 } // namespace yafiyogi::yy_data::tests
