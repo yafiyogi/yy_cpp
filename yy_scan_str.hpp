@@ -50,7 +50,7 @@ using width_type = std::optional<size_type>;
 constexpr inline const size_type default_width = 9999;
 constexpr inline const size_type max_width_width = 4;
 
-constexpr inline const char g_digits_raw[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+constexpr inline const char g_digits_raw[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 constexpr inline const scan_type g_digits{yy_quad::make_const_span(g_digits_raw)};
 
 constexpr inline const char g_whitespace_raw[] = {'\000', ' ', '\t', '\n'};
@@ -68,10 +68,8 @@ struct is_string_param_traits:
 
 template<typename T>
 struct is_string_param_traits<T,
-                              std::enable_if_t<(yy_traits::is_vector_v<T>
-                                                  && std::is_same_v<char, typename T::value_type>)
-                                               || yy_traits::is_std_string_v<T>
-                                               || yy_traits::is_std_string_view_v<T>
+                              std::enable_if_t<(yy_traits::is_vector_v<T> && std::is_same_v<char, typename T::value_type>)
+                                               || yy_traits::is_std_string_v<T> || yy_traits::is_std_string_view_v<T>
                                                || std::is_same_v<const_span_type, T>>>:
       std::true_type
 {
@@ -93,7 +91,6 @@ inline constexpr bool is_string_param_v = is_string_param<T>::value;
 template<typename T>
 using is_string_param_t = typename is_string_param<T>::type;
 
-
 size_type find_first_of(scan_type p_source,
                         const scan_type p_chars) noexcept;
 
@@ -106,7 +103,7 @@ struct capture_type final
     bool more = true;
 
     constexpr capture_type(size_type p_count,
-                           bool p_more) noexcept:
+                           bool p_more) noexcept :
       count(p_count),
       more(p_more)
     {
@@ -114,10 +111,10 @@ struct capture_type final
 
     constexpr capture_type() noexcept = default;
     constexpr capture_type(const capture_type &) noexcept = default;
-    constexpr capture_type(capture_type && ) noexcept = default;
+    constexpr capture_type(capture_type &&) noexcept = default;
 
     capture_type & operator=(const capture_type &) = delete;
-    capture_type & operator=(capture_type && ) = delete;
+    capture_type & operator=(capture_type &&) = delete;
 
     constexpr operator bool() const noexcept
     {
@@ -129,7 +126,7 @@ struct capture_type final
       count += p_other.count;
       more = more && p_other.more;
 
-      return * this;
+      return *this;
     }
 };
 
@@ -147,7 +144,7 @@ template<size_type N>
 inline size_type scan_string(scan_type & p_source,
                              char (&p_dest)[N]) noexcept
 {
-  if constexpr (N > 0)
+  if constexpr(N > 0)
   {
     scan_span(p_source, yy_quad::make_span(p_dest));
     return 1;
@@ -238,52 +235,54 @@ inline capture_type scan(scan_type & p_source,
     if(!p_format.empty()
        && !p_source.empty())
     {
-      size_type width{p_width.has_value() ? p_width.value() : std::min(digits_type::digits, get_width(p_format))};
+      size_type width{p_width.has_value() ? p_width.value()
+                                          : std::min(digits_type::digits, get_width(p_format))};
       p_width.reset();
 
       switch(p_format[0])
       {
-        case '*':
-          // Consume '*'.
-          p_format.inc_begin();
-          p_width = std::min(max_width_width, static_cast<width_type::value_type>(p_value));
-          return capture_type{0, true};
+      case '*':
+        // Consume '*'.
+        p_format.inc_begin();
+        p_width = std::min(max_width_width, static_cast<width_type::value_type>(p_value));
+        return capture_type{0, true};
 
-        case 'd':
+      case 'd':
+      {
+        // Consume 'd'.
+        p_format.inc_begin();
+        const bool is_negative = '-' == p_source[0];
+        if(!std::numeric_limits<int_type>::is_signed
+           && is_negative)
         {
-          // Consume 'd'.
-          p_format.inc_begin();
-          const bool is_negative = '-' == p_source[0];
-          if(!std::numeric_limits<int_type>::is_signed && is_negative)
-          {
-            // Early exit.
-            return capture_type{0, false};
-          }
+          // Early exit.
+          return capture_type{0, false};
+        }
 
+        if(is_negative)
+        {
+          p_source.inc_begin();
+        }
+
+        width = find_first_of(p_source.subspan(0, width), g_whitespace);
+        scan_type l_source{p_source.data(), width};
+
+        width = find_first_not_of(l_source, g_digits);
+        l_source = scan_type{l_source.data(), width};
+
+        if(auto [l_value, l_valid] = fast_atoi<int_type>::convert(l_source);
+           FastFloat::Ok == l_valid)
+        {
+          p_value = l_value;
           if(is_negative)
           {
-            p_source.inc_begin();
+            p_value = -l_value;
           }
-
-          width = find_first_of(p_source.subspan(0, width), g_whitespace);
-          scan_type l_source{p_source.data(), width};
-
-          width = find_first_not_of(l_source, g_digits);
-          l_source = scan_type{l_source.data(), width};
-
-          if(auto [l_value, l_valid] = fast_atoi<int_type>::convert(l_source);
-             FastFloat::Ok == l_valid)
-          {
-            p_value = l_value;
-            if(is_negative)
-            {
-              p_value = -l_value;
-            }
-            p_source.inc_begin(l_source.size());
-            return capture_type{1, true};
-          }
+          p_source.inc_begin(l_source.size());
+          return capture_type{1, true};
         }
-        break;
+      }
+      break;
       }
     }
   }
@@ -296,12 +295,12 @@ inline capture_type scan(scan_type & p_source,
 template<typename... Args>
 inline size_type scan_str(scan_str_detail::scan_type p_source,
                           scan_str_detail::scan_type p_format,
-                          Args && ...p_args) noexcept
+                          Args &&... p_args) noexcept
 {
   scan_str_detail::width_type l_width;
   scan_str_detail::capture_type captured{};
 
-  ((captured && (captured += scan_str_detail::scan(p_source, p_format, l_width, p_args))), ...);
+  ((captured += scan_str_detail::scan(p_source, p_format, l_width, p_args)) && ...);
 
   return captured.count;
 }
@@ -309,7 +308,7 @@ inline size_type scan_str(scan_str_detail::scan_type p_source,
 template<typename... Args>
 inline size_type scan_str(std::string_view p_source,
                           std::string_view p_format,
-                          Args && ...p_args) noexcept
+                          Args &&... p_args) noexcept
 {
   return scan_str(yy_quad::make_const_span(p_source),
                   yy_quad::make_const_span(p_format),
