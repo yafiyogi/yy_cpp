@@ -24,6 +24,9 @@
 
 */
 
+
+#include <iostream>
+
 #include "gtest/gtest.h"
 
 #include "yy_utf8.hpp"
@@ -56,7 +59,16 @@ class TestUTF8: public testing::Test
 
 TEST_F(TestUTF8, test_utf8_len)
 {
-  EXPECT_EQ(yy_util::utf8_len(utf8_1_start[0]), 1);
+  std::string_view ch_1{"Z"};
+  std::string_view ch_2{"Č"};
+  std::string_view ch_3{"Ḋ"};
+  std::string_view ch_4{"\xf8\xA0\xA1\xA2"};
+
+  EXPECT_EQ(yy_util::utf8_len(ch_1[0]), 1);
+  EXPECT_EQ(yy_util::utf8_len(ch_2[0]), 2);
+  EXPECT_EQ(yy_util::utf8_len(ch_3[0]), 3);
+  EXPECT_EQ(yy_util::utf8_len(ch_4[0]), 4);
+
   EXPECT_EQ(yy_util::utf8_len(utf8_1_end[0]), 1);
   EXPECT_EQ(yy_util::utf8_len(utf8_2_start[0]), 2);
   EXPECT_EQ(yy_util::utf8_len(utf8_2_end[0]), 2);
@@ -68,11 +80,24 @@ TEST_F(TestUTF8, test_utf8_len)
 
 TEST_F(TestUTF8, test_utf8_find)
 {
-  std::string_view delim{"\xC2\x80"};
-  std::string_view str{"12345\xC2\x80"
-                       "6789"};
+  std::string_view ch_1{"Z"};
+  std::string_view ch_2{"Č"};
+  std::string_view ch_3{"Ḋ"};
+  std::string_view ch_4{"\xf8\xA0\xA1\xA2"};
+  std::string_view str{"12345Z" "Č" "Ḋ" "\xf8\xA0\xA1\xA2" "6789"};
 
-  EXPECT_EQ(yy_util::utf8_find(str, delim), (yy_util::utf8_result{5, 2}));
+  EXPECT_EQ(yy_util::utf8_find(str, ch_1), (yy_util::utf8_result{5, 1}));
+  EXPECT_EQ(yy_util::utf8_find(str, ch_2), (yy_util::utf8_result{6, 2}));
+  EXPECT_EQ(yy_util::utf8_find(str, ch_3), (yy_util::utf8_result{8, 3}));
+  EXPECT_EQ(yy_util::utf8_find(str, ch_4), (yy_util::utf8_result{11, 4}));
+}
+
+TEST_F(TestUTF8, test_utf8_find_1)
+{
+  std::string_view delim{"\xC2\x81"};
+  std::string_view str{"12345" "\xC2\x80" "\xf8\xA0\xA1\xA2" "\xC2\x81" "6789"};
+
+  EXPECT_EQ(yy_util::utf8_find(str, delim), (yy_util::utf8_result{11, 2}));
 }
 
 TEST_F(TestUTF8, test_utf8_find_last_ch)
