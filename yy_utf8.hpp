@@ -134,38 +134,6 @@ inline bool match_ch(SpanType ch,
   return found;
 }
 
-template<typename SpanType>
-bool find_ch(SpanType ch,
-             SpanType delim) noexcept
-{
-  using traits_type = utf8_detail::utf8_traits<SpanType>;
-  using const_char_ptr = typename traits_type::const_char_ptr;
-
-  const_char_ptr data = delim.data();
-  size_type size = delim.size();
-  size_type delim_len;
-
-  while(size != 0)
-  {
-    delim_len = utf8_len(*data);
-
-    if((delim_len == 0) || (delim_len > size))
-    {
-      return false;
-    }
-
-    if(match_ch(ch, std::string_view{data, delim_len}))
-    {
-      return true;
-    }
-
-    data += delim_len;
-    size -= delim_len;
-  }
-
-  return false;
-}
-
 } // namespace utf8_detail
 
 struct utf8_result final
@@ -188,10 +156,12 @@ utf8_result utf8_find(SpanType sv,
   using value_type = typename traits_type::value_type;
   using const_char_ptr = typename traits_type::const_char_ptr;
 
-  const_char_ptr data = sv.data();
+  const_char_ptr data_begin = sv.data();
   size_type data_size = sv.size();
+  const_char_ptr data_end = data_begin + data_size;
+
+  const_char_ptr data = data_begin;
   const_char_ptr data_new;
-  const_char_ptr end = data + sv.size();
   const_char_ptr delim_data = delim.data();
   size_type ch_size{};
 
@@ -206,21 +176,21 @@ utf8_result utf8_find(SpanType sv,
 
     ch_size = utf8_len(*data_new);
 
-    if((0 == ch_size) || (ch_size > static_cast<size_type>(end - data_new)))
+    if((0 == ch_size) || (ch_size > static_cast<size_type>(data_end - data_new)))
     {
       break;
     }
 
     if(utf8_detail::match_ch(span_type{data_new, ch_size}, delim))
     {
-      return utf8_result{static_cast<size_type>(data_new - data), ch_size};
+      return utf8_result{static_cast<size_type>(data_new - data_begin), ch_size};
     }
 
     data = data_new + ch_size;
-    data_size -= ch_size;
+    data_size -= static_cast<size_type>(data_end - data);
   }
 
-  return utf8_result{sv.size(), 0};
+  return utf8_result{data_size - data_size, 0};
 }
 
 template<typename SpanType>
@@ -232,31 +202,31 @@ utf8_result utf8_find_first_of(SpanType sv,
   using span_type = typename traits_type::span_type;
 
   const_char_ptr data = sv.data();
-  size_type size = sv.size();
+  size_type data_size = sv.size();
   span_type ch;
   size_type ch_size{};
 
-  while(size != 0)
+  while(data_size != 0)
   {
     ch_size = utf8_len(*data);
 
-    if((ch_size == 0) || (ch_size > size))
+    if((ch_size == 0) || (ch_size > data_size))
     {
       break;
     }
 
-    ch = std::string_view{data, ch_size};
+    ch = span_type{data, ch_size};
 
-    if(find_ch(ch, delim))
+    if(find(delim, ch).size != 0)
     {
-      return utf8_result{sv.size() - size, ch_size};
+      break;
     }
 
     data += ch_size;
-    size -= ch_size;
+    data_size -= ch_size;
   }
 
-  return utf8_result{sv.size(), ch_size};
+  return utf8_result{sv.size() - data_size, ch_size};
 }
 
 // Find start of last utf8 multi byte char
@@ -273,24 +243,24 @@ utf8_result utf8_find_last_ch(SpanType sv) noexcept
     return yy_util::utf8_result{sv.size(), 0};
   }
 
-  size_type size = sv.size();
-  const_char_ptr data = sv.begin() + size;
+  size_type data_size = sv.size();
+  const_char_ptr data = sv.data() + data_size;
   value_type ch;
 
-  while(size != 0)
+  while(data_size != 0)
   {
-    --size;
+    --data_size;
     --data;
 
     ch = *data;
     if(((ch & utf8_constants::utf8_bits_mask) != utf8_constants::utf8_bits)
        || ((ch & utf8_constants::utf8_start_mask) == utf8_constants::utf8_start))
     {
-      return utf8_result{size, utf8_len(*data)};
+      return utf8_result{data_size, utf8_len(*data)};
     }
   }
 
-  return utf8_result{sv.size(), 0};
+  return utf8_result{data_size, 0};
 }
 
 } // namespace yafiyogi::yy_util
