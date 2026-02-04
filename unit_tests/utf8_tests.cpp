@@ -113,4 +113,13 @@ TEST_F(TestUTF8, test_utf8_find_last_ch)
   EXPECT_EQ(yy_util::utf8_find_last_ch(utf8_4_end), (yy_util::utf8_result{0, 4}));
 }
 
+TEST_F(TestUTF8, test_utf8_find_first_of)
+{
+  std::string_view delim{"\xC2\x80\xC2\x81"};
+  std::string_view{"12345" "\xC2\x82" "\xf8\xA0\xA1\xA2" "\xC2\x81" "6789"};
+
+  EXPECT_EQ(yy_util::utf8_find_first_of(std::string_view{"12345" "\xC2\x82" "\xf8\xA0\xA1\xA2" "\xC2\x81" "6789"}, delim), (yy_util::utf8_result{11, 2}));
+  EXPECT_EQ(yy_util::utf8_find_first_of(std::string_view{"12345" "\xC2\x82" "\xf8\xA0\xA1\xA2" "\xC2\x80" "6789"}, delim), (yy_util::utf8_result{11, 2}));
+}
+
 } // namespace yafiyogi::yy_data::tests
