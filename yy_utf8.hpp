@@ -217,7 +217,7 @@ utf8_result utf8_find_first_of(SpanType sv,
 
     ch = span_type{data, ch_size};
 
-    if(find(delim, ch).size != 0)
+    if(utf8_find(delim, ch).size != 0)
     {
       break;
     }
