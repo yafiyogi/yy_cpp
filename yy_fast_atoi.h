@@ -36,7 +36,7 @@
 
 namespace yafiyogi::yy_util {
 
-enum class FastFloat:uint8_t {Ok, NoValue};
+enum class FastNum:uint8_t {Ok, NoValue};
 
 namespace fast_atoi_detail {
 
@@ -46,7 +46,7 @@ struct val_valid_type final
     using value_type = yy_traits::remove_cvr_t<I>;
 
     value_type value{};
-    FastFloat state = FastFloat::NoValue;
+    FastNum state = FastNum::NoValue;
 
     friend
     constexpr bool operator==(const val_valid_type a, const val_valid_type b) noexcept
@@ -76,7 +76,7 @@ struct fast_atoi final
       }
 
       value_type val = value_type{};
-      FastFloat state = FastFloat::NoValue;
+      FastNum state = FastNum::NoValue;
 
       auto add = [&val, p_str]() mutable {
         // Multiply current value by 10.
@@ -167,7 +167,7 @@ struct fast_atoi final
 
         case 1:
           add();
-          state = FastFloat::Ok;
+          state = FastNum::Ok;
       }
 
       return val_valid_type{val, state};
