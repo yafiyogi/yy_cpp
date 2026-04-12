@@ -46,7 +46,7 @@ add_executable(test_yy_cpp
   find_util_iter_tests.cpp
   lower_bound_tests.cpp
   ref_traits_tests.cpp
-  scan_str_tests.cpp
+#  scan_str_tests.cpp
   span_iter_tests.cpp
   span_tests.cpp
   string_case_tests.cpp

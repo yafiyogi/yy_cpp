@@ -67,7 +67,8 @@ add_executable(benchmark_yy_cpp
   bench_uo_map.cpp
 
   bench_trie_lookup.cpp
-  bench_bit_twiddling.cpp
+  bench_bit_twiddling_64.cpp
+  bench_bit_twiddling_8.cpp
   bench_compare_util.cpp
 
   bench_string_copy.cpp

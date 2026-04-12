@@ -33,16 +33,18 @@
 
 #include "yy_bit_twiddling.h"
 
-static constexpr const int max_size = 10000;
+inline constexpr const int max_size = 10000;
 
-std::array<uint64_t, max_size> set_numbers()
+using bit_twiddling = yafiyogi::yy_bit_twiddling::bits<uint8_t>;
+
+static std::array<uint8_t, max_size> set_numbers()
 {
-  std::array<uint64_t, max_size> num;
+  std::array<uint8_t, max_size> num;
 
   std::random_device rd{};
   std::mt19937 generator{rd()};
 
-  std::uniform_int_distribution<uint64_t> uniform_dist{1, std::numeric_limits<uint64_t>::max()};
+  std::uniform_int_distribution<uint8_t> uniform_dist{1, std::numeric_limits<uint8_t>::max()};
 
   for(size_t idx = 0; idx < num.size(); ++idx)
   {
@@ -52,18 +54,18 @@ std::array<uint64_t, max_size> set_numbers()
   return num;
 }
 
-auto nums = set_numbers();
+static auto nums = set_numbers();
 
-struct BitCeil:
+struct BitCeil8:
       public ::benchmark::Fixture
 {
   public:
-    BitCeil() {};
+    BitCeil8() {};
     void SetUp(const ::benchmark::State &) override {}
 };
 
 
-BENCHMARK_F(BitCeil, std_bit_ceil)(::benchmark::State & state)
+BENCHMARK_F(BitCeil8, std_bit_ceil)(::benchmark::State & state)
 {
   size_t idx = 0;
 
@@ -80,13 +82,13 @@ BENCHMARK_F(BitCeil, std_bit_ceil)(::benchmark::State & state)
   }
 }
 
-BENCHMARK_F(BitCeil, round_up_pow2)(::benchmark::State & state)
+BENCHMARK_F(BitCeil8, round_up_pow2)(::benchmark::State & state)
 {
   size_t idx = 0;
 
   while(state.KeepRunning())
   {
-    auto rv = yafiyogi::yy_bit_twiddling::round_up_pow2(nums[idx]);
+    auto rv = bit_twiddling::round_up_pow2(nums[idx]);
     ::benchmark::DoNotOptimize(rv);
 
     ++idx;
@@ -97,16 +99,16 @@ BENCHMARK_F(BitCeil, round_up_pow2)(::benchmark::State & state)
   }
 }
 
-struct BitFloor:
+struct BitFloor8:
       public ::benchmark::Fixture
 {
   public:
-    BitFloor() {};
+    BitFloor8() {};
     void SetUp(const ::benchmark::State &) override {}
 };
 
 
-BENCHMARK_F(BitFloor, std_bit_floor)(::benchmark::State & state)
+BENCHMARK_F(BitFloor8, std_bit_floor)(::benchmark::State & state)
 {
   size_t idx = 0;
 
@@ -123,13 +125,13 @@ BENCHMARK_F(BitFloor, std_bit_floor)(::benchmark::State & state)
   }
 }
 
-BENCHMARK_F(BitFloor, round_down_pow2)(::benchmark::State & state)
+BENCHMARK_F(BitFloor8, round_down_pow2)(::benchmark::State & state)
 {
   size_t idx = 0;
 
   while(state.KeepRunning())
   {
-    auto rv = yafiyogi::yy_bit_twiddling::round_down_pow2(nums[idx]);
+    auto rv = bit_twiddling::round_down_pow2(nums[idx]);
     ::benchmark::DoNotOptimize(rv);
 
     ++idx;
@@ -140,16 +142,16 @@ BENCHMARK_F(BitFloor, round_down_pow2)(::benchmark::State & state)
   }
 }
 
-struct PopCount:
+struct PopCount8:
       public ::benchmark::Fixture
 {
   public:
-    PopCount() {};
+    PopCount8() {};
     void SetUp(const ::benchmark::State &) override {}
 };
 
 
-BENCHMARK_F(PopCount, std_popcount)(::benchmark::State & state)
+BENCHMARK_F(PopCount8, std_popcount)(::benchmark::State & state)
 {
   size_t idx = 0;
 
@@ -166,13 +168,90 @@ BENCHMARK_F(PopCount, std_popcount)(::benchmark::State & state)
   }
 }
 
-BENCHMARK_F(PopCount, pop)(::benchmark::State & state)
+BENCHMARK_F(PopCount8, pop)(::benchmark::State & state)
 {
   size_t idx = 0;
 
   while(state.KeepRunning())
   {
-    auto rv = yafiyogi::yy_bit_twiddling::pop(nums[idx]);
+    auto rv = bit_twiddling::pop(nums[idx]);
+    ::benchmark::DoNotOptimize(rv);
+
+    ++idx;
+    if(nums.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+struct CountZeros8:
+      public ::benchmark::Fixture
+{
+  public:
+    CountZeros8() {};
+    void SetUp(const ::benchmark::State &) override {}
+};
+
+
+BENCHMARK_F(CountZeros8, std_countl_zero)(::benchmark::State & state)
+{
+  size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    auto rv = std::countl_zero(nums[idx]);
+    ::benchmark::DoNotOptimize(rv);
+
+    ++idx;
+    if(nums.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(CountZeros8, nlz)(::benchmark::State & state)
+{
+  size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    auto rv = bit_twiddling::nlz(nums[idx]);
+    ::benchmark::DoNotOptimize(rv);
+
+    ++idx;
+    if(nums.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(CountZeros8, std_countr_zero)(::benchmark::State & state)
+{
+  size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    auto rv = std::countr_zero(nums[idx]);
+    ::benchmark::DoNotOptimize(rv);
+
+    ++idx;
+    if(nums.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(CountZeros8, ntz)(::benchmark::State & state)
+{
+  size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    auto rv = bit_twiddling::ntz(nums[idx]);
     ::benchmark::DoNotOptimize(rv);
 
     ++idx;
