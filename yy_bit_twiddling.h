@@ -31,58 +31,113 @@
 
 namespace yafiyogi::yy_bit_twiddling {
 
-// From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-constexpr uint64_t round_up_pow2(uint64_t val)
+template <typename T>
+struct bits
 {
-  --val;
-  val |= val >> uint64_t{1};
-  val |= val >> uint64_t{2};
-  val |= val >> uint64_t{4};
-  val |= val >> uint64_t{8};
-  val |= val >> uint64_t{16};
-  val |= val >> uint64_t{32};
-  ++val;
+};
 
-  return val;
-}
-
-constexpr uint64_t round_down_pow2(uint64_t val)
+template<>
+struct bits<uint64_t>
 {
-  val |= val >> uint64_t{1};
-  val |= val >> uint64_t{2};
-  val |= val >> uint64_t{4};
-  val |= val >> uint64_t{8};
-  val |= val >> uint64_t{16};
-  val |= val >> uint64_t{32};
+    using value_type = uint64_t;
+    // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    static constexpr uint64_t round_up_pow2(value_type val)
+    {
+      --val;
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
+      val |= val >> value_type{8};
+      val |= val >> value_type{16};
+      val |= val >> value_type{32};
+      ++val;
 
-  return val - (val >> uint64_t{1});
-}
+      return val;
+    }
 
-constexpr uint64_t pop(uint64_t val)
+    static constexpr uint64_t round_down_pow2(value_type val)
+    {
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
+      val |= val >> value_type{8};
+      val |= val >> value_type{16};
+      val |= val >> value_type{32};
+
+      return val - (val >> value_type{1});
+    }
+
+    static constexpr int pop(value_type val)
+    {
+      val = val - ((val >> value_type{1}) & value_type{0x5555555555555555});
+      val = (val & value_type{0x3333333333333333}) + ((val >> value_type{2}) & value_type{0x3333333333333333});
+      return static_cast<int>((((val + (val >> value_type{4})) & value_type{0xF0F0F0F0F0F0F0F}) * value_type{0x101010101010101}) >> value_type{56});
+    }
+
+    static constexpr int nlz(value_type val)
+    {
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
+      val |= val >> value_type{8};
+      val |= val >> value_type{16};
+      val |= val >> value_type{32};
+
+      return pop(~val);
+    }
+
+    static constexpr int ntz(value_type val)
+    {
+      return std::numeric_limits<value_type>::digits - pop(val | -val);
+    }
+};
+
+template<>
+struct bits<uint8_t>
 {
-  val = val - ((val >> uint64_t{1}) & uint64_t{0x5555555555555555});
-  val = (val & uint64_t{0x3333333333333333}) + ((val >> uint64_t{2}) & uint64_t{0x3333333333333333});
-  return (((val + (val >> uint64_t{4})) & uint64_t{0xF0F0F0F0F0F0F0F}) * uint64_t{0x101010101010101}) >> uint64_t{56};
-}
+    using value_type = uint8_t;
 
-constexpr uint64_t nlz(uint64_t val)
-{
-  val |= val >> uint64_t{1};
-  val |= val >> uint64_t{2};
-  val |= val >> uint64_t{4};
-  val |= val >> uint64_t{8};
-  val |= val >> uint64_t{16};
-  val |= val >> uint64_t{32};
+    // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+    static constexpr value_type round_up_pow2(value_type val)
+    {
+      --val;
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
+      ++val;
 
-  return pop(~val);
-}
+      return val;
+    }
 
-inline constexpr uint64_t all_bits{std::numeric_limits<uint64_t>::max()};
+    static constexpr value_type round_down_pow2(value_type val)
+    {
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
 
-constexpr uint64_t ntz(uint64_t val)
-{
-  uint64_t mask = all_bits + static_cast<uint64_t>(0 == val);
-  return mask & (uint64_t{63} - nlz(val));
-}
+      return val - (val >> value_type{1});
+    }
+
+    static constexpr int pop(value_type val)
+    {
+      val = val - ((val >> value_type{1}) & value_type{0x55});
+      val = (val & value_type{0x33}) + ((val >> value_type{2}) & value_type{0x33});
+      return ((val + (val >> value_type{4})) & value_type{0x0F}) * value_type{0x01};
+    }
+
+    static constexpr int nlz(value_type val)
+    {
+      val |= val >> value_type{1};
+      val |= val >> value_type{2};
+      val |= val >> value_type{4};
+
+      return pop(static_cast<value_type>(~val));;
+    }
+
+    static constexpr int ntz(value_type val)
+    {
+      return std::numeric_limits<value_type>::digits - pop(val | -val);
+    }
+};
 
 } // namespace yafiyogi::yy_bit_twiddling
