@@ -44,8 +44,7 @@ struct utf8_constants
 
     static_assert(yy_traits::is_narrow_char_type_v<char_type>, "CharType must be char, char8_t, or uint8_t for utf8_constants!");
 
-    static constexpr char_type utf8_bits_mask = static_cast<char_type>(0xC0);
-    static constexpr char_type utf8_bits = static_cast<char_type>(0x80);
+    static constexpr char_type utf8_flag = static_cast<char_type>(0x80);
 
     static constexpr char_type utf8_start = static_cast<char_type>(0xC0);
     static constexpr char_type utf8_start_mask = static_cast<char_type>(0xC0);
@@ -58,6 +57,9 @@ struct utf8_constants
 
     static constexpr char_type utf8_4 = static_cast<char_type>(0xF0);
     static constexpr char_type utf8_4_mask = static_cast<char_type>(0xF8);
+
+    static constexpr char_type utf8_cont_mask = static_cast<char_type>(0xC0);
+    static constexpr char_type utf8_cont_bits = static_cast<char_type>(0x80);
 };
 
 template<typename SpanType,
@@ -84,7 +86,7 @@ inline size_type utf8_len(CharType ch) noexcept
 {
   using utf8_constants = utf8_detail::utf8_constants<CharType>;
 
-  size_type size = (utf8_constants::utf8_bits & ch) == 0;
+  size_type size = (utf8_constants::utf8_flag & ch) == 0;
 
   if((utf8_constants::utf8_start_mask & ch) == utf8_constants::utf8_start)
   {
@@ -96,6 +98,18 @@ inline size_type utf8_len(CharType ch) noexcept
   }
 
   return size;
+}
+
+template<typename CharType>
+inline bool utf8_valid(CharType ch) noexcept
+{
+  using utf8_constants = utf8_detail::utf8_constants<CharType>;
+
+  return ((utf8_constants::utf8_bits & ch) == 0)
+    || ((ch & utf8_constants::utf8_2_mask) == utf8_constants::utf8_2)
+    || ((ch & utf8_constants::utf8_3_mask) == utf8_constants::utf8_3)
+    || ((ch & utf8_constants::utf8_4_mask) == utf8_constants::utf8_4)
+    || ((ch & utf8_constants::utf8_cont_mask) == utf8_constants::utf8_cont_bits);
 }
 
 namespace utf8_detail {
@@ -253,7 +267,7 @@ utf8_result utf8_find_last_ch(SpanType sv) noexcept
     --data;
 
     ch = *data;
-    if(((ch & utf8_constants::utf8_bits_mask) != utf8_constants::utf8_bits)
+    if(((ch & utf8_constants::utf8_cont_mask) != utf8_constants::utf8_cont_bits)
        || ((ch & utf8_constants::utf8_start_mask) == utf8_constants::utf8_start))
     {
       return utf8_result{data_size, utf8_len(*data)};
