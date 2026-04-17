@@ -152,8 +152,8 @@ inline bool match_ch(SpanType ch,
 
 struct utf8_result final
 {
-    size_type pos{};
-    size_type size{};
+    size_type pos = 0;
+    size_type size = 0;
 
     bool operator==(const utf8_result & other) const noexcept
     {
@@ -177,7 +177,7 @@ utf8_result utf8_find(SpanType sv,
   const_char_ptr data = data_begin;
   const_char_ptr data_new;
   const_char_ptr delim_data = delim.data();
-  size_type ch_size{};
+  size_type ch_size = 0;
 
   while(data_size != 0)
   {
@@ -185,13 +185,21 @@ utf8_result utf8_find(SpanType sv,
 
     if(nullptr == data_new)
     {
+      // delim not found.
+      data_size = 0;
       break;
     }
 
     ch_size = utf8_len(*data_new);
 
-    if((0 == ch_size) || (ch_size > static_cast<size_type>(data_end - data_new)))
+    if(0 == ch_size)
     {
+      break;
+    }
+
+    if(ch_size > data_size)
+    {
+      data_size = 0;
       break;
     }
 
@@ -204,7 +212,7 @@ utf8_result utf8_find(SpanType sv,
     data_size -= static_cast<size_type>(data_end - data);
   }
 
-  return utf8_result{data_size - data_size, 0};
+  return utf8_result{sv.size() - data_size, 0};
 }
 
 template<typename SpanType>
@@ -218,14 +226,20 @@ utf8_result utf8_find_first_of(SpanType sv,
   const_char_ptr data = sv.data();
   size_type data_size = sv.size();
   span_type ch;
-  size_type ch_size{};
+  size_type ch_size = 0;
 
   while(data_size != 0)
   {
     ch_size = utf8_len(*data);
 
-    if((ch_size == 0) || (ch_size > data_size))
+    if(0 == ch_size)
     {
+      break;
+    }
+
+    if(ch_size > data_size)
+    {
+      data_size = 0;
       break;
     }
 
