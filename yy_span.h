@@ -773,9 +773,8 @@ constexpr auto make_const_span(T p_sv)
 }
 
 template<typename T,
-         std::enable_if_t<std::is_pointer_v<T>
-                          && !std::is_array_v<T>
-                          && std::is_same_v<char, std::remove_const_t<std::remove_pointer_t<T>>>, bool> = true>
+         std::enable_if_t<!std::is_array_v<T>
+                          && yy_traits::is_c_string_v<T>, bool> = true>
 constexpr auto make_const_span(T p_str)
 {
   std::string_view str{p_str};
@@ -783,7 +782,8 @@ constexpr auto make_const_span(T p_str)
 }
 
 template<typename T,
-         size_type N>
+         size_type N,
+         std::enable_if_t<!std::is_same_v<char, yy_traits::remove_cvr_t<T>>, bool> = true>
 constexpr auto make_const_span(T (& p_array)[N])
 {
   using helper = span_traits_helper<T>;
