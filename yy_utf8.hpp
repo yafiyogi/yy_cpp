@@ -34,6 +34,8 @@
 #include "yy_traits_string.hpp"
 #include "yy_type_traits.h"
 
+#include "yy_span.h"
+
 namespace yafiyogi::yy_util {
 namespace utf8_detail {
 
@@ -70,8 +72,8 @@ template<typename SpanType,
                               || yy_traits::is_std_string_view_v<span_type_raw>), bool> = true>
 struct utf8_traits
 {
+    using value_type = yy_traits::remove_cvr_t<typename span_type_raw::value_type>;
     using span_type = span_type_raw;
-    using value_type = yy_traits::remove_cvr_t<typename span_type::value_type>;
     using char_ptr = std::add_pointer<value_type>;
     using const_char_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
 
@@ -92,9 +94,9 @@ inline size_type utf8_len(CharType ch) noexcept
   {
     size = 1;
 
-    size += (utf8_constants::utf8_2 & ch) == utf8_constants::utf8_2;
-    size += (utf8_constants::utf8_3 & ch) == utf8_constants::utf8_3;
-    size += (utf8_constants::utf8_4 & ch) == utf8_constants::utf8_4;
+    size += utf8_constants::utf8_2 == (utf8_constants::utf8_2 & ch);
+    size += utf8_constants::utf8_3 == (utf8_constants::utf8_3 & ch);
+    size += utf8_constants::utf8_4 == (utf8_constants::utf8_4 & ch);
   }
 
   return size;
@@ -105,43 +107,39 @@ inline bool utf8_valid(CharType ch) noexcept
 {
   using utf8_constants = utf8_detail::utf8_constants<CharType>;
 
-  return ((utf8_constants::utf8_bits & ch) == 0)
-    || ((ch & utf8_constants::utf8_2_mask) == utf8_constants::utf8_2)
-    || ((ch & utf8_constants::utf8_3_mask) == utf8_constants::utf8_3)
-    || ((ch & utf8_constants::utf8_4_mask) == utf8_constants::utf8_4)
-    || ((ch & utf8_constants::utf8_cont_mask) == utf8_constants::utf8_cont_bits);
+  return (0 == (utf8_constants::utf8_bits & ch))
+    || (utf8_constants::utf8_2 == (ch & utf8_constants::utf8_2_mask))
+    || (utf8_constants::utf8_3 == (ch & utf8_constants::utf8_3_mask))
+    || (utf8_constants::utf8_4 == (ch & utf8_constants::utf8_4_mask))
+    || (utf8_constants::utf8_cont_bits == (ch & utf8_constants::utf8_cont_mask));
 }
 
 namespace utf8_detail {
 
-template<typename SpanType>
+template<typename SpanType,
+         typename traits_type = utf8_traits<SpanType>>
 inline bool match_ch(SpanType ch,
                      SpanType delim) noexcept
 {
-  using traits_type = utf8_detail::utf8_traits<SpanType>;
-  using const_char_ptr = typename traits_type::const_char_ptr;
-
-  const_char_ptr delim_data = delim.data();
-  const size_type delim_size = delim.size();
-  const_char_ptr ch_data = ch.data();
+  size_type delim_size = delim.size();
   bool found = ch.size() == delim_size;
 
   if(found)
   {
     switch(delim_size)
     {
-    case 4:
-      found = found && (*ch_data++ == *delim_data++);
-      [[fallthrough]];
-    case 3:
-      found = found && (*ch_data++ == *delim_data++);
-      [[fallthrough]];
-    case 2:
-      found = found && (*ch_data++ == *delim_data++);
-      [[fallthrough]];
-    case 1:
-      found = found && (*ch_data++ == *delim_data++);
-      break;
+      case 4:
+        found = found && (ch[3] == delim[3]);
+        [[fallthrough]];
+      case 3:
+        found = found && (ch[2] == delim[2]);
+        [[fallthrough]];
+      case 2:
+        found = found && (ch[1] == delim[1]);
+        [[fallthrough]];
+      case 1:
+        found = found && (ch[0] == delim[0]);
+        break;
     }
   }
 
@@ -161,12 +159,11 @@ struct utf8_result final
     }
 };
 
-template<typename SpanType>
+template<typename SpanType,
+         typename traits_type = utf8_detail::utf8_traits<SpanType>>
 utf8_result utf8_find(SpanType sv,
-                      SpanType delim) noexcept
+                      SpanType p_delim) noexcept
 {
-  using traits_type = utf8_detail::utf8_traits<SpanType>;
-  using span_type = typename traits_type::span_type;
   using value_type = typename traits_type::value_type;
   using const_char_ptr = typename traits_type::const_char_ptr;
 
@@ -176,16 +173,19 @@ utf8_result utf8_find(SpanType sv,
 
   const_char_ptr data = data_begin;
   const_char_ptr data_new;
-  const_char_ptr delim_data = delim.data();
+
+  SpanType l_delim{p_delim.data(), utf8_len(p_delim[0])};
+
   size_type ch_size = 0;
 
   while(data_size != 0)
   {
-    data_new = std::char_traits<value_type>::find(data, data_size, *delim_data);
+    data_new = std::char_traits<value_type>::find(data, data_size, l_delim[0]);
 
     if(nullptr == data_new)
     {
       // delim not found.
+      ch_size = 0;
       data_size = 0;
       break;
     }
@@ -203,7 +203,7 @@ utf8_result utf8_find(SpanType sv,
       break;
     }
 
-    if(utf8_detail::match_ch(span_type{data_new, ch_size}, delim))
+    if(utf8_detail::match_ch(SpanType{data_new, ch_size}, l_delim))
     {
       return utf8_result{static_cast<size_type>(data_new - data_begin), ch_size};
     }
@@ -212,20 +212,60 @@ utf8_result utf8_find(SpanType sv,
     data_size -= static_cast<size_type>(data_end - data);
   }
 
-  return utf8_result{sv.size() - data_size, 0};
+  return utf8_result{sv.size() - data_size, ch_size};
 }
 
-template<typename SpanType>
+template<typename SpanType,
+         typename traits_type = utf8_detail::utf8_traits<SpanType>>
+utf8_result utf8_find_first_not(SpanType sv,
+                                SpanType delim) noexcept
+{
+  using const_char_ptr = typename traits_type::const_char_ptr;
+
+  const_char_ptr data_begin = sv.data();
+  size_type data_size = sv.size();
+  const_char_ptr data = data_begin;
+  size_type ch_size = 0;
+
+  SpanType l_delim{delim.data(), utf8_len(delim[0])};
+
+  while(data_size != 0)
+  {
+    ch_size = utf8_len(*data);
+
+    if(0 == ch_size)
+    {
+      break;
+    }
+
+    if(ch_size > data_size)
+    {
+      break;
+    }
+
+    SpanType ch{data, ch_size};
+    if(!utf8_detail::match_ch(ch, l_delim))
+    {
+      return utf8_result{sv.size() - data_size, ch_size};
+    }
+
+    data += ch_size;
+    data_size -= ch_size;
+  }
+
+  return utf8_result{sv.size() - data_size, ch_size};
+}
+
+template<typename SpanType,
+         typename traits_type = utf8_detail::utf8_traits<SpanType>>
 utf8_result utf8_find_first_of(SpanType sv,
                                SpanType delim) noexcept
 {
-  using traits_type = utf8_detail::utf8_traits<SpanType>;
   using const_char_ptr = typename traits_type::const_char_ptr;
-  using span_type = typename traits_type::span_type;
 
   const_char_ptr data = sv.data();
   size_type data_size = sv.size();
-  span_type ch;
+  SpanType ch;
   size_type ch_size = 0;
 
   while(data_size != 0)
@@ -243,9 +283,9 @@ utf8_result utf8_find_first_of(SpanType sv,
       break;
     }
 
-    ch = span_type{data, ch_size};
+    ch = SpanType{data, ch_size};
 
-    if(utf8_find(delim, ch).size != 0)
+    if(utf8_find(delim, ch).pos != delim.size())
     {
       break;
     }
@@ -258,17 +298,17 @@ utf8_result utf8_find_first_of(SpanType sv,
 }
 
 // Find start of last utf8 multi byte char
-template<typename SpanType>
+template<typename SpanType,
+         typename traits_type = utf8_detail::utf8_traits<SpanType>>
 utf8_result utf8_find_last_ch(SpanType sv) noexcept
 {
-  using traits_type = utf8_detail::utf8_traits<SpanType>;
   using utf8_constants = typename traits_type::constants;
   using const_char_ptr = typename traits_type::const_char_ptr;
   using value_type = typename traits_type::value_type;
 
   if(sv.empty())
   {
-    return yy_util::utf8_result{sv.size(), 0};
+    return yy_util::utf8_result{0, 0};
   }
 
   size_type data_size = sv.size();
