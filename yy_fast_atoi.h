@@ -80,7 +80,7 @@ struct fast_atoi final
 
       auto add = [&val, p_str]() mutable {
         // Multiply current value by 10.
-        val = (val << value_type{1}) + (val << value_type{3});
+        val *= 10;
 
         // Add next digit.
         val += static_cast<value_type>(*p_str.begin() - '0');
