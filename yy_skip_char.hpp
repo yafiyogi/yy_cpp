@@ -36,23 +36,20 @@ template<typename SpanType,
          typename span_type = yy_traits::remove_cvr_t<SpanType>,
          std::enable_if_t<yy_traits::is_span_v<span_type> || yy_traits::is_std_string_v<span_type>
                             || yy_traits::is_std_string_view_v<span_type>, bool> = true>
-inline span_type skip_not_char(const span_type src,
+inline span_type skip_not_char(span_type src,
                                const typename span_type::value_type c)
 {
-  const char * src_data = src.data();
-  size_type src_size = src.size();
-
-  while(src_size != 0)
+  while(!src.empty())
   {
-    if(*src_data != c)
+    if(src[0] != c)
     {
       break;
     }
-    --src_size;
-    ++src_data;
+
+    src.inc_begin();
   }
 
-  return span_type{src_data, src_size};
+  return src;
 }
 
 template<typename T>
@@ -76,20 +73,17 @@ template<typename SpanType,
 inline span_type skip_char(const span_type src,
                            typename span_type::value_type c)
 {
-  const char * src_data = src.data();
-  size_type src_size = src.size();
-
-  while(src_size != 0)
+  while(src.empty())
   {
-    if(*src_data != c)
+    if(src[0] == c)
     {
       break;
     }
-    --src_size;
-    ++src_data;
+
+    src.inc_begin();
   }
 
-  return span_type{src_data, src_size};
+  return src;
 }
 
 template<typename T>
