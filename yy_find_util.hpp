@@ -29,50 +29,63 @@
 #include <algorithm>
 #include <type_traits>
 
+#include "yy_type_traits.h"
 #include "yy_find_types.hpp"
 
 namespace yafiyogi::yy_data {
 namespace find_util_detail {
 
-template<typename Iterator,
-         typename ValueType,
+template<typename ValueType,
          typename Enable = void>
 struct find_pos_linear
 {
+    template<typename Iterator>
     constexpr static pos_found_type find(const Iterator & p_begin,
                                          const Iterator & p_end,
                                          const ValueType & p_value) noexcept
     {
-      auto found = std::find(p_begin, p_end, p_value);
+      const auto found = std::find(p_begin, p_end, p_value);
 
-      if(found == p_end)
-      {
-        return pos_found_type{npos, false};
-      }
+      return pos_found_type{static_cast<size_type>(found - p_begin), found == p_end};
+    }
 
-      return pos_found_type{static_cast<size_type>(found - p_begin), true};
+    template<typename Iterator>
+    constexpr static pos_found_type find(const Iterator & p_begin,
+                                         const size_type & p_size,
+                                         const ValueType & p_value) noexcept
+    {
+      return find(p_begin, p_begin + p_size, p_value);
     }
 };
 
-template<typename Iterator,
-         typename ValueType>
-struct find_pos_linear<Iterator,
-                       ValueType,
-                       std::enable_if_t<std::is_same_v<char, yy_traits::remove_cvr_t<ValueType>>
-                                        || std::is_same_v<char8_t, yy_traits::remove_cvr_t<ValueType>>>>
+template<typename ValueType>
+struct find_pos_linear<ValueType,
+                       std::enable_if_t<yy_traits::is_narrow_char_type_v<ValueType>
+                                        || yy_traits::is_wide_char_type_v<ValueType>>>
 {
+    template<typename Iterator>
+    constexpr static pos_found_type find(const Iterator & p_begin,
+                                         const size_type & p_size,
+                                         const ValueType & p_value) noexcept
+    {
+      auto found{std::char_traits<ValueType>::find(p_begin, p_size, p_value)};
+
+      const bool is_found = nullptr != found;
+
+      if(!is_found)
+      {
+        found = p_begin + p_size;
+      }
+
+      return pos_found_type{static_cast<size_type>(found - p_begin), is_found};
+    };
+
+    template<typename Iterator>
     constexpr static pos_found_type find(const Iterator & p_begin,
                                          const Iterator & p_end,
                                          const ValueType & p_value) noexcept
     {
-      auto found{std::char_traits<char>::find(p_begin, static_cast<size_type>(p_end - p_begin), p_value)};
-
-      if(nullptr == found)
-      {
-        return pos_found_type{npos, false};
-      }
-
-      return pos_found_type{static_cast<size_type>(found - p_begin), true};
+      return find(p_begin, static_cast<size_type>(p_end - p_begin), p_value);
     };
 };
 
@@ -84,21 +97,32 @@ constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
                                                 const Iterator & p_end,
                                                 const ValueType & p_value) noexcept
 {
-  return find_util_detail::find_pos_linear<Iterator, ValueType>::find(p_begin,
-                                                                      p_end,
-                                                                      p_value);
+  return find_util_detail::find_pos_linear<ValueType>::find(p_begin,
+                                                            p_end,
+                                                            p_value);
 }
 
-template<typename ValueStore>
+template<typename Iterator,
+         typename ValueType>
+constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
+                                                const size_type & p_size,
+                                                const ValueType & p_value) noexcept
+{
+  return find_util_detail::find_pos_linear<ValueType>::find(p_begin,
+                                                            p_size,
+                                                            p_value);
+}
+
+template<typename ValueStore,
+         std::enable_if_t<yy_traits::is_container_v<ValueStore>, bool> = true>
 constexpr inline pos_found_type find_pos_linear(const ValueStore & p_store,
                                                 const typename ValueStore::value_type & p_value) noexcept
 {
-  using iterator = typename ValueStore::iterator;
   using value_type = typename ValueStore::value_type;
 
-  return find_util_detail::find_pos_linear<iterator, value_type>::find(p_store.begin(),
-                                                                       p_store.end(),
-                                                                       p_value);
+  return find_util_detail::find_pos_linear<value_type>::find(p_store.begin(),
+                                                             p_store.end(),
+                                                             p_value);
 }
 
 } // namespace yafiyogi::yy_data
