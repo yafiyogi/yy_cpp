@@ -80,35 +80,35 @@ class span final
                               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
     constexpr explicit span(const T & container) noexcept:
       m_begin(container.data()),
-      m_end(container.data() + container.size())
+      m_size(container.size())
     {
     }
 
     constexpr explicit span(ptr p_begin,
                             ptr p_end) noexcept:
       m_begin(p_begin),
-      m_end(p_end)
+      m_size(staic_cast<size_type>(p_end - p_begin))
     {
     }
 
     constexpr explicit span(ptr p_begin,
                             size_type p_size) noexcept:
       m_begin(p_begin),
-      m_end(p_begin + p_size)
+      m_size(p_size)
     {
     }
 
     constexpr explicit span(iterator p_begin,
                             iterator p_end) noexcept:
       m_begin(p_begin.ptr()),
-      m_end(p_end.ptr())
+      m_size(static_cast<size_type>(p_end.ptr() - p_begin.ptr()))
     {
     }
 
     constexpr explicit span(iterator p_begin,
                             size_type p_size) noexcept:
       m_begin(p_begin.ptr),
-      m_end(p_begin.ptr + p_size)
+      m_size(p_size)
     {
     }
 
@@ -122,14 +122,14 @@ class span final
     [[nodiscard]]
     constexpr value_type & operator[](size_type idx) noexcept
     {
-      idx = std::min(idx, size());
+      idx = std::min(idx, m_size);
       return *(m_begin + idx);
     }
 
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
-      idx = std::min(idx, size());
+      idx = std::min(idx, m_size);
       return *(m_begin + idx);
     }
 
@@ -148,57 +148,69 @@ class span final
     [[nodiscard]]
     constexpr iterator end() noexcept
     {
-      return iterator{this, size()};
+      return iterator{this, m_size};
     }
 
     [[nodiscard]]
     constexpr const_iterator end() const noexcept
     {
-      return const_iterator{this, size()};
+      return const_iterator{this, m_size};
     }
 
     constexpr span & inc_begin() noexcept
     {
-      if(m_begin != m_end)
+      if(size_type{0} != m_size)
       {
         ++m_begin;
+        --m_size;
       }
       return *this;
     }
 
     constexpr span & inc_begin(size_type step) noexcept
     {
-      m_begin += std::min(step, size());
+      step = std::min(step, m_size);
+      m_begin += step;
+      m_size -= step;
 
       return *this;
     }
 
     constexpr span & inc_begin(int step) noexcept
     {
-      m_begin += std::min(step, static_cast<int>(size()));
+      if(step > 0)
+      {
+        size_type l_step = std::min(static_cast<size_t>(step), m_size);
+
+        m_begin += l_step;
+        m_size -= l_step;
+      }
 
       return *this;
     }
 
     constexpr span & dec_end() noexcept
     {
-      if(m_begin != m_end)
+      if(size_type{0} != m_size)
       {
-        --m_end;
+        --m_size;
       }
       return *this;
     }
 
     constexpr span & dec_end(size_type step) noexcept
     {
-      m_end -= std::min(step, size());
+      m_size -= std::min(step, m_size);
 
       return *this;
     }
 
     constexpr span & dec_end(int step) noexcept
     {
-      m_end -= std::min(step, static_cast<int>(size()));
+      if(step > 0)
+      {
+        m_size -= std::min(static_cast<size_type>(step), m_size);
+      }
 
       return *this;
     }
@@ -218,13 +230,13 @@ class span final
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return m_begin == m_end;;
+      return size_type{0} == m_size;
     }
 
     [[nodiscard]]
     constexpr value_type & front()
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("span<T>::front(): span is empty!");
       }
@@ -235,7 +247,7 @@ class span final
     [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("span<T>::front(): span is empty!");
       }
@@ -246,36 +258,36 @@ class span final
     [[nodiscard]]
     constexpr value_type & back()
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("span<T>::back(): span is empty!");
       }
 
-      return *(m_end - 1);
+      return *(begin() + (m_size - 1));
     }
 
     [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("span<T>::back(): span is empty!");
       }
 
-      return *(m_end - 1);
+      return *(begin() + (m_size - 1));
     }
 
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {
-      return static_cast<size_type>(m_end - m_begin);
+      return m_size;
     }
 
     [[nodiscard]]
     constexpr span subspan(size_type pos,
                            size_type len = npos) const noexcept
     {
-      const size_type l_size = size();
+      const size_type l_size = m_size;
       if(npos == len)
       {
         len = 0;
@@ -302,7 +314,7 @@ class span final
 
     constexpr size_type find_pos(const value_type & p_value) const noexcept
     {
-      return yy_data::find_pos_linear(m_begin, m_end, p_value).pos;
+      return yy_data::find_pos_linear(m_begin, m_size, p_value).pos;
     }
 
     [[nodiscard]]
@@ -357,7 +369,7 @@ class span final
 
   private:
     ptr m_begin = nullptr;
-    ptr m_end = nullptr;
+    size_type m_size = 0;
 };
 
 template<typename ValueType>
@@ -377,55 +389,55 @@ class const_span final
                               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
     constexpr explicit const_span(const T & container) noexcept:
       m_begin(container.data()),
-      m_end(container.data() + container.size())
+      m_size(container.size())
     {
     }
 
     constexpr explicit const_span(ptr p_begin,
                                   ptr p_end) noexcept:
       m_begin(p_begin),
-      m_end(p_end)
+      m_size(static_cast<size_type>(p_end - p_begin))
     {
     }
 
     constexpr explicit const_span(ptr p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin),
-      m_end(p_begin + p_size)
+      m_size(p_size)
     {
     }
 
     constexpr explicit const_span(iterator p_begin,
                                   iterator p_end) noexcept:
       m_begin(p_begin.ptr()),
-      m_end(p_end.ptr())
+      m_size(static_cast<size_type>(p_end.ptr() - p_begin.ptr()))
     {
     }
 
     constexpr explicit const_span(iterator p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin.ptr()),
-      m_end(p_begin.ptr() + p_size)
+      m_size(p_size)
     {
     }
 
     constexpr explicit const_span(yy_data::iterator_detail::iterator_ptr<const_span> p_begin,
                                   yy_data::iterator_detail::iterator_ptr<const_span> p_end) noexcept:
       m_begin(p_begin.ptr()),
-      m_end(p_end.ptr())
+      m_size(static_cast<size_type>(p_end.ptr() - p_begin.ptr()))
     {
     }
 
     constexpr explicit const_span(yy_data::iterator_detail::iterator_ptr<const_span> p_begin,
                                   const size_type p_size) noexcept:
       m_begin(p_begin.ptr()),
-      m_end(p_begin.ptr() + p_size)
+      m_size(p_size)
     {
     }
 
     constexpr explicit const_span(span<value_type> span) noexcept:
       m_begin(span.m_begin),
-      m_end(span.m_end)
+      m_size(span.m_size)
     {
     }
 
@@ -439,7 +451,7 @@ class const_span final
     [[nodiscard]]
     constexpr const value_type & operator[](size_type idx) const noexcept
     {
-      idx = std::min(idx, size());
+      idx = std::min(idx, m_size);
       return *(m_begin + idx);
     }
 
@@ -452,51 +464,62 @@ class const_span final
     [[nodiscard]]
     constexpr iterator end() const noexcept
     {
-      return iterator{this, size()};
+      return iterator{this, m_size};
     }
 
     constexpr const_span & inc_begin() noexcept
     {
-      if(m_begin != m_end)
+      if(size_type{0} != m_size)
       {
         ++m_begin;
+        --m_size;
       }
       return *this;
     }
 
     constexpr const_span & inc_begin(size_type step) noexcept
     {
-      m_begin += std::min(step, size());
+      step = std::min(step, m_size);
+      m_begin += step;
+      m_size -= step;
 
       return *this;
     }
 
     constexpr const_span & inc_begin(int step) noexcept
     {
-      m_begin += std::min(step, static_cast<int>(size()));
+      if(step > 0)
+      {
+        size_type l_step = std::min(static_cast<size_type>(step), size());
+        m_begin += l_step;
+        m_size -= l_step;
+      }
 
       return *this;
     }
 
     constexpr const_span & dec_end() noexcept
     {
-      if(m_begin != m_end)
+      if(size_type{0} != m_size)
       {
-        --m_end;
+        --m_size;
       }
       return *this;
     }
 
     constexpr const_span & dec_end(size_type step) noexcept
     {
-      m_end -= std::min(step, size());
+      m_size -= std::min(step, size());
 
       return *this;
     }
 
     constexpr const_span & dec_end(int step) noexcept
     {
-      m_end -= std::min(step, static_cast<int>(size()));
+      if(step > 0)
+      {
+        m_size -= std::min(static_cast<size_type>(step), m_size);
+      }
 
       return *this;
     }
@@ -510,13 +533,13 @@ class const_span final
     [[nodiscard]]
     constexpr bool empty() const noexcept
     {
-      return m_begin == m_end;;
+      return size_type{0} == m_size;
     }
 
     [[nodiscard]]
     constexpr value_const_l_value_ref front() const
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("const_span<T>::front(): span is empty!");
       }
@@ -527,25 +550,25 @@ class const_span final
     [[nodiscard]]
     constexpr value_const_l_value_ref back() const
     {
-      if(m_begin == m_end)
+      if(size_type{0} == m_size)
       {
         throw std::out_of_range("const_span<T>::back(): span is empty!");
       }
 
-      return *(m_end - 1);
+      return *(begin() + (m_size - 1));
     }
 
     [[nodiscard]]
     constexpr size_type size() const noexcept
     {
-      return static_cast<size_type>(m_end - m_begin);
+      return m_size;
     }
 
     [[nodiscard]]
     constexpr const_span subspan(size_type pos,
                                  size_type len = npos) const noexcept
     {
-      const size_type l_size = size();
+      const size_type l_size = m_size;
       if(npos == len)
       {
         len = 0;
@@ -572,7 +595,7 @@ class const_span final
 
     constexpr size_type find_pos(const value_type & p_value) const noexcept
     {
-      return yy_data::find_pos_linear(m_begin, m_end, p_value).pos;
+      return yy_data::find_pos_linear(m_begin, m_size, p_value).pos;
     }
 
     [[nodiscard]]
@@ -653,7 +676,7 @@ class const_span final
 
   private:
     mutable ptr m_begin = nullptr;
-    mutable ptr m_end = nullptr;
+    mutable size_type m_size = 0;
 };
 
 
