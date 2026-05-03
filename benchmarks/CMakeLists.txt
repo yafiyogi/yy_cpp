@@ -74,6 +74,12 @@ add_executable(benchmark_yy_cpp
   bench_string_copy.cpp
   bench_string_find.cpp
 
+  bench_fast_atoi.cpp
+  bench_fast_atoi_inc.cpp
+  bench_fast_atoi_idx.cpp
+  bench_fast_atoi_atoll.cpp
+  bench_fast_atoi_strtoll.cpp
+
   bench_yy_cpp.cpp )
 
 add_dependencies(benchmark_yy_cpp yy_cpp)
