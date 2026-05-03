@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2024-2025 Yafiyogi
+  Copyright (c) 2024-2026 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -55,11 +55,24 @@ struct val_valid_type final
     }
 };
 
+template<typename ValueType,
+         size_type Idx>
+inline void add_digit(ValueType & val, yy_quad::const_span<char> p_str) noexcept
+{
+  static_assert(Idx > 0, "add<Idx>(): Idx must be > 0.");
+  // Multiply current value by 10.
+  val *= 10;
+
+  // Add next digit.
+  val += static_cast<ValueType>(p_str[Idx - 1] - '0');
+};
+
 } // namespace fast_atoi_detail
 
 template<typename I>
 struct fast_atoi final
 {
+    static constexpr size_type max_digits = 20;
     using val_valid_type = fast_atoi_detail::val_valid_type<I>;
     using value_type = val_valid_type::value_type;
 
@@ -68,7 +81,7 @@ struct fast_atoi final
       using digits_type = Digits<value_type>;
 
       static_assert(std::is_integral_v<value_type>, "fast_atoi() only works with integer types!");
-      static_assert(digits_type::digits <= 20, "fast_atoi(): type contains too many digits!");
+      static_assert(digits_type::digits <= max_digits, "fast_atoi(): type contains too many digits!");
 
       if(p_str.size() > digits_type::digits)
       {
@@ -78,95 +91,86 @@ struct fast_atoi final
       value_type val = value_type{};
       FastNum state = FastNum::NoValue;
 
-      auto add = [&val, p_str]() mutable {
-        // Multiply current value by 10.
-        val *= 10;
-
-        // Add next digit.
-        val += static_cast<value_type>(*p_str.begin() - '0');
-        p_str.inc_begin();
-      };
-
       switch(p_str.size())
       {
         case 20:
-          add();
+          fast_atoi_detail::add_digit<value_type, 20>(val, p_str);
           [[fallthrough]];
 
         case 19:
-          add();
+          fast_atoi_detail::add_digit<value_type, 19>(val, p_str);
           [[fallthrough]];
 
         case 18:
-          add();
+          fast_atoi_detail::add_digit<value_type, 18>(val, p_str);
           [[fallthrough]];
 
         case 17:
-          add();
+          fast_atoi_detail::add_digit<value_type, 17>(val, p_str);
           [[fallthrough]];
 
         case 16:
-          add();
+          fast_atoi_detail::add_digit<value_type, 16>(val, p_str);
           [[fallthrough]];
 
         case 15:
-          add();
+          fast_atoi_detail::add_digit<value_type, 15>(val, p_str);
           [[fallthrough]];
 
         case 14:
-          add();
+          fast_atoi_detail::add_digit<value_type, 14>(val, p_str);
           [[fallthrough]];
 
         case 13:
-          add();
+          fast_atoi_detail::add_digit<value_type, 13>(val, p_str);
           [[fallthrough]];
 
         case 12:
-          add();
+          fast_atoi_detail::add_digit<value_type, 12>(val, p_str);
           [[fallthrough]];
 
         case 11:
-          add();
+          fast_atoi_detail::add_digit<value_type, 11>(val, p_str);
           [[fallthrough]];
 
         case 10:
-          add();
+          fast_atoi_detail::add_digit<value_type, 10>(val, p_str);
           [[fallthrough]];
 
         case 9:
-          add();
+          fast_atoi_detail::add_digit<value_type, 9>(val, p_str);
           [[fallthrough]];
 
         case 8:
-          add();
+          fast_atoi_detail::add_digit<value_type, 8>(val, p_str);
           [[fallthrough]];
 
         case 7:
-          add();
+          fast_atoi_detail::add_digit<value_type, 7>(val, p_str);
           [[fallthrough]];
 
         case 6:
-          add();
+          fast_atoi_detail::add_digit<value_type, 6>(val, p_str);
           [[fallthrough]];
 
         case 5:
-          add();
+          fast_atoi_detail::add_digit<value_type, 5>(val, p_str);
           [[fallthrough]];
 
         case 4:
-          add();
+          fast_atoi_detail::add_digit<value_type, 4>(val, p_str);
           [[fallthrough]];;
 
         case 3:
-          add();
+          fast_atoi_detail::add_digit<value_type, 3>(val, p_str);
           [[fallthrough]];
 
         case 2:
-          add();
+          fast_atoi_detail::add_digit<value_type, 2>(val, p_str);
           [[fallthrough]];
 
         case 1:
-          add();
+          fast_atoi_detail::add_digit<value_type, 1>(val, p_str);
           state = FastNum::Ok;
       }
 
