@@ -198,8 +198,8 @@ class tokenizer_first:
     using token_type = typename base_traits::token_type;
 
     constexpr explicit tokenizer_first(token_type p_source,
-                                     value_type p_delim) noexcept :
-      Base(p_source)
+                                       value_type p_delim) noexcept :
+      Base(p_source, p_delim)
     {
       if(auto src{Base::source()}; !src.empty() && (p_delim == src[0]))
       {
