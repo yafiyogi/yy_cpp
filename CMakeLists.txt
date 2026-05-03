@@ -54,7 +54,7 @@ target_sources(yy_cpp
     yy_locale.cpp
     yy_string_case.cpp
     yy_string_util.cpp
-    yy_scan_str.cpp
+#    yy_scan_str.cpp
   PUBLIC FILE_SET HEADERS
     FILES
       yy_aho_corasick.h
@@ -102,7 +102,8 @@ target_sources(yy_cpp
       yy_range.hpp
       yy_ref_traits.h
       yy_ring_buffer.h
-      yy_scan_str.hpp
+#      yy_scan_str.hpp
+      yy_skip_char.hpp
       yy_span.h
       yy_static_flat_map.h
       yy_static_vector.h
