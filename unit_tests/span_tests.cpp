@@ -93,9 +93,10 @@ TEST_F(TestSpan, span_subspan)
 TEST_F(TestSpan, span_find_pos)
 {
   std::string str = "1234567890";
+  const auto span = yafiyogi::yy_quad::make_span(str);
 
-  EXPECT_EQ(4, yafiyogi::yy_quad::make_span(str).find_pos('5'));
-  EXPECT_EQ(yafiyogi::npos, yafiyogi::yy_quad::make_span(str).find_pos('A'));
+  EXPECT_EQ(4, span.find_pos('5'));
+  EXPECT_EQ(span.size(), span.find_pos('A'));
 }
 
 TEST_F(TestSpan, span_lt)
@@ -212,9 +213,10 @@ TEST_F(TestSpan, const_span_subspan)
 TEST_F(TestSpan, const_span_find_pos)
 {
   std::string str = "1234567890";
+  const auto span = yafiyogi::yy_quad::make_const_span(str);
 
-  EXPECT_EQ(4, yafiyogi::yy_quad::make_const_span(str).find_pos('5'));
-  EXPECT_EQ(yafiyogi::npos, yafiyogi::yy_quad::make_const_span(str).find_pos('A'));
+  EXPECT_EQ(4, span.find_pos('5'));
+  EXPECT_EQ(span.size(), span.find_pos('A'));
 }
 
 TEST_F(TestSpan, const_span_lt)

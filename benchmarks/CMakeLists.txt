@@ -72,6 +72,7 @@ add_executable(benchmark_yy_cpp
   bench_compare_util.cpp
 
   bench_string_copy.cpp
+  bench_string_find.cpp
 
   bench_yy_cpp.cpp )
 

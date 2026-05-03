@@ -32,6 +32,8 @@
 
 #include "benchmark/benchmark.h"
 
+#include "yy_find_util.hpp"
+
 namespace {
 
 static constexpr const int max_array_size = 100000;
@@ -69,115 +71,113 @@ strings_type set_strings()
 
 static strings_type strings = set_strings();
 
-struct StringCopy:
+struct StringFind:
       public ::benchmark::Fixture
 {
   public:
-    StringCopy() {};
+    StringFind() {};
     void SetUp(const ::benchmark::State &) override {}
 };
 
 
 static constexpr char whitespace[] = {'\000', ' ', '\t', '\n'};
 
-static constexpr std::string_view whitespace_sv{whitespace, sizeof(whitespace)};
-
 }
 
-BENCHMARK_F(StringCopy, memcpy_memchr)(::benchmark::State & state)
+BENCHMARK_F(StringFind, memchr)(::benchmark::State & state)
 {
   std::size_t idx = 0;
-  char dest[max_dest_size];
-
-  while(state.KeepRunning())
-  {
-    auto & str = strings[idx];
-    const char * src = str.c_str();
-
-    std::size_t copy_size = std::min(sizeof(dest) - 1, str.size());
-
-    for(std::size_t ws_idx = 0; ws_idx < sizeof(whitespace); ++ws_idx)
-    {
-      if(auto end = static_cast<const char *>(std::memchr(src, whitespace[ws_idx], copy_size));
-         nullptr != end)
-      {
-        copy_size = static_cast<std::size_t>(end - src);
-      }
-    }
-
-    std::memcpy(dest, src, copy_size);
-    *(dest + copy_size) = 0;
-
-    ::benchmark::DoNotOptimize(dest);
-
-    ++idx;
-    if(strings.size() == idx)
-    {
-      idx = 0;
-    }
-  }
-}
-
-BENCHMARK_F(StringCopy, while_loop)(::benchmark::State & state)
-{
-  std::size_t idx = 0;
-  char dest[max_dest_size];
-
-  while(state.KeepRunning())
-  {
-    char * dst = dest;
-    const char * src = strings[idx].c_str();
-
-    std::size_t pos = 0;
-    while((*dst = *src))
-    {
-      ++pos;
-      if((pos == sizeof(dest))
-         || (nullptr != std::memchr(whitespace, *src, sizeof(whitespace))))
-      {
-        *dst = 0;
-        break;
-      }
-
-      ++dst;
-      ++src;
-    }
-
-    ::benchmark::DoNotOptimize(dest);
-
-    ++idx;
-    if(strings.size() == idx)
-    {
-      idx = 0;
-    }
-  }
-}
-
-BENCHMARK_F(StringCopy, memcpy_sv_find)(::benchmark::State & state)
-{
-  std::size_t idx = 0;
-  char dest[max_dest_size];
 
   while(state.KeepRunning())
   {
     const auto & str = strings[idx];
 
-    const char * src = str.c_str();
+    const auto start = str.c_str();
+    auto pos = static_cast<const char *>(memchr(start, 0, str.size() + 1)) - start;
 
-    std::size_t copy_size = std::min(sizeof(dest) - 1, str.size());
+    ::benchmark::DoNotOptimize(pos);
 
-    std::string_view copy_str{src, copy_size};
-    std::size_t end_pos = copy_str.find_first_of(whitespace_sv);
-
-    if(std::string_view::npos != end_pos)
+    ++idx;
+    if(strings.size() == idx)
     {
-      copy_size = end_pos;
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(StringFind, std_find)(::benchmark::State & state)
+{
+  std::size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    const auto & str = strings[idx];
+
+    const auto start = str.c_str();
+    const auto size = str.size() + 1;
+    auto end = std::find(start, start + size, 0);
+
+    if(nullptr == end)
+    {
+      end = start + size;
     }
 
-    std::memcpy(dest, src, copy_size);
-    *(dest + copy_size) = 0;
+    auto pos = end - start;
 
-    ::benchmark::DoNotOptimize(dest);
+    ::benchmark::DoNotOptimize(pos);
+
+    ++idx;
+    if(strings.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(StringFind, char_traits_find)(::benchmark::State & state)
+{
+  std::size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    const auto & str = strings[idx];
+
+    const auto start = str.c_str();
+    const auto size = str.size() + 1;
+
+    auto end = std::char_traits<char>::find(start, size, 0);
+
+    if(nullptr == end)
+    {
+      end = start + size;
+    }
+
+    auto pos = end - start;
+
+    ::benchmark::DoNotOptimize(pos);
+
+    ++idx;
+    if(strings.size() == idx)
+    {
+      idx = 0;
+    }
+  }
+}
+
+BENCHMARK_F(StringFind, find_pos_linear)(::benchmark::State & state)
+{
+  std::size_t idx = 0;
+
+  while(state.KeepRunning())
+  {
+    const auto & str = strings[idx];
+
+    const auto start = str.c_str();
+    const auto size = str.size() + 1;
+
+    auto pos = yafiyogi::yy_data::find_pos_linear(start, size, 0).pos;
+
+    ::benchmark::DoNotOptimize(pos);
 
     ++idx;
     if(strings.size() == idx)
