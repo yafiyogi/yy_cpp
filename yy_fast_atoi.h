@@ -64,7 +64,7 @@ inline void add_digit(ValueType & val, yy_quad::const_span<char> p_str) noexcept
   val *= 10;
 
   // Add next digit.
-  val += static_cast<ValueType>(p_str[Idx - 1] - '0');
+  val += static_cast<ValueType>(p_str[p_str.size() - Idx] - '0');
 };
 
 } // namespace fast_atoi_detail
