@@ -177,6 +177,7 @@ class Automaton final
     trie_vector m_nodes{};
     data_vector m_data{};
     node_ptr m_state{};
+    label_span_type::value_type m_delim{};
 };
 
 } // namespace fm_flat_trie_ptr_detail

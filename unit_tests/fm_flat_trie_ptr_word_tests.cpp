@@ -28,7 +28,6 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include <fmt/format.h>
 
 #include "yy_fm_flat_trie_ptr.h"
 
@@ -42,11 +41,11 @@ class TestFMFlatTriePtrWord:
 {
   public:
     template<typename LabelType>
-    using fm_flat_ptr_word_tokenizer_type = yafiyogi::yy_trie::label_word_tokenizer<LabelType, '/'>;
+    using tokenizer_type = yafiyogi::yy_trie::label_word_tokenizer<LabelType, '/'>;
 
     using flat_trie_type = yafiyogi::yy_data::fm_flat_trie_ptr<std::string, int,
                                                                yafiyogi::yy_data::fm_flat_trie_ptr_detail::Automaton,
-                                                               fm_flat_ptr_word_tokenizer_type>;
+                                                               tokenizer_type>;
     using traits = flat_trie_type::trie_traits;
     using trie_node = traits::idx_node_type;
 

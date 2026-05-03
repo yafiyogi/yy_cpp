@@ -54,7 +54,6 @@ struct traits final
 };
 
 template<typename T,
-         T t_delim,
          typename Enable = void>
 struct default_scanner final
 {
@@ -63,24 +62,24 @@ struct default_scanner final
     using token_type = typename tokenizer_traits::token_type;
 
     [[nodiscard]]
-    static constexpr token_type scan(const token_type p_source) noexcept
+    static constexpr token_type scan(const token_type p_source,
+                                     value_type p_delim) noexcept
     {
       const auto source_begin{p_source.begin()};
-      auto token_end{std::find(source_begin, p_source.end(), t_delim)};
+      auto token_end{std::find(source_begin, p_source.end(), p_delim)};
 
       return token_type{source_begin, token_end};
     }
 
-    static constexpr token_type skip(const token_type p_source) noexcept
+    static constexpr token_type skip(const token_type p_source,
+                                     value_type p_delim) noexcept
     {
-      return skip_not_char<token_type>(p_source, t_delim);
+      return skip_not_char<token_type>(p_source, p_delim);
     }
 };
 
-template<typename T,
-         T t_delim>
+template<typename T>
 struct default_scanner<T,
-                       t_delim,
                        std::enable_if_t<yy_traits::is_char_type_v<T>>> final
 {
     using tokenizer_traits = traits<T>;
@@ -90,12 +89,13 @@ struct default_scanner<T,
     using char_traits = std::char_traits<value_type>;
 
     [[nodiscard]]
-    static constexpr token_type scan(const token_type p_source) noexcept
+    static constexpr token_type scan(const token_type p_source,
+                                     value_type p_delim) noexcept
     {
       const_value_ptr l_source_begin = p_source.data();
       size_type l_size = p_source.size();
 
-      const_value_ptr token_end{char_traits::find(l_source_begin, l_size, t_delim)};
+      const_value_ptr token_end{char_traits::find(l_source_begin, l_size, p_delim)};
       if(nullptr == token_end)
       {
         token_end = l_source_begin + l_size;
@@ -104,16 +104,16 @@ struct default_scanner<T,
       return token_type{l_source_begin, token_end};
     }
 
-    static constexpr token_type skip(const token_type p_source) noexcept
+    static constexpr token_type skip(const token_type p_source,
+                                     value_type p_delim) noexcept
     {
-      return skip_not_char<token_type>(p_source, t_delim);
+      return skip_not_char<token_type>(p_source, p_delim);
     }
 };
 
 template<typename T,
-         T t_delim,
-         ScanType t_scan_type,
-         typename Scanner = default_scanner<T, t_delim>>
+         ScanType t_scan_type = ScanType::All,
+         typename Scanner = default_scanner<T>>
 class tokenizer
 {
   public:
@@ -123,9 +123,10 @@ class tokenizer
     using token_type = typename tokenizer_traits::token_type;
     using scanner = Scanner;
 
-    constexpr explicit tokenizer(token_type p_source) noexcept :
+    constexpr explicit tokenizer(token_type p_source, value_type p_delim) noexcept :
       m_source(p_source),
-      m_token(p_source.begin(), p_source.begin())
+      m_token(p_source.begin(), p_source.begin()),
+      m_delim(p_delim)
     {
     }
 
@@ -139,7 +140,7 @@ class tokenizer
     [[nodiscard]]
     constexpr token_type scan() noexcept
     {
-      m_token = Scanner::scan(m_source);
+      m_token = Scanner::scan(m_source, m_delim);
       m_source = token_type{m_token.end(), m_source.end()};
       m_source.inc_begin();
 
@@ -147,7 +148,7 @@ class tokenizer
       {
         if(!m_source.empty())
         {
-          m_source = Scanner::skip(m_source);
+          m_source = Scanner::skip(m_source, m_delim);
         }
       }
 
@@ -178,18 +179,16 @@ class tokenizer
       return m_source;
     }
 
-    static constexpr value_type delim = t_delim;
-
   private:
     token_type m_source{};
     token_type m_token{};
+    value_type m_delim{};
 };
 
 template<typename T,
-         T t_delim,
-         ScanType t_scan_type,
-         typename Scanner = default_scanner<T, t_delim>,
-         typename Base = tokenizer<T, t_delim, t_scan_type, Scanner>>
+         ScanType t_scan_type = ScanType::All,
+         typename Scanner = default_scanner<T>,
+         typename Base = tokenizer<T, t_scan_type, Scanner>>
 class tokenizer_first:
       public Base
 {
@@ -198,10 +197,11 @@ class tokenizer_first:
     using value_type = typename base_traits::value_type;
     using token_type = typename base_traits::token_type;
 
-    constexpr explicit tokenizer_first(token_type p_source) noexcept :
+    constexpr explicit tokenizer_first(token_type p_source,
+                                     value_type p_delim) noexcept :
       Base(p_source)
     {
-      if(auto src{Base::source()}; !src.empty() && (t_delim == src[0]))
+      if(auto src{Base::source()}; !src.empty() && (p_delim == src[0]))
       {
         // Remove delim at begining if present.
         std::ignore = Base::scan();
@@ -211,13 +211,11 @@ class tokenizer_first:
 
 } // namespace tokenizer_detail
 
-template<typename T,
-         T t_delim>
-using tokenizer = tokenizer_detail::tokenizer<T, t_delim, tokenizer_detail::ScanType::All>;
+template<typename T>
+using tokenizer = tokenizer_detail::tokenizer<T, tokenizer_detail::ScanType::All>;
 
-template<typename T,
-         T t_delim>
+template<typename T>
 using tokenizer_first =
-  tokenizer_detail::tokenizer_first<T, t_delim, tokenizer_detail::ScanType::All>;
+  tokenizer_detail::tokenizer_first<T, tokenizer_detail::ScanType::All>;
 
 } // namespace yafiyogi::yy_util
