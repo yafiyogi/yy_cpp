@@ -112,8 +112,8 @@ target_link_libraries(test_yy_cpp
   yy_cpp
   yy_test::yy_test
   Boost::locale
-  fmt::fmt
   spdlog::spdlog
+  fmt::fmt
   GTest::gtest
   GTest::gtest_main
   ICU::i18n
