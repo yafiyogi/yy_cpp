@@ -146,16 +146,16 @@ template<typename T>
 using is_optional_t = typename is_optional<T>::type;
 
 template<typename T>
-constexpr bool is_narrow_char_type_v = std::is_same_v<char, yy_traits::remove_cvr_t<T>>
-                                       || std::is_same_v<char8_t, yy_traits::remove_cvr_t<T>>
-                                       || std::is_same_v<uint8_t, yy_traits::remove_cvr_t<T>>;
+concept is_narrow_char_type = std::is_same_v<char, yy_traits::remove_cvr_t<T>>
+  || std::is_same_v<char8_t, yy_traits::remove_cvr_t<T>>
+  || std::is_same_v<uint8_t, yy_traits::remove_cvr_t<T>>;
 
 template<typename T>
-constexpr bool is_wide_char_type_v = std::is_same_v<wchar_t, yy_traits::remove_cvr_t<T>>
-                                     || std::is_same_v<char16_t, yy_traits::remove_cvr_t<T>>
-                                     || std::is_same_v<char32_t, yy_traits::remove_cvr_t<T>>;
+concept is_wide_char_type = std::is_same_v<wchar_t, yy_traits::remove_cvr_t<T>>
+  || std::is_same_v<char16_t, yy_traits::remove_cvr_t<T>>
+  || std::is_same_v<char32_t, yy_traits::remove_cvr_t<T>>;
 
 template<typename T>
-constexpr bool is_char_type_v = is_narrow_char_type_v<T> || is_wide_char_type_v<T>;
+concept is_char_type_v = is_narrow_char_type<T> || is_wide_char_type<T>;
 
 } // namespace yafiyogi::yy_traits

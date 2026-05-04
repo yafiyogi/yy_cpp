@@ -75,9 +75,9 @@ class span final
     using iterator = yy_data::iterator_detail::iterator_ptr<span>;
     using const_iterator = yy_data::iterator_detail::const_iterator_ptr<span>;
 
-    template<typename T,
-             std::enable_if_t<yy_traits::is_container_v<T>
-                              && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
+    template<typename T>
+      requires yy_traits::is_container_v<T>
+                 && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
     constexpr explicit span(const T & container) noexcept:
       m_begin(container.data()),
       m_size(container.size())
@@ -384,9 +384,9 @@ class const_span final
     using ptr = typename traits::const_ptr;
     using iterator = yy_data::iterator_detail::const_iterator_ptr<const_span>;
 
-    template<typename T,
-             std::enable_if_t<yy_traits::is_container_v<T>
-                              && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>>>
+    template<typename T>
+      requires yy_traits::is_container_v<T>
+                 && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
     constexpr explicit const_span(const T & container) noexcept:
       m_begin(container.data()),
       m_size(container.size())
@@ -679,9 +679,7 @@ class const_span final
     mutable size_type m_size = 0;
 };
 
-
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct span_traits_helper final
 {
     using traits = typename span_detail::span_traits<T>;
@@ -691,10 +689,8 @@ struct span_traits_helper final
 };
 
 template<typename T>
-struct span_traits_helper<T,
-                          std::enable_if_t<yy_traits::is_vector_v<T>
-                                           || yy_traits::is_std_string_v<T>
-                                           || yy_traits::is_array_v<T>>> final
+  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
+struct span_traits_helper<T> final
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
     using value_type = typename traits::value_type;
@@ -703,8 +699,8 @@ struct span_traits_helper<T,
 };
 
 template<typename T>
-struct span_traits_helper<T,
-                          std::enable_if_t<yy_traits::is_std_string_view_v<T>>> final
+  requires yy_traits::is_std_string_view_v<T>
+struct span_traits_helper<T> final
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
     using value_type = typename traits::value_type;
@@ -713,8 +709,8 @@ struct span_traits_helper<T,
 };
 
 template<typename T>
-struct span_traits_helper<T,
-                          std::enable_if_t<std::is_same_v<char, yy_traits::remove_cvr_t<T>>>> final
+  requires std::is_same_v<char, yy_traits::remove_cvr_t<T>>
+struct span_traits_helper<T> final
 {
     using traits = typename span_detail::span_traits<char>;
     using value_type = typename traits::value_type;
@@ -723,8 +719,8 @@ struct span_traits_helper<T,
 };
 
 template<typename T>
-struct span_traits_helper<T,
-                          std::enable_if_t<yy_traits::is_c_string_v<T>>> final
+  requires yy_traits::is_c_string_v<T>
+struct span_traits_helper<T> final
 {
     using traits = typename span_detail::span_traits<std::remove_pointer_t<std::decay_t<T>>>;
     using value_type = typename traits::value_type;
@@ -732,37 +728,34 @@ struct span_traits_helper<T,
     using const_span_type = const_span<value_type>;
 };
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_std_string_v<T>
-                          || yy_traits::is_array_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
 constexpr auto make_span(T & container)
 {
   return typename span_traits_helper<T>::span_type{container.data(), container.size()};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_std_string_view_v<T>
 constexpr auto make_span(T p_sv)
 {
-  static_assert(!yy_traits::is_std_string_view_v<T>, "Can't create a 'span<>' from std::string_view!");
+  static_assert(!yy_traits::is_std_string_view_v<T>,
+                "Can't create a 'span<>' from std::string_view!");
   //return typename span_traits_helper<T>::const_span_type{p_sv.data(), p_sv.size()};
 }
 
-template<typename T,
-         std::enable_if_t<!std::is_array_v<T>
-                          && yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires(!std::is_array_v<T> && yy_traits::is_c_string_v<T>)
 constexpr auto make_span(T /* p_str */)
 {
-  static_assert(std::is_array_v<T>
-                || !yy_traits::is_c_string_v<T>, "Can't create a 'span<>' from 'char *' or 'char[]'!");
+  static_assert(std::is_array_v<T> || !yy_traits::is_c_string_v<T>,
+                "Can't create a 'span<>' from 'char *' or 'char[]'!");
   // std::string_view str{p_str};
   // return make_span(str);
 }
 
-template<typename T,
-         size_type N>
-constexpr auto make_span(T (& p_array)[N])
+template<typename T, size_type N>
+constexpr auto make_span(T (&p_array)[N])
 {
   using helper = span_traits_helper<T>;
   using traits = typename helper::traits;
@@ -772,42 +765,38 @@ constexpr auto make_span(T (& p_array)[N])
   return typename span_traits_helper<T>::span_type{l_array, N};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_span_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_span_v<T>
 constexpr auto make_span(T p_span)
 {
   return T{p_span};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_vector_v<T>
-                          || yy_traits::is_std_string_v<T>
-                          || yy_traits::is_array_v<T>, bool> = true>
-constexpr auto make_const_span(T & container)
+template<typename T>
+  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
+constexpr auto make_const_span(const T & container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_std_string_view_v<T>, bool> = true>
-constexpr auto make_const_span(T p_sv)
+template<typename T>
+  requires yy_traits::is_std_string_view_v<T>
+constexpr auto make_const_span(const T p_sv)
 {
   return typename span_traits_helper<T>::const_span_type{p_sv.data(), p_sv.size()};
 }
 
-template<typename T,
-         std::enable_if_t<!std::is_array_v<T>
-                          && yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires(!std::is_array_v<T> && yy_traits::is_c_string_v<T>)
 constexpr auto make_const_span(T p_str)
 {
   std::string_view str{p_str};
   return typename span_traits_helper<std::string_view>::const_span_type{str.data(), str.size()};
 }
 
-template<typename T,
-         size_type N,
-         std::enable_if_t<!std::is_same_v<char, yy_traits::remove_cvr_t<T>>, bool> = true>
-constexpr auto make_const_span(T (& p_array)[N])
+template<typename T, size_type N>
+  requires(!std::is_same_v<char, yy_traits::remove_cvr_t<T>>)
+constexpr auto make_const_span(T (&p_array)[N])
 {
   using helper = span_traits_helper<T>;
   using traits = typename helper::traits;
@@ -817,8 +806,8 @@ constexpr auto make_const_span(T (& p_array)[N])
   return typename span_traits_helper<T>::const_span_type{l_array, N};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_span_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_span_v<T>
 constexpr auto make_const_span(T p_span)
 {
   return T{p_span};

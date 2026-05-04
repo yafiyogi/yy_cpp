@@ -35,8 +35,7 @@
 namespace yafiyogi::yy_util {
 
 template<typename Lhs,
-         typename Rhs,
-         typename Enable = void>
+         typename Rhs>
 struct Compare final
 {
     using lhs_type = yy_traits::remove_cvr_t<Lhs>;
@@ -100,9 +99,9 @@ struct Compare final
 
 template<typename Lhs,
          typename Rhs>
-struct Compare<Lhs, Rhs,
-               std::enable_if_t<std::is_arithmetic_v<Lhs>
-                                && std::is_arithmetic_v<Rhs>>> final
+  requires std::is_arithmetic_v<Lhs>
+    && std::is_arithmetic_v<Rhs>
+struct Compare<Lhs, Rhs> final
 {
     using lhs_type = yy_traits::remove_cvr_t<Lhs>;
     using rhs_type = yy_traits::remove_cvr_t<Rhs>;
@@ -130,10 +129,10 @@ struct Compare<Lhs, Rhs,
 
 template<typename Lhs,
          typename Rhs>
-struct Compare<Lhs, Rhs,
-               std::enable_if_t<std::is_same_v<typename yy_traits::remove_cvr_t<Lhs>::value_type,
-                                               typename yy_traits::remove_cvr_t<Rhs>::value_type>
-                                && std::is_same_v<char, typename yy_traits::remove_cvr_t<Lhs>::value_type>>> final
+requires std::is_same_v<typename yy_traits::remove_cvr_t<Lhs>::value_type,
+                        typename yy_traits::remove_cvr_t<Rhs>::value_type>
+  && std::is_same_v<char, typename yy_traits::remove_cvr_t<Lhs>::value_type>
+struct Compare<Lhs, Rhs> final
 {
     using lhs_type = yy_traits::remove_cvr_t<Lhs>;
     using rhs_type = yy_traits::remove_cvr_t<Rhs>;

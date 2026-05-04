@@ -34,8 +34,7 @@
 namespace yafiyogi::yy_util {
 namespace traits {
 
-template<typename Value,
-         typename Enable = void>
+template<typename Value>
 struct lockable_value_visitor_traits final
 {
     constexpr lockable_value_visitor_traits() noexcept = default;
@@ -62,9 +61,9 @@ struct lockable_value_visitor_traits final
 };
 
 template<typename Value>
-struct lockable_value_visitor_traits<Value,
-                                     std::enable_if_t<std::is_pointer_v<Value>
-                                                      || yy_traits::is_smart_ptr_v<Value>>> final
+  requires std::is_pointer_v<Value>
+    || yy_traits::is_smart_ptr_v<Value>
+struct lockable_value_visitor_traits<Value> final
 {
     constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;
@@ -96,8 +95,8 @@ struct lockable_value_visitor_traits<Value,
 };
 
 template<typename Value>
-struct lockable_value_visitor_traits<Value,
-                                     std::enable_if_t<yy_traits::is_optional_v<Value>>> final
+  requires yy_traits::is_optional_v<Value>
+struct lockable_value_visitor_traits<Value> final
 {
     constexpr lockable_value_visitor_traits() noexcept = default;
     lockable_value_visitor_traits(const lockable_value_visitor_traits &) = delete;

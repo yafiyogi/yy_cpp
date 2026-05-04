@@ -40,16 +40,14 @@ template<typename T>
 struct container_traits<std::basic_string<T>>:
       std::true_type
 {
-    using value_type =
-      yy_traits::remove_cvr_t<typename std::basic_string<T>::value_type>;
+    using value_type = yy_traits::remove_cvr_t<typename std::basic_string<T>::value_type>;
 };
 
 template<typename T>
 struct container_traits<std::basic_string_view<T>>:
       std::true_type
 {
-    using value_type =
-      yy_traits::remove_cvr_t<typename std::basic_string_view<T>::value_type>;
+    using value_type = yy_traits::remove_cvr_t<typename std::basic_string_view<T>::value_type>;
 };
 
 template<>
@@ -94,54 +92,47 @@ struct container_traits<char8_t[N]>:
     using value_type = char8_t;
 };
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct is_std_string_traits:
       std::false_type
 {
 };
 
 template<typename T>
-struct is_std_string_traits<T,
-                            typename std::enable_if_t<std::is_base_of_v<std::string,
-                                                                        yy_traits::remove_cvr_t<T>>>>:
+  requires std::is_base_of_v<std::string, yy_traits::remove_cvr_t<T>>
+struct is_std_string_traits<T>:
       std::true_type
 {
 };
 
 template<typename T>
-struct is_std_string_traits<T,
-                            typename std::enable_if_t<std::is_base_of_v<std::u8string,
-                                                                        yy_traits::remove_cvr_t<T>>>>:
+  requires std::is_base_of_v<std::u8string, yy_traits::remove_cvr_t<T>>
+struct is_std_string_traits<T>:
       std::true_type
 {
 };
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct is_std_string_view_traits:
       std::false_type
 {
 };
 
 template<typename T>
-struct is_std_string_view_traits<T,
-                                 typename std::enable_if_t<std::is_base_of_v<std::string_view,
-                                                                             yy_traits::remove_cvr_t<T>>>>:
+  requires std::is_base_of_v<std::string_view, yy_traits::remove_cvr_t<T>>
+struct is_std_string_view_traits<T>:
       std::true_type
 {
 };
 
 template<typename T>
-struct is_std_string_view_traits<T,
-                                 typename std::enable_if_t<std::is_base_of_v<std::u8string_view,
-                                                                             yy_traits::remove_cvr_t<T>>>>:
+  requires std::is_base_of_v<std::u8string_view, yy_traits::remove_cvr_t<T>>
+struct is_std_string_view_traits<T>:
       std::true_type
 {
 };
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct is_c_string_traits:
       std::false_type
 {
@@ -149,56 +140,50 @@ struct is_c_string_traits:
 
 // is_c_string_traits for char *
 template<typename T>
-struct is_c_string_traits<T,
-                          typename std::enable_if_t<std::is_pointer_v<T>
-                                                    && std::is_same_v<char,
-                                                                      yy_traits::remove_cvr_t<std::remove_pointer_t<T>>>>>:
+  requires std::is_pointer_v<T>
+           && std::is_same_v<char, yy_traits::remove_cvr_t<std::remove_pointer_t<T>>>
+struct is_c_string_traits<T>:
       std::true_type
 {
 };
 
 // is_c_string_traits for char[]
 template<typename T>
-struct is_c_string_traits<T,
-                          typename std::enable_if_t<std::is_array_v<T>
-                                                    && std::is_same_v<char,
-                                                                      yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>>>:
+  requires std::is_array_v<T>
+           && std::is_same_v<char, yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>
+struct is_c_string_traits<T>:
       std::true_type
 {
 };
 
 // is_c_string_traits for char8_t *
 template<typename T>
-struct is_c_string_traits<T,
-                          typename std::enable_if_t<std::is_pointer_v<T>
-                                                    && std::is_same_v<char8_t,
-                                                                      yy_traits::remove_cvr_t<std::remove_pointer_t<T>>>>>:
+  requires std::is_pointer_v<T>
+           && std::is_same_v<char8_t, yy_traits::remove_cvr_t<std::remove_pointer_t<T>>>
+struct is_c_string_traits<T>:
       std::true_type
 {
 };
 
 // is_c_string_traits for char8_t[]
 template<typename T>
-struct is_c_string_traits<T,
-                          typename std::enable_if_t<std::is_array_v<T>
-                                                    && std::is_same_v<char8_t,
-                                                                      yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>>>:
+  requires std::is_array_v<T>
+           && std::is_same_v<char8_t, yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>
+struct is_c_string_traits<T>:
       std::true_type
 {
 };
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct is_char_array_traits:
       std::false_type
 {
 };
 
 template<typename T>
-struct is_char_array_traits<T,
-                            typename std::enable_if_t<std::is_array_v<T>
-                                                      && std::is_same_v<char,
-                                                                        yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>>>:
+  requires std::is_array_v<T>
+           && std::is_same_v<char, yy_traits::remove_cvr_t<std::remove_all_extents_t<T>>>
+struct is_char_array_traits<T>:
       std::true_type
 {
 };
@@ -244,17 +229,15 @@ using is_c_string_t = typename is_c_string<T>::type;
 /**
  * @brief is_string type trait
  */
-template<typename T, typename Enable = void>
+template<typename T>
 struct is_string: std::false_type
 {
 };
 
 template<typename T>
-struct is_string<T,
-                 typename std::enable_if_t<is_c_string_v<T>
-                                           || is_std_string_v<T>
-                                           || is_std_string_view_v<T>>>:
-      std::true_type
+  requires is_c_string_v<T> || is_std_string_v<T> || is_std_string_view_v<T>
+struct is_string<T>:
+  std::true_type
 {
 };
 
@@ -263,7 +246,6 @@ inline constexpr bool is_string_v = is_string<T>::value;
 
 template<typename T>
 using is_string_t = typename is_string<T>::type;
-
 
 /**
  * @brief is_c_string type trait

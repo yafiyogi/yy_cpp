@@ -51,8 +51,8 @@ inline bool yaml_is_sequence(const YAML::Node & node) noexcept
   return node && node.IsSequence();
 }
 
-template<typename T,
-         std::enable_if_t<!yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires (!yy_traits::is_c_string_v<T>)
 inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node)
 {
   if(yaml_is_scalar(node))
@@ -63,16 +63,16 @@ inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node)
   return T{};
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_c_string_v<T>
 inline std::string_view yaml_get_value(const YAML::Node & node)
 {
   return yaml_get_value<std::string_view>(node);
 }
 
-template<typename T,
-         std::enable_if_t<!yy_traits::is_std_string_v<T>
-                          && !yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires (!yy_traits::is_std_string_v<T>
+    && !yy_traits::is_c_string_v<T>)
 inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node, T && value)
 {
   if(yaml_is_scalar(node))
@@ -83,16 +83,16 @@ inline yy_traits::remove_cvr_t<T> yaml_get_value(const YAML::Node & node, T && v
   return value;
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_std_string_v<T>
-                          || yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_std_string_v<T>
+    || yy_traits::is_c_string_v<T>
 inline std::string_view yaml_get_value(const YAML::Node & node, T && value)
 {
   return yaml_get_value(node, std::string_view{value});
 }
 
-template<typename T,
-         std::enable_if_t<!yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires (!yy_traits::is_c_string_v<T>)
 inline std::optional<yy_traits::remove_cvr_t<T>> yaml_get_optional_value(const YAML::Node & node)
 {
   std::optional<T> return_value{std::nullopt};
@@ -104,8 +104,8 @@ inline std::optional<yy_traits::remove_cvr_t<T>> yaml_get_optional_value(const Y
   return return_value;
 }
 
-template<typename T,
-         std::enable_if_t<yy_traits::is_c_string_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_c_string_v<T>
 inline std::optional<std::string_view> yaml_get_optional_value(const YAML::Node & node)
 {
   return yaml_get_optional_value<std::string_view>(node);

@@ -35,8 +35,7 @@
 namespace yafiyogi::yy_data {
 namespace find_util_detail {
 
-template<typename ValueType,
-         typename Enable = void>
+template<typename ValueType>
 struct find_pos_linear
 {
     template<typename Iterator>
@@ -59,9 +58,9 @@ struct find_pos_linear
 };
 
 template<typename ValueType>
-struct find_pos_linear<ValueType,
-                       std::enable_if_t<yy_traits::is_narrow_char_type_v<ValueType>
-                                        || yy_traits::is_wide_char_type_v<ValueType>>>
+requires yy_traits::is_narrow_char_type<ValueType>
+  || yy_traits::is_wide_char_type<ValueType>
+struct find_pos_linear<ValueType>
 {
     template<typename Iterator>
     constexpr static pos_found_type find(const Iterator & p_begin,
@@ -113,8 +112,8 @@ constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
                                                             p_value);
 }
 
-template<typename ValueStore,
-         std::enable_if_t<yy_traits::is_container_v<ValueStore>, bool> = true>
+template<typename ValueStore>
+requires yy_traits::is_container_v<ValueStore>
 constexpr inline pos_found_type find_pos_linear(const ValueStore & p_store,
                                                 const typename ValueStore::value_type & p_value) noexcept
 {

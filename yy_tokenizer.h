@@ -53,8 +53,7 @@ struct traits final
     using token_type = yy_quad::const_span<value_type>;
 };
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct default_scanner final
 {
     using tokenizer_traits = traits<T>;
@@ -79,8 +78,8 @@ struct default_scanner final
 };
 
 template<typename T>
-struct default_scanner<T,
-                       std::enable_if_t<yy_traits::is_char_type_v<T>>> final
+  requires yy_traits::is_char_type_v<T>
+struct default_scanner<T> final
 {
     using tokenizer_traits = traits<T>;
     using token_type = typename tokenizer_traits::token_type;

@@ -39,9 +39,9 @@
 
 namespace yafiyogi::yy_util {
 
-template<typename T,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>
-                          || yafiyogi::yy_traits::is_array_v<T>, bool> = true>
+template<typename T>
+  requires yy_traits::is_vector_v<T>
+    || yy_traits::is_array_v<T>
 constexpr T sort(T && container)
 {
   std::sort(container.data(), container.data() + container.size());
@@ -49,8 +49,8 @@ constexpr T sort(T && container)
   return container;
 }
 
-template<typename T,
-         std::enable_if_t<yafiyogi::yy_traits::is_vector_v<T>, bool> = true>
+template<typename T>
+  requires yafiyogi::yy_traits::is_vector_v<T>
 constexpr void unique(T & container)
 {
   container.erase(std::unique(container.begin(),

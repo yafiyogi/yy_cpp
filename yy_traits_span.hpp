@@ -72,6 +72,18 @@ struct span_traits<yy_quad::const_span<T>>:
 {
 };
 
+template<typename T>
+struct const_span_traits:
+      std::false_type
+{
+};
+
+template<typename T>
+struct const_span_traits<yy_quad::const_span<T>>:
+      std::true_type
+{
+};
+
 } // namespace traits_detail
 
 template<typename T>
@@ -82,6 +94,15 @@ using is_span_t = typename is_span<T>::type;
 
 template<typename T>
 inline constexpr bool is_span_v = is_span<T>::value;
+
+template<typename T>
+using is_const_span = traits_detail::const_span_traits<T>;
+
+template<typename T>
+using is_const_span_t = typename is_const_span<T>::type;
+
+template<typename T>
+inline constexpr bool is_const_span_v = is_const_span<T>::value;
 
 } // namespace yy_traits
 } // namespace yafiyogi

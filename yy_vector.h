@@ -165,9 +165,9 @@ class vector
       return yy_util::less_than(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -176,9 +176,9 @@ class vector
       return yy_util::less_than(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const vector & b) noexcept
@@ -194,9 +194,9 @@ class vector
       return yy_util::equal(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
@@ -205,9 +205,9 @@ class vector
       return yy_util::equal(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const vector & b) noexcept
@@ -918,18 +918,18 @@ class simple_vector
       return yy_util::less_than(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
       return yy_util::less_than(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const simple_vector & b) noexcept
@@ -943,18 +943,18 @@ class simple_vector
       return yy_util::equal(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
       return yy_util::equal(*this, other);
     }
 
-    template<typename type,
-             std::enable_if_t<yy_traits::is_container_v<type>
-                              && !yy_traits::is_span_v<type>>>
+    template<typename type>
+      requires (yy_traits::is_container_v<type>
+        && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const simple_vector & b) noexcept

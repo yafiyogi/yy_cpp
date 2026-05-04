@@ -32,8 +32,7 @@
 
 namespace yafiyogi::yy_traits {
 
-template<typename T,
-         typename Enable = void>
+template<typename T>
 struct ref_traits
 {
     using type = yy_traits::remove_cvr_t<T>;
@@ -43,8 +42,8 @@ struct ref_traits
 };
 
 template<typename T>
-struct ref_traits<T,
-                  std::enable_if_t<std::is_trivially_copyable_v<yy_traits::remove_cvr_t<T>>>>
+  requires std::is_trivially_copyable_v<yy_traits::remove_cvr_t<T>>
+struct ref_traits<T>
 {
     using type = yy_traits::remove_cvr_t<T>;
     using l_value_ref = type;

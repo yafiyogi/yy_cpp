@@ -34,25 +34,36 @@
 #include <bit>
 #include <string_view>
 
-#include "yy_types.hpp"
 #include "yy_traits_span.hpp"
 #include "yy_traits_string.hpp"
 #include "yy_type_traits.h"
+#include "yy_types.hpp"
 
 #include "yy_span.h"
 
 namespace yafiyogi::yy_util {
 
-enum class UTF8State: uint8_t { Ok, Start, InvalidDelim, InvalidChar, NotFound };
+enum class UTF8State : uint8_t
+{
+  Ok,
+  InvalidDelim,
+  InvalidChar,
+  NotFound
+};
 
 namespace utf8_detail {
 
+template<typename SpanType>
+concept utf8_span_type = yy_traits::is_const_span_v<SpanType>;
+
 template<typename CharType>
+concept utf8_char_type = yy_traits::is_narrow_char_type<CharType>;
+
+template<typename CharType>
+  requires utf8_char_type<CharType>
 struct utf8_constants
 {
     using char_type = yy_traits::remove_cvr_t<CharType>;
-
-    static_assert(yy_traits::is_narrow_char_type_v<char_type>, "CharType must be char, char8_t, or uint8_t for utf8_constants!");
 
     static constexpr char_type utf8_flag = static_cast<char_type>(0x80);
 
@@ -72,26 +83,37 @@ struct utf8_constants
     static constexpr char_type utf8_cont_bits = static_cast<char_type>(0x80);
 };
 
-template<typename SpanType,
-         typename span_type_raw = yy_traits::remove_cvr_t<SpanType>,
-         std::enable_if_t<yy_traits::is_narrow_char_type_v<typename span_type_raw::value_type>
-                          && (yy_traits::is_span_v<span_type_raw>
-                              || yy_traits::is_std_string_v<span_type_raw>
-                              || yy_traits::is_std_string_view_v<span_type_raw>), bool> = true>
+template<typename SpanType, typename span_type_t = yy_traits::remove_cvr_t<SpanType>>
+  requires requires {
+    requires utf8_span_type<span_type_t>;
+    typename span_type_t::value_type;
+    requires utf8_char_type<typename span_type_t::value_type>;
+  }
 struct utf8_traits
 {
-    using value_type = yy_traits::remove_cvr_t<typename span_type_raw::value_type>;
-    using span_type = span_type_raw;
-    using char_ptr = std::add_pointer<value_type>;
-    using const_char_ptr = std::add_pointer_t<std::add_const_t<value_type>>;
+    using span_type = span_type_t;
+    using char_type = yy_traits::remove_cvr_t<typename span_type::value_type>;
+    using char_ptr = std::add_pointer<char_type>;
+    using const_char_ptr = std::add_pointer_t<std::add_const_t<char_type>>;
+    using constants = utf8_constants<char_type>;
+};
 
-    using constants = utf8_constants<value_type>;
+template<typename SpanType>
+concept span_interface = requires(SpanType span) {
+  requires utf8_span_type<SpanType>;
+  typename SpanType::value_type;
+  span.data();
+  span.size();
+  span.begin();
+  span.end();
+  span.inc_begin();
+  span.dec_end();
 };
 
 } // namespace utf8_detail
 
-
 template<typename CharType>
+  requires utf8_detail::utf8_char_type<CharType>
 inline size_type utf8_cp_len(CharType ch) noexcept
 {
   using utf8_constants = utf8_detail::utf8_constants<CharType>;
@@ -107,6 +129,7 @@ inline size_type utf8_cp_len(CharType ch) noexcept
 }
 
 template<typename CharType>
+  requires utf8_detail::utf8_char_type<CharType>
 inline bool utf8_cp_valid(CharType ch) noexcept
 {
   using utf8_constants = utf8_detail::utf8_constants<CharType>;
@@ -135,6 +158,7 @@ namespace utf8_detail {
 template<typename SpanType,
          typename traits_type = utf8_traits<SpanType>,
          typename const_char_ptr = typename traits_type::const_char_ptr>
+  requires utf8_detail::span_interface<SpanType>
 inline bool cp_match_ch(const_char_ptr ch,
                         const SpanType delim) noexcept
 {
@@ -142,26 +166,28 @@ inline bool cp_match_ch(const_char_ptr ch,
 
   switch(delim.size())
   {
-    case 4:
-      found = found && (ch[3] == delim[3]);
-      [[fallthrough]];
-    case 3:
-      found = found && (ch[2] == delim[2]);
-      [[fallthrough]];
-    case 2:
-      found = found && (ch[1] == delim[1]);
-      break;
+  case 4:
+    found = found && (ch[3] == delim[3]);
+    [[fallthrough]];
+  case 3:
+    found = found && (ch[2] == delim[2]);
+    [[fallthrough]];
+  case 2:
+    found = found && (ch[1] == delim[1]);
+    break;
   }
 
   return found;
 }
 
-template<typename SpanType,
-         typename traits_type = utf8_detail::utf8_traits<SpanType>,
-         typename span_type = typename traits_type::span_type>
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
 utf8_result cp_find_delim(const SpanType p_sv,
                           const SpanType p_delim) noexcept
 {
+  using traits_type = utf8_detail::utf8_traits<SpanType>;
+  using span_type = typename traits_type::span_type;
+
   span_type data{p_sv};
   size_type pos;
 
@@ -195,36 +221,50 @@ utf8_result cp_find_delim(const SpanType p_sv,
 
 } // namespace utf8_detail
 
-template<typename SpanType,
-         typename traits_type = utf8_detail::utf8_traits<SpanType>,
-         typename span_type = SpanType>
-utf8_result utf8_cp_find(const SpanType sv,
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
+utf8_result utf8_cp_find(const SpanType p_sv,
                          const SpanType p_delim) noexcept
 {
-  SpanType l_delim{p_delim.data(), utf8_cp_len(p_delim[0])};
+  using traits_type = utf8_detail::utf8_traits<SpanType>;
+  using span_type = typename traits_type::span_type;
+
+  span_type l_delim{p_delim.data(), utf8_cp_len(p_delim[0])};
 
   if(l_delim.empty() || (l_delim.size() > p_delim.size()))
   {
     return utf8_result{0, 0, UTF8State::InvalidDelim};
   }
 
-  return utf8_detail::cp_find_delim(sv, l_delim);
+  return utf8_detail::cp_find_delim(p_sv, l_delim);
 }
 
-template<typename SpanType,
-         typename traits_type = utf8_detail::utf8_traits<SpanType>>
-utf8_result utf8_cp_find_first_not(SpanType p_sv,
+template<typename SpanType>
+  requires((yy_traits::is_span_v<SpanType> && !yy_traits::is_const_span_v<SpanType>)
+           || yy_traits::is_std_string_view_v<SpanType> || yy_traits::is_std_string_v<SpanType>)
+utf8_result utf8_cp_find(const SpanType p_str,
+                         const SpanType p_delim) noexcept
+{
+  return utf8_cp_find(yy_quad::make_const_span(p_str), yy_quad::make_const_span(p_delim));
+}
+
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
+utf8_result utf8_cp_find_first_not(const SpanType p_sv,
                                    const SpanType p_delim) noexcept
 {
-  SpanType l_delim{p_delim.data(), utf8_cp_len(p_delim[0])};
+  using traits_type = utf8_detail::utf8_traits<SpanType>;
+  using span_type = typename traits_type::span_type;
+
+  const span_type l_delim{p_delim.data(), utf8_cp_len(p_delim[0])};
 
   if(l_delim.empty() || (l_delim.size() > p_delim.size()))
   {
     return utf8_result{0, 0, UTF8State::InvalidDelim};
   }
 
-  SpanType data{p_sv};
-  SpanType ch{};
+  span_type data{p_sv};
+  span_type ch{};
   UTF8State state = UTF8State::NotFound;
 
   while(!data.empty())
@@ -254,13 +294,24 @@ utf8_result utf8_cp_find_first_not(SpanType p_sv,
   return utf8_result{p_sv.size() - data.size(), ch.size(), state};
 }
 
-template<typename SpanType,
-         typename traits_type = utf8_detail::utf8_traits<SpanType>>
+template<typename SpanType>
+  requires((yy_traits::is_span_v<SpanType> && !yy_traits::is_const_span_v<SpanType>)
+           || yy_traits::is_std_string_view_v<SpanType> || yy_traits::is_std_string_v<SpanType>)
+utf8_result utf8_cp_find_first_not(const SpanType p_str, const SpanType p_delim) noexcept
+{
+  return utf8_cp_find_first_not(yy_quad::make_const_span(p_str), yy_quad::make_const_span(p_delim));
+}
+
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
 utf8_result utf8_cp_find_first_of(const SpanType sv,
                                   const SpanType p_delim) noexcept
 {
-  SpanType data{sv};
-  SpanType ch{};
+  using traits_type = utf8_detail::utf8_traits<SpanType>;
+  using span_type = typename traits_type::span_type;
+
+  span_type data{sv};
+  span_type ch{};
   UTF8State state = UTF8State::NotFound;
 
   while(!data.empty())
@@ -291,16 +342,26 @@ utf8_result utf8_cp_find_first_of(const SpanType sv,
   return utf8_result{sv.size() - data.size(), ch.size(), state};
 }
 
+template<typename SpanType>
+  requires((yy_traits::is_span_v<SpanType> && !yy_traits::is_const_span_v<SpanType>)
+           || yy_traits::is_std_string_view_v<SpanType> || yy_traits::is_std_string_v<SpanType>)
+utf8_result utf8_cp_find_first_of(const SpanType & p_str,
+                                  const SpanType p_delim) noexcept
+{
+  return utf8_cp_find_first_of(yy_quad::make_const_span(p_str), yy_quad::make_const_span(p_delim));
+}
+
 // Find start of last utf8 multi byte char
-template<typename SpanType,
-         typename traits_type = utf8_detail::utf8_traits<SpanType>>
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
 utf8_result utf8_cp_find_last_ch(SpanType sv) noexcept
 {
+  using traits_type = utf8_detail::utf8_traits<SpanType>;
   using utf8_constants = typename traits_type::constants;
-  using value_type = typename traits_type::value_type;
+  using char_type = typename traits_type::char_type;
 
   const size_type size = sv.size();
-  value_type ch;
+  char_type ch;
 
   while(!sv.empty())
   {
@@ -315,7 +376,7 @@ utf8_result utf8_cp_find_last_ch(SpanType sv) noexcept
 
       if(ch_len == (size - sv.size()))
       {
-        state = UTF8State::Start;
+        state = UTF8State::Ok;
       }
 
       return utf8_result{sv.size(), ch_len, state};
@@ -323,6 +384,81 @@ utf8_result utf8_cp_find_last_ch(SpanType sv) noexcept
   }
 
   return utf8_result{0, 0, UTF8State::NotFound};
+}
+
+template<typename SpanType>
+  requires((yy_traits::is_span_v<SpanType> && !yy_traits::is_const_span_v<SpanType>)
+           || yy_traits::is_std_string_view_v<SpanType> || yy_traits::is_std_string_v<SpanType>)
+utf8_result utf8_cp_find_last_ch(const SpanType p_str) noexcept
+{
+  return utf8_cp_find_last_ch(yy_quad::make_const_span(p_str));
+}
+
+template<typename CharType>
+utf8_result utf8_cp_truncate(yy_quad::span<CharType> str)
+{
+  auto [pos, ch_len, state] = utf8_cp_find_last_ch(yy_quad::make_const_span(str));
+
+  if(UTF8State::InvalidChar == state)
+  {
+    const size_type size = str.size() - pos;
+
+    switch(size)
+    {
+    case 3:
+      str[pos + 2] = 0;
+      [[fallthrough]];
+    case 2:
+      str[pos + 1] = 0;
+      [[fallthrough]];
+    case 1:
+      str[pos] = 0;
+      break;
+    }
+  }
+
+  return utf8_result{pos, ch_len, state};
+}
+
+template<typename SpanType>
+  requires yy_traits::is_std_string_v<SpanType>
+utf8_result utf8_cp_truncate(std::string & str)
+{
+  return utf8_cp_truncate(yy_quad::make_span(str));
+}
+
+template<typename SpanType>
+  requires utf8_detail::span_interface<SpanType>
+utf8_result utf8_cp_strlen(SpanType sv)
+{
+  size_type count = 0;
+  size_type ch_len = 0;
+  UTF8State state = UTF8State::Ok;
+
+  while(!sv.empty())
+  {
+    ch_len = utf8_cp_len(sv[0]);
+
+    if(ch_len > sv.size())
+    {
+      state = UTF8State::InvalidChar;
+      break;
+    }
+
+    ++count;
+
+    sv.inc_begin(ch_len);
+  }
+
+  return utf8_result{count, ch_len, state};
+}
+
+template<typename SpanType>
+  requires((yy_traits::is_span_v<SpanType> && !yy_traits::is_const_span_v<SpanType>)
+           || yy_traits::is_std_string_view_v<SpanType> || yy_traits::is_std_string_v<SpanType>)
+utf8_result utf8_cp_strlen(const SpanType p_str) noexcept
+{
+  return utf8_cp_strlen(yy_quad::make_const_span(p_str));
 }
 
 } // namespace yafiyogi::yy_util
