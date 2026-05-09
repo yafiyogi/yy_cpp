@@ -27,11 +27,13 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 #include <array>
-#include <utility>
+#include <limits>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 #include "yy_type_traits.h"
 #include "yy_types.hpp"
@@ -75,6 +77,14 @@ constexpr auto make_array(Types && ... data)
 {
   using type = std::common_type<Types...>::type;
   return std::array<type, sizeof...(Types)>{std::forward<Types>(data)...};
+}
+
+template<typename T,
+         typename A>
+requires std::is_integral_v<A>
+constexpr bool is_aligned(const T * ptr)
+{
+  return 0 == (reinterpret_cast<uintptr_t>(ptr) % sizeof(A));
 }
 
 } // namespace yafiyogi::yy_util
