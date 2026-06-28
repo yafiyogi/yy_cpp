@@ -84,21 +84,23 @@ add_executable(benchmark_yy_cpp
 
 add_dependencies(benchmark_yy_cpp yy_cpp)
 
-target_include_directories(benchmark_yy_cpp
-  PRIVATE
-    ${PROJECT_SOURCE_DIR}/..)
-
-target_include_directories(benchmark_yy_cpp
-  SYSTEM PRIVATE
-    "${YY_THIRD_PARTY_LIBRARY}/include" )
-
 target_compile_options(benchmark_yy_cpp
   PRIVATE
     "-DSPDLOG_COMPILED_LIB"
     "-DSPDLOG_FMT_EXTERNAL")
 
-target_link_directories(benchmark_yy_cpp
+target_include_directories(benchmark_yy_cpp
   PRIVATE
+    "${PROJECT_SOURCE_DIR}/.."
+    "${CMAKE_INSTALL_PREFIX}/include")
+
+target_include_directories(benchmark_yy_cpp
+  SYSTEM
+    PRIVATE
+      "${YY_THIRD_PARTY_LIBRARY}/include")
+
+target_link_directories(benchmark_yy_cpp
+  PUBLIC
     "${YY_THIRD_PARTY_LIBRARY}/lib"
     "/opt/local/lib")
 

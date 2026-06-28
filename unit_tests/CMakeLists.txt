@@ -106,8 +106,6 @@ target_link_directories(test_yy_cpp
     "${YY_THIRD_PARTY_LIBRARY}/lib"
     "/opt/local/lib")
 
-#target_link_directories(test_yy_cpp BEFORE PRIVATE ${YY_THIRD_PARTY_LIBRARY} /lib)
-
 target_link_libraries(test_yy_cpp
   yy_cpp
   yy_test::yy_test
