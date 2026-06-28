@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2021-2025 Yafiyogi
+  Copyright (c) 2021-2026 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -77,7 +77,7 @@ class span final
 
     template<typename T>
       requires yy_traits::is_container_v<T>
-                 && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
+               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
     constexpr explicit span(const T & container) noexcept:
       m_begin(container.data()),
       m_size(container.size())
@@ -386,7 +386,7 @@ class const_span final
 
     template<typename T>
       requires yy_traits::is_container_v<T>
-                 && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
+               && std::is_same_v<value_type, yy_traits::remove_cvr_t<typename T::value_type>>
     constexpr explicit const_span(const T & container) noexcept:
       m_begin(container.data()),
       m_size(container.size())
@@ -689,7 +689,9 @@ struct span_traits_helper final
 };
 
 template<typename T>
-  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
+  requires yy_traits::is_vector_v<T>
+           || yy_traits::is_std_string_v<T>
+           || yy_traits::is_array_v<T>
 struct span_traits_helper<T> final
 {
     using traits = typename span_detail::span_traits<typename T::value_type>;
@@ -729,7 +731,9 @@ struct span_traits_helper<T> final
 };
 
 template<typename T>
-  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
+  requires yy_traits::is_vector_v<T>
+           || yy_traits::is_std_string_v<T>
+           || yy_traits::is_array_v<T>
 constexpr auto make_span(T & container)
 {
   return typename span_traits_helper<T>::span_type{container.data(), container.size()};
@@ -745,7 +749,8 @@ constexpr auto make_span(T p_sv)
 }
 
 template<typename T>
-  requires(!std::is_array_v<T> && yy_traits::is_c_string_v<T>)
+  requires(!std::is_array_v<T>
+           && yy_traits::is_c_string_v<T>)
 constexpr auto make_span(T /* p_str */)
 {
   static_assert(std::is_array_v<T> || !yy_traits::is_c_string_v<T>,
@@ -773,7 +778,9 @@ constexpr auto make_span(T p_span)
 }
 
 template<typename T>
-  requires yy_traits::is_vector_v<T> || yy_traits::is_std_string_v<T> || yy_traits::is_array_v<T>
+  requires yy_traits::is_vector_v<T>
+           || yy_traits::is_std_string_v<T>
+           || yy_traits::is_array_v<T>
 constexpr auto make_const_span(const T & container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
@@ -787,7 +794,8 @@ constexpr auto make_const_span(const T p_sv)
 }
 
 template<typename T>
-  requires(!std::is_array_v<T> && yy_traits::is_c_string_v<T>)
+  requires(!std::is_array_v<T>
+           && yy_traits::is_c_string_v<T>)
 constexpr auto make_const_span(T p_str)
 {
   std::string_view str{p_str};
