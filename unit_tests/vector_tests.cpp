@@ -1114,4 +1114,63 @@ TEST_F(TestVector, TestFullPopFrontAddMid)
   ASSERT_EQ(raw_data, vec.data());
 }
 
+
+TEST_F(TestVector, TestResizeSmaller)
+{
+  vector vec;
+  vec.reserve(4);
+
+  vec.emplace_back(668);
+  vec.emplace_back(777);
+  vec.emplace_back(888);
+  vec.emplace_back(999);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(668, vec[0]);
+  ASSERT_EQ(777, vec[1]);
+  ASSERT_EQ(888, vec[2]);
+  ASSERT_EQ(999, vec[3]);
+
+  vec.resize(3);
+
+  ASSERT_EQ(3, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(668, vec[0]);
+  ASSERT_EQ(777, vec[1]);
+  ASSERT_EQ(888, vec[2]);
+}
+
+TEST_F(TestVector, TestResizeBigger)
+{
+  vector vec;
+  vec.reserve(4);
+
+  vec.emplace_back(668);
+  vec.emplace_back(777);
+  vec.emplace_back(888);
+  vec.emplace_back(999);
+
+  ASSERT_EQ(4, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(668, vec[0]);
+  ASSERT_EQ(777, vec[1]);
+  ASSERT_EQ(888, vec[2]);
+  ASSERT_EQ(999, vec[3]);
+
+  vec.resize(5);
+
+  ASSERT_EQ(5, vec.size());
+  ASSERT_EQ(0, vec.offset());
+
+  ASSERT_EQ(668, vec[0]);
+  ASSERT_EQ(777, vec[1]);
+  ASSERT_EQ(888, vec[2]);
+  ASSERT_EQ(999, vec[3]);
+  ASSERT_EQ(0, vec[4]);
+}
+
 } // namespace yafiyogi::yy_cpp::tests

@@ -40,7 +40,6 @@
 #include "yy_traits_vector.hpp"
 #include "yy_type_traits.h"
 
-
 namespace yafiyogi::yy_quad {
 
 using ClearAction = yy_data::ClearAction;
@@ -94,7 +93,7 @@ class vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr explicit vector(size_type num):
+    constexpr explicit vector(size_type num) :
       m_size(num)
     {
       reserve(m_size);
@@ -166,8 +165,8 @@ class vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -177,8 +176,8 @@ class vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const vector & b) noexcept
@@ -195,8 +194,8 @@ class vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
@@ -206,8 +205,8 @@ class vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const vector & b) noexcept
@@ -376,12 +375,12 @@ class vector
       }
       else if(distance < m_size)
       {
-#if defined(__GNUC__) && ! defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #endif
         std::move_backward(pos, end(), end() + 1);
-#if defined(__GNUC__) && ! defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic pop
 #endif
       }
@@ -405,9 +404,9 @@ class vector
       return result;
     }
 
-    template<typename ...Args>
+    template<typename... Args>
     constexpr insert_result emplace(iterator pos,
-                                    Args && ...args)
+                                    Args &&... args)
     {
       insert_result result{add_empty(pos)};
 
@@ -427,8 +426,8 @@ class vector
       return *iter;
     }
 
-    template<typename ...Args>
-    constexpr reference emplace_back(Args && ...args)
+    template<typename... Args>
+    constexpr reference emplace_back(Args &&... args)
     {
       auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
 
@@ -436,7 +435,7 @@ class vector
     }
 
     template<typename InputValueType>
-    constexpr  reference push_back(InputValueType && value)
+    constexpr reference push_back(InputValueType && value)
     {
       return emplace(end(), std::forward<InputValueType>(value));
     }
@@ -466,6 +465,20 @@ class vector
     constexpr void reserve(size_type new_capacity)
     {
       reserve_and_move(new_capacity, m_size);
+    }
+
+    constexpr void resize(size_type p_size,
+                          ClearAction action = default_action)
+    {
+      if(p_size > m_size)
+      {
+        reserve_and_move(p_size, m_size);
+        add_default(p_size - m_size);
+      }
+      else if(p_size < m_size)
+      {
+        erase(begin() + p_size, end(), action);
+      }
     }
 
     constexpr bool erase(iterator pos,
@@ -549,8 +562,7 @@ class vector
           {
             if(ClearAction::Clear == action)
             {
-              for(auto range{yy_util::make_range(p_begin, p_end)};
-                  auto & item : range)
+              for(auto range{yy_util::make_range(p_begin, p_end)}; auto & item: range)
               {
                 item = value_type{};
               }
@@ -562,8 +574,7 @@ class vector
             std::move(p_end, end(), p_begin);
             if(ClearAction::Clear == action)
             {
-              for(auto range{yy_util::make_range(p_end, end())};
-                  auto & item : range)
+              for(auto range{yy_util::make_range(p_end, end())}; auto & item: range)
               {
                 item = value_type{};
               }
@@ -648,8 +659,7 @@ class vector
       auto this_data = data();
       auto this_size = size();
 
-      if(((other_data < this_data)
-          || (other_data > (this_data + this_size)))
+      if(((other_data < this_data) || (other_data > (this_data + this_size)))
          && (((other_data + other_size) < this_data)
              || ((other_data + other_size) > (this_data + this_size))))
 
@@ -702,7 +712,8 @@ class vector
       }
     }
 
-    friend constexpr void swap(vector & lhs, vector & rhs) noexcept
+    friend constexpr void swap(vector & lhs,
+                               vector & rhs) noexcept
     {
       lhs.swap(rhs);
     }
@@ -710,8 +721,7 @@ class vector
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) noexcept
     {
-      for(auto range{yy_util::make_range(data(), data() + size())};
-          auto & item : range)
+      for(auto range{yy_util::make_range(data(), data() + size())}; auto & item: range)
       {
         visitor(item);
       }
@@ -720,8 +730,7 @@ class vector
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) const noexcept
     {
-      for(auto range{yy_util::make_range(data(), data() + size())};
-          const auto & item : range)
+      for(auto range{yy_util::make_range(data(), data() + size())}; const auto & item: range)
       {
         visitor(item);
       }
@@ -739,6 +748,16 @@ class vector
         p_other.m_size = 0;
         m_offset = p_other.m_offset;
         p_other.m_offset = 0;
+      }
+    }
+
+    void add_default(size_type count)
+    {
+      while(0 != count)
+      {
+        --count;
+
+        emplace(end(), value_type{});
       }
     }
 
@@ -765,7 +784,7 @@ class vector
     }
 
     constexpr vector_detail::distance_valid_type distance_valid(const iterator pos,
-                                                                size_type max) const noexcept
+                                                                const size_type max) const noexcept
     {
       ssize_type distance = const_iterator{pos} - begin();
 
@@ -779,7 +798,7 @@ class vector
       if(!empty() && (ClearAction::Clear == action))
       {
         for(auto range{yy_util::make_range(begin() + static_cast<ssize_type>(start), end())};
-            auto & element : range)
+            auto & element: range)
         {
           element = value_type{};
         }
@@ -790,8 +809,8 @@ class vector
       m_offset = 0;
     }
 
-    constexpr void reserve_and_move(size_type new_capacity,
-                                    size_type pos) noexcept
+    constexpr void reserve_and_move(const size_type new_capacity,
+                                    const size_type pos) noexcept
     {
       if(new_capacity > m_capacity)
       {
@@ -847,7 +866,7 @@ class simple_vector
     static_assert(std::is_default_constructible_v<value_type>, "T must be default contructable.");
     static_assert(std::is_destructible_v<value_type>, "T must be destructable.");
 
-    constexpr explicit simple_vector(size_type num):
+    constexpr explicit simple_vector(size_type num) :
       m_size(num)
     {
       reserve(m_size);
@@ -919,8 +938,8 @@ class simple_vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator<(const type & other) const noexcept
     {
@@ -928,8 +947,8 @@ class simple_vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator<(const type & a,
                                     const simple_vector & b) noexcept
@@ -944,8 +963,8 @@ class simple_vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     constexpr bool operator==(const type & other) const noexcept
     {
@@ -953,8 +972,8 @@ class simple_vector
     }
 
     template<typename type>
-      requires (yy_traits::is_container_v<type>
-        && !yy_traits::is_span_v<type>)
+      requires(yy_traits::is_container_v<type>
+               && !yy_traits::is_span_v<type>)
     [[nodiscard]]
     friend constexpr bool operator==(const type & a,
                                      const simple_vector & b) noexcept
@@ -1095,13 +1114,13 @@ class simple_vector
         }
         else if(distance < m_size)
         {
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wnonnull" // for g++ 12.3
 #endif
           std::move_backward(pos, end(), end() + 1);
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic pop
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
 #endif
         }
 
@@ -1127,9 +1146,9 @@ class simple_vector
       return result;
     }
 
-    template<typename ...Args>
+    template<typename... Args>
     constexpr insert_result emplace(iterator pos,
-                                    Args && ...args)
+                                    Args &&... args)
     {
       insert_result result{add_empty(pos)};
 
@@ -1149,8 +1168,8 @@ class simple_vector
       return *iter;
     }
 
-    template<typename ...Args>
-    constexpr reference emplace_back(Args && ...args)
+    template<typename... Args>
+    constexpr reference emplace_back(Args &&... args)
     {
       auto [iter, inserted] = emplace(end(), std::forward<Args>(args)...);
 
@@ -1190,6 +1209,20 @@ class simple_vector
       reserve_and_move(new_capacity, m_size);
     }
 
+    constexpr void resize(size_type p_size,
+                          ClearAction action = default_action)
+    {
+      if(p_size > m_size)
+      {
+        reserve_and_move(p_size, m_size);
+        add_default(p_size - m_size);
+      }
+      else if(p_size < m_size)
+      {
+        erase(begin() + p_size, end(), action);
+      }
+    }
+
     constexpr bool erase(iterator pos) noexcept
     {
       bool erased = false;
@@ -1201,13 +1234,13 @@ class simple_vector
         {
           erased = true;
 
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #endif
           std::move(pos + 1, end(), pos);
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic pop
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
 #endif
           --m_size;
         }
@@ -1215,9 +1248,10 @@ class simple_vector
       return erased;
     }
 
-    constexpr bool erase(iterator p_begin,
-                         iterator p_end,
-                         ClearAction action = default_action) noexcept
+    constexpr bool
+    erase(iterator p_begin,
+          iterator p_end,
+          ClearAction action = default_action) noexcept
     {
       bool erased = false;
 
@@ -1249,8 +1283,7 @@ class simple_vector
           std::move(p_end, end(), p_begin);
           if(ClearAction::Clear == action)
           {
-            for(auto range{yy_util::make_range(p_end, end())};
-                auto & item : range)
+            for(auto range{yy_util::make_range(p_end, end())}; auto & item: range)
             {
               item = value_type{};
             }
@@ -1325,8 +1358,7 @@ class simple_vector
     void assign(yy_quad::const_span<value_type> other,
                 ClearAction action = default_action)
     {
-      if(((other.data() < data())
-          || (other.data() > (data() + size())))
+      if(((other.data() < data()) || (other.data() > (data() + size())))
          && (((other.data() + other.size()) < data())
              || ((other.data() + other.size()) > (data() + size()))))
       {
@@ -1374,7 +1406,8 @@ class simple_vector
       move(std::move(other));
     }
 
-    friend constexpr void swap(simple_vector & lhs, simple_vector & rhs) noexcept
+    friend constexpr void swap(simple_vector & lhs,
+                               simple_vector & rhs) noexcept
     {
       lhs.swap(rhs);
     }
@@ -1382,8 +1415,7 @@ class simple_vector
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) noexcept
     {
-      for(auto range{yy_util::make_range(data(), data() + size())};
-          auto & item : range)
+      for(auto range{yy_util::make_range(data(), data() + size())}; auto & item: range)
       {
         visitor(item);
       }
@@ -1392,8 +1424,7 @@ class simple_vector
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) const noexcept
     {
-      for(auto range{yy_util::make_range(data(), data() + size())};
-          const auto & item : range)
+      for(auto range{yy_util::make_range(data(), data() + size())}; const auto & item: range)
       {
         visitor(item);
       }
@@ -1412,9 +1443,19 @@ class simple_vector
       }
     }
 
+    void add_default(size_type count) noexcept
+    {
+      while(0 != count)
+      {
+        --count;
+
+        emplace_back(value_type{});
+      }
+    }
+
     [[nodiscard]]
     constexpr vector_detail::distance_valid_type distance_valid(const iterator pos,
-                                                                size_type max) noexcept
+                                                                const size_type max) noexcept
     {
       ssize_type distance = const_iterator{pos} - begin();
 
@@ -1427,8 +1468,7 @@ class simple_vector
     {
       if(!empty() && (ClearAction::Clear == action))
       {
-        for(auto range{yy_util::make_range(begin() + start, end())};
-            auto & element : range)
+        for(auto range{yy_util::make_range(begin() + start, end())}; auto & element: range)
         {
           element = value_type{};
         }
@@ -1438,8 +1478,8 @@ class simple_vector
       m_size = 0;
     }
 
-    constexpr void reserve_and_move(size_type new_capacity,
-                                    size_type pos) noexcept
+    constexpr void reserve_and_move(const size_type new_capacity,
+                                    const size_type pos) noexcept
     {
       if(new_capacity > m_capacity)
       {
@@ -1447,24 +1487,24 @@ class simple_vector
 
         if((m_size > 0) && m_data)
         {
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
 #endif
           std::move(begin(), begin() + pos, new_data.get());
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic pop
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
 #endif
           if(pos != m_size)
           {
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
-#pragma GCC diagnostic ignored "-Warray-bounds" // for g++ 12.3
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow" // for g++ 12.3
+# pragma GCC diagnostic ignored "-Warray-bounds"      // for g++ 12.3
 #endif
             std::move(begin() + pos, end(), new_data.get() + pos + 1);
-#if defined(__GNUC__) && ! defined(__clang__)
-#pragma GCC diagnostic pop
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
 #endif
           }
         }
