@@ -107,6 +107,7 @@ target_link_directories(benchmark_yy_cpp
 target_link_libraries(benchmark_yy_cpp
   yy_cpp
   Boost::locale
+  spdlog::spdlog
   fmt::fmt
   benchmark::benchmark
   #profiler
