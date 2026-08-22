@@ -180,10 +180,7 @@ class span final
     {
       if(step > 0)
       {
-        size_type l_step = std::min(static_cast<size_t>(step), m_size);
-
-        m_begin += l_step;
-        m_size -= l_step;
+        inc_begin(static_cast<size_type>(step));
       }
 
       return *this;
@@ -209,7 +206,7 @@ class span final
     {
       if(step > 0)
       {
-        m_size -= std::min(static_cast<size_type>(step), m_size);
+        dec_end(static_cast<size_type>(step));
       }
 
       return *this;
@@ -490,9 +487,7 @@ class const_span final
     {
       if(step > 0)
       {
-        size_type l_step = std::min(static_cast<size_type>(step), size());
-        m_begin += l_step;
-        m_size -= l_step;
+        inc_begin(static_cast<size_type>(step));
       }
 
       return *this;
@@ -518,7 +513,7 @@ class const_span final
     {
       if(step > 0)
       {
-        m_size -= std::min(static_cast<size_type>(step), m_size);
+        dec_end(static_cast<size_type>(step));
       }
 
       return *this;
