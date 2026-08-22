@@ -30,7 +30,7 @@
 
 namespace yafiyogi::yy_util {
 
-inline constexpr std::string_view white_space = {" \t"};
+inline constexpr std::string_view whitespace = {" \f\n\r\t\v"}; // See https://en.cppreference.com/cpp/string/byte/isspace
 
 std::string_view trim_left(std::string_view str,
                            const std::string_view chs) noexcept;
@@ -41,17 +41,17 @@ std::string_view trim(std::string_view str,
 
 inline std::string_view trim_left(std::string_view str) noexcept
 {
-  return trim_left(str, white_space);
+  return trim_left(str, whitespace);
 }
 
 inline std::string_view trim_right(std::string_view str) noexcept
 {
-  return trim_right(str, white_space);
+  return trim_right(str, whitespace);
 }
 
 inline std::string_view trim(std::string_view str) noexcept
 {
-  return trim(str, white_space);
+  return trim(str, whitespace);
 }
 
 } // namespace yafiyogi::yy_util
