@@ -30,6 +30,7 @@
 
 namespace yafiyogi::yy_util {
 
+inline constexpr std::string_view linear_whitespace = {" \t"};
 inline constexpr std::string_view whitespace = {" \f\n\r\t\v"}; // See https://en.cppreference.com/cpp/string/byte/isspace
 
 std::string_view trim_left(std::string_view str,
