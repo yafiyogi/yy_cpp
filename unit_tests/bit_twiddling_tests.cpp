@@ -34,7 +34,7 @@
 
 #include "yy_bit_twiddling.h"
 
-inline constexpr const int max_size = 10000;
+inline constexpr const int max_size = 100000;
 
 template<typename T>
 static std::array<T, max_size> set_numbers()
@@ -56,11 +56,14 @@ static std::array<T, max_size> set_numbers()
 
 namespace yafiyogi::yy_cpp::tests {
 
+static auto nums = set_numbers<uint64_t>();
+
 class TestBitTwiddling_64:
       public testing::Test
 {
   public:
-    using bit_twiddling = yafiyogi::yy_bit_twiddling::bits<uint64_t>;
+    template<typename T>
+    using bits = yy_bit_twiddling::bits_detail::bits<uint64_t>;
 
     void SetUp() override
     {
@@ -69,17 +72,31 @@ class TestBitTwiddling_64:
     void TearDown() override
     {
     }
+
+
 };
 
-TEST_F(TestBitTwiddling_64, test_round_up_pow2)
+TEST_F(TestBitTwiddling_64, pop)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
+  for(size_t num = 0; num < nums.size(); ++num)
+  {
+    ASSERT_EQ(std::popcount(nums[num]), bit_twiddling::pop(nums[num]));
+  }
+}
+
+TEST_F(TestBitTwiddling_64, round_up_pow2)
+{
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   uint64_t one_64{1};
 
   for(std::uint64_t pow2 = 0; pow2 < 2; ++pow2)
   {
     std::uint64_t val = one_64 << pow2;
 
-    EXPECT_EQ(val, bit_twiddling::round_up_pow2(val));
+    EXPECT_EQ(val, bit_twiddling::round_up_pow2<uint64_t>(val));
   }
 
   for(std::uint64_t pow2 = 3; pow2 < 64; ++pow2)
@@ -93,8 +110,10 @@ TEST_F(TestBitTwiddling_64, test_round_up_pow2)
   }
 }
 
-TEST_F(TestBitTwiddling_64, test_round_down_pow2)
+TEST_F(TestBitTwiddling_64, round_down_pow2)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   uint64_t one_64{1};
 
   for(std::uint64_t pow2 = 0; pow2 < 2; ++pow2)
@@ -118,7 +137,7 @@ class TestBitTwiddling_8:
       public testing::Test
 {
   public:
-    using bit_twiddling = yafiyogi::yy_bit_twiddling::bits<uint8_t>;
+    using bits = yy_bit_twiddling::bits_detail::bits<uint8_t>;
 
     void SetUp() override
     {
@@ -129,8 +148,22 @@ class TestBitTwiddling_8:
     }
 };
 
-TEST_F(TestBitTwiddling_8, test_round_up_pow2)
+TEST_F(TestBitTwiddling_8, pop)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
+  for(uint64_t num = 0; num < 256; ++num)
+  {
+    const uint8_t num_8 = static_cast<uint8_t>(num);
+
+    EXPECT_EQ(std::popcount(num_8), bit_twiddling::pop(num_8));
+  }
+}
+
+TEST_F(TestBitTwiddling_8, round_up_pow2)
+{
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   uint8_t one_8{1};
 
   for(std::uint8_t pow2 = 0; pow2 < 2; ++pow2)
@@ -146,13 +179,15 @@ TEST_F(TestBitTwiddling_8, test_round_up_pow2)
 
     EXPECT_EQ(val, bit_twiddling::round_up_pow2(val));
     EXPECT_EQ(std::bit_ceil(val), bit_twiddling::round_up_pow2(val));
-    EXPECT_EQ(val, bit_twiddling::round_up_pow2(val - 1));
-    EXPECT_EQ(std::bit_ceil(static_cast<uint64_t>(val) - 1), bit_twiddling::round_up_pow2(val - 1));
+    EXPECT_EQ(val, bit_twiddling::round_up_pow2(static_cast<uint8_t>(val - 1)));
+    EXPECT_EQ(std::bit_ceil(static_cast<uint64_t>(val) - 1), bit_twiddling::round_up_pow2(static_cast<uint8_t>(val - 1)));
   }
 }
 
-TEST_F(TestBitTwiddling_8, test_round_down_pow2)
+TEST_F(TestBitTwiddling_8, round_down_pow2)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   uint8_t one_8{1};
 
   for(std::uint8_t pow2 = 0; pow2 < 2; ++pow2)
@@ -168,12 +203,14 @@ TEST_F(TestBitTwiddling_8, test_round_down_pow2)
 
     EXPECT_EQ(val, bit_twiddling::round_down_pow2(val));
     EXPECT_EQ(std::bit_floor(static_cast<uint64_t>(val)), bit_twiddling::round_down_pow2(val));
-    EXPECT_EQ(std::bit_floor(static_cast<uint64_t>(val) - 1), bit_twiddling::round_down_pow2(val - 1));
+    EXPECT_EQ(std::bit_floor(static_cast<uint64_t>(val) - 1), bit_twiddling::round_down_pow2(static_cast<uint8_t>(val - 1)));
   }
 }
 
-TEST_F(TestBitTwiddling_8, test_nlz_8)
+TEST_F(TestBitTwiddling_8, nlz_8)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   for(uint64_t num = 0; num < 256; ++num)
   {
     const uint8_t num_8 = static_cast<uint8_t>(num);
@@ -183,8 +220,10 @@ TEST_F(TestBitTwiddling_8, test_nlz_8)
 }
 
 
-TEST_F(TestBitTwiddling_8, test_ntz_8)
+TEST_F(TestBitTwiddling_8, ntz_8)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   for(uint64_t num = 1; num < 256; ++num)
   {
     const uint8_t num_8 = static_cast<uint8_t>(num);
