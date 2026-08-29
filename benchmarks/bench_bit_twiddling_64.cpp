@@ -35,8 +35,6 @@
 
 inline constexpr const int max_size = 10000;
 
-using bit_twiddling = yafiyogi::yy_bit_twiddling::bits<uint64_t>;
-
 static std::array<uint64_t, max_size> set_numbers()
 {
   std::array<uint64_t, max_size> num;
@@ -84,6 +82,8 @@ BENCHMARK_F(BitCeil64, std_bit_ceil)(::benchmark::State & state)
 
 BENCHMARK_F(BitCeil64, round_up_pow2)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -127,6 +127,7 @@ BENCHMARK_F(BitFloor64, std_bit_floor)(::benchmark::State & state)
 
 BENCHMARK_F(BitFloor64, round_down_pow2)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -170,6 +171,8 @@ BENCHMARK_F(PopCount64, std_popcount)(::benchmark::State & state)
 
 BENCHMARK_F(PopCount64, pop)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -196,6 +199,8 @@ struct CountZeros64:
 
 BENCHMARK_F(CountZeros64, std_countl_zero)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -213,6 +218,8 @@ BENCHMARK_F(CountZeros64, std_countl_zero)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros64, nlz)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -230,6 +237,8 @@ BENCHMARK_F(CountZeros64, nlz)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros64, std_countr_zero)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -247,6 +256,8 @@ BENCHMARK_F(CountZeros64, std_countr_zero)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros64, ntz)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())

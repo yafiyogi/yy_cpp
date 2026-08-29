@@ -35,8 +35,6 @@
 
 inline constexpr const int max_size = 10000;
 
-using bit_twiddling = yafiyogi::yy_bit_twiddling::bits<uint8_t>;
-
 static std::array<uint8_t, max_size> set_numbers()
 {
   std::array<uint8_t, max_size> num;
@@ -67,6 +65,8 @@ struct BitCeil8:
 
 BENCHMARK_F(BitCeil8, std_bit_ceil)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -84,6 +84,8 @@ BENCHMARK_F(BitCeil8, std_bit_ceil)(::benchmark::State & state)
 
 BENCHMARK_F(BitCeil8, round_up_pow2)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -110,6 +112,8 @@ struct BitFloor8:
 
 BENCHMARK_F(BitFloor8, std_bit_floor)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -127,6 +131,8 @@ BENCHMARK_F(BitFloor8, std_bit_floor)(::benchmark::State & state)
 
 BENCHMARK_F(BitFloor8, round_down_pow2)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -153,6 +159,8 @@ struct PopCount8:
 
 BENCHMARK_F(PopCount8, std_popcount)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -170,6 +178,8 @@ BENCHMARK_F(PopCount8, std_popcount)(::benchmark::State & state)
 
 BENCHMARK_F(PopCount8, pop)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -196,6 +206,8 @@ struct CountZeros8:
 
 BENCHMARK_F(CountZeros8, std_countl_zero)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -213,6 +225,8 @@ BENCHMARK_F(CountZeros8, std_countl_zero)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros8, nlz)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -230,6 +244,8 @@ BENCHMARK_F(CountZeros8, nlz)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros8, std_countr_zero)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())
@@ -247,6 +263,8 @@ BENCHMARK_F(CountZeros8, std_countr_zero)(::benchmark::State & state)
 
 BENCHMARK_F(CountZeros8, ntz)(::benchmark::State & state)
 {
+  namespace bit_twiddling = yafiyogi::yy_bit_twiddling;
+
   size_t idx = 0;
 
   while(state.KeepRunning())

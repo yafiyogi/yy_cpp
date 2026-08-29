@@ -2,7 +2,7 @@
 
   MIT License
 
-  Copyright (c) 2024-2025 Yafiyogi
+  Copyright (c) 2024-2026 Yafiyogi
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -26,118 +26,160 @@
 
 #pragma once
 
+#include <bitset>
 #include <cstdint>
+#include <iostream>
 #include <limits>
 
-namespace yafiyogi::yy_bit_twiddling {
+#include "yy_types.hpp"
 
-template <typename T>
+namespace yafiyogi::yy_bit_twiddling {
+namespace bits_detail {
+
+template<typename T>
 struct bits
 {
+    using value_type = std::make_unsigned_t<T>;
+    static constexpr int digits = std::numeric_limits<value_type>::digits;
+
+    static constexpr value_type multiplier =
+      static_cast<value_type>(std::numeric_limits<value_type>::max() / value_type{0xff});
+    static constexpr value_type three_three = multiplier * value_type{0x33};
+    static constexpr value_type five_five = multiplier * value_type{0x55};
+    static constexpr value_type eight_zero = multiplier * value_type{0x80};
+    static constexpr value_type zero_one = multiplier * value_type{0x01};
+    static constexpr value_type zero_f = multiplier * value_type{0x0f};
 };
 
-template<>
-struct bits<uint64_t>
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr int pop(value_type val) noexcept
 {
-    using value_type = uint64_t;
-    // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    static constexpr uint64_t round_up_pow2(value_type val)
+  val = val - ((val >> 1) & bits::five_five);
+  val = (val & bits::three_three) + ((val >> 2) & bits::three_three);
+
+  return static_cast<int>((((val + (val >> 4)) & bits::zero_f) * bits::zero_one)
+                          >> (bits::digits - 8));
+}
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr int ntz(value_type val) noexcept
+{
+  return bits::digits - pop<value_type>(static_cast<value_type>(val | -val));
+}
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr value_type has_zero_raw(value_type v) noexcept
+{
+  return (v - bits::zero_one) & (v) &bits::eight_zero;
+}
+
+template<typename T, typename value_type = typename bits<T>::value_type>
+inline constexpr bool has_zero(value_type v) noexcept
+{
+  return 0 != has_zero_raw(v);
+}
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr bool has_value(value_type v, uint8_t n) noexcept
+{
+  return value_type{0} != (has_zero_raw(v) ^ (bits::multiplier * n));
+}
+
+template<typename T, size_type Bits>
+struct BitsShift
+{
+    using value_type = typename bits<T>::value_type;
+
+    static constexpr value_type shift(value_type val)
     {
-      --val;
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-      val |= val >> value_type{8};
-      val |= val >> value_type{16};
-      val |= val >> value_type{32};
-      ++val;
+      val = BitsShift<T, Bits / 2>::shift(val);
+      val |= val >> value_type{Bits >> 1};
 
       return val;
     }
-
-    static constexpr uint64_t round_down_pow2(value_type val)
-    {
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-      val |= val >> value_type{8};
-      val |= val >> value_type{16};
-      val |= val >> value_type{32};
-
-      return val - (val >> value_type{1});
-    }
-
-    static constexpr int pop(value_type val)
-    {
-      val = val - ((val >> value_type{1}) & value_type{0x5555555555555555});
-      val = (val & value_type{0x3333333333333333}) + ((val >> value_type{2}) & value_type{0x3333333333333333});
-      return static_cast<int>((((val + (val >> value_type{4})) & value_type{0xF0F0F0F0F0F0F0F}) * value_type{0x101010101010101}) >> value_type{56});
-    }
-
-    static constexpr int nlz(value_type val)
-    {
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-      val |= val >> value_type{8};
-      val |= val >> value_type{16};
-      val |= val >> value_type{32};
-
-      return pop(~val);
-    }
-
-    static constexpr int ntz(value_type val)
-    {
-      return std::numeric_limits<value_type>::digits - pop(val | -val);
-    }
 };
 
-template<>
-struct bits<uint8_t>
+template<typename T>
+struct BitsShift<T, 0>
 {
-    using value_type = uint8_t;
+    using value_type = typename bits<T>::value_type;
 
-    // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-    static constexpr value_type round_up_pow2(value_type val)
+    static constexpr value_type shift(value_type val)
     {
-      --val;
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-      ++val;
-
       return val;
     }
-
-    static constexpr value_type round_down_pow2(value_type val)
-    {
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-
-      return val - (val >> value_type{1});
-    }
-
-    static constexpr int pop(value_type val)
-    {
-      val = val - ((val >> value_type{1}) & value_type{0x55});
-      val = (val & value_type{0x33}) + ((val >> value_type{2}) & value_type{0x33});
-      return ((val + (val >> value_type{4})) & value_type{0x0F}) * value_type{0x01};
-    }
-
-    static constexpr int nlz(value_type val)
-    {
-      val |= val >> value_type{1};
-      val |= val >> value_type{2};
-      val |= val >> value_type{4};
-
-      return pop(static_cast<value_type>(~val));;
-    }
-
-    static constexpr int ntz(value_type val)
-    {
-      return std::numeric_limits<value_type>::digits - pop(val | -val);
-    }
 };
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr value_type round_up_pow2(value_type val) noexcept
+{
+  --val;
+
+  val = BitsShift<value_type, bits::digits>::shift(val);
+
+  ++val;
+
+  return val;
+}
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr value_type round_down_pow2(value_type val) noexcept
+{
+  val = BitsShift<value_type, bits::digits>::shift(val);
+
+  return val - (val >> value_type{1});
+}
+
+template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
+inline constexpr int nlz(value_type val) noexcept
+{
+  val = BitsShift<value_type, bits::digits>::shift(val);
+
+  return pop<value_type>(static_cast<value_type>(~val));
+}
+
+} // namespace bits_detail
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr int pop(T val)
+{
+  return bits_detail::pop<value_type>(static_cast<value_type>(val));
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr int ntz(T val)
+{
+  return bits_detail::ntz<value_type>(static_cast<value_type>(val));
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr value_type has_zero(T val)
+{
+  return bits_detail::has_zero<value_type>(static_cast<value_type>(val));
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr value_type has_value(T val)
+{
+  return bits_detail::has_value<value_type>(static_cast<value_type>(val));
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr value_type round_up_pow2(T val) noexcept
+{
+  return bits_detail::round_up_pow2<value_type>(val);
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr value_type round_down_pow2(T val) noexcept
+{
+  return bits_detail::round_down_pow2<value_type>(static_cast<value_type>(val));
+}
+
+template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
+inline constexpr int nlz(T val) noexcept
+{
+  return bits_detail::nlz<value_type>(static_cast<value_type>(val));
+}
 
 } // namespace yafiyogi::yy_bit_twiddling
