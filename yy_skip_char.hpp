@@ -72,10 +72,10 @@ template<typename SpanType,
   requires yy_traits::is_span_v<span_type>
     || yy_traits::is_std_string_v<span_type>
     || yy_traits::is_std_string_view_v<span_type>
-inline span_type skip_char(const span_type src,
+inline span_type skip_char(span_type src,
                            typename span_type::value_type c)
 {
-  while(src.empty())
+  while(!src.empty())
   {
     if(src[0] == c)
     {
