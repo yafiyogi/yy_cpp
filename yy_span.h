@@ -167,7 +167,7 @@ class span final
       return *this;
     }
 
-    constexpr span & inc_begin(size_type step) noexcept
+    constexpr span & remove_prefix(size_type step) noexcept
     {
       step = std::min(step, m_size);
       m_begin += step;
@@ -176,11 +176,11 @@ class span final
       return *this;
     }
 
-    constexpr span & inc_begin(int step) noexcept
+    constexpr span & remove_prefix(int step) noexcept
     {
       if(step > 0)
       {
-        inc_begin(static_cast<size_type>(step));
+        remove_prefix(static_cast<size_type>(step));
       }
 
       return *this;
@@ -195,18 +195,18 @@ class span final
       return *this;
     }
 
-    constexpr span & dec_end(size_type step) noexcept
+    constexpr span & remove_suffix(size_type step) noexcept
     {
       m_size -= std::min(step, m_size);
 
       return *this;
     }
 
-    constexpr span & dec_end(int step) noexcept
+    constexpr span & remove_suffix(int step) noexcept
     {
       if(step > 0)
       {
-        dec_end(static_cast<size_type>(step));
+        remove_suffix(static_cast<size_type>(step));
       }
 
       return *this;
@@ -474,7 +474,7 @@ class const_span final
       return *this;
     }
 
-    constexpr const_span & inc_begin(size_type step) noexcept
+    constexpr const_span & remove_prefix(size_type step) noexcept
     {
       step = std::min(step, m_size);
       m_begin += step;
@@ -483,11 +483,11 @@ class const_span final
       return *this;
     }
 
-    constexpr const_span & inc_begin(int step) noexcept
+    constexpr const_span & remove_prefix(int step) noexcept
     {
       if(step > 0)
       {
-        inc_begin(static_cast<size_type>(step));
+        remove_prefix(static_cast<size_type>(step));
       }
 
       return *this;
@@ -502,18 +502,18 @@ class const_span final
       return *this;
     }
 
-    constexpr const_span & dec_end(size_type step) noexcept
+    constexpr const_span & remove_suffix(size_type step) noexcept
     {
       m_size -= std::min(step, size());
 
       return *this;
     }
 
-    constexpr const_span & dec_end(int step) noexcept
+    constexpr const_span & remove_suffix(int step) noexcept
     {
       if(step > 0)
       {
-        dec_end(static_cast<size_type>(step));
+        remove_suffix(static_cast<size_type>(step));
       }
 
       return *this;

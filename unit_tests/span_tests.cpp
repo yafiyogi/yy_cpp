@@ -62,10 +62,10 @@ TEST_F(TestSpan, span_inc_begin)
   std::string str = "str";
 
   EXPECT_EQ(str.substr(1), yafiyogi::yy_quad::make_span(str).inc_begin());
-  EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_span(str).inc_begin(2));
-  EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_span(str).inc_begin(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).inc_begin(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).inc_begin(4));
+  EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_span(str).remove_prefix(2));
+  EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_span(str).remove_prefix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_prefix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_prefix(4));
 }
 
 TEST_F(TestSpan, span_dec_end)
@@ -73,10 +73,10 @@ TEST_F(TestSpan, span_dec_end)
   std::string str = "str";
 
   EXPECT_EQ(str.substr(0, str.size() - 1), yafiyogi::yy_quad::make_span(str).dec_end());
-  EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_span(str).dec_end(2));
-  EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_span(str).dec_end(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).dec_end(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).dec_end(4));
+  EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_span(str).remove_suffix(2));
+  EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_span(str).remove_suffix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_suffix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_suffix(4));
 }
 
 TEST_F(TestSpan, span_subspan)
@@ -182,10 +182,10 @@ TEST_F(TestSpan, const_span_inc_begin)
   std::string_view str = "str";
 
   EXPECT_EQ(str.substr(1), yafiyogi::yy_quad::make_const_span(str).inc_begin());
-  EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_const_span(str).inc_begin(2));
-  EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_const_span(str).inc_begin(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).inc_begin(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).inc_begin(4));
+  EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_const_span(str).remove_prefix(2));
+  EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_const_span(str).remove_prefix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_prefix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_prefix(4));
 }
 
 TEST_F(TestSpan, const_span_dec_end)
@@ -193,10 +193,10 @@ TEST_F(TestSpan, const_span_dec_end)
   std::string_view str = "str";
 
   EXPECT_EQ(str.substr(0, str.size() - 1), yafiyogi::yy_quad::make_const_span(str).dec_end());
-  EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_const_span(str).dec_end(2));
-  EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_const_span(str).dec_end(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).dec_end(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).dec_end(4));
+  EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_const_span(str).remove_suffix(2));
+  EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_const_span(str).remove_suffix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_suffix(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_suffix(4));
 }
 
 TEST_F(TestSpan, const_span_subspan)

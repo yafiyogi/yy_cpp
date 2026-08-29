@@ -370,7 +370,7 @@ class Automaton final
         }
 
         node = edge_node;
-        label_target.inc_begin(common);
+        label_target.remove_prefix(common);
       }
 
       m_state = node;

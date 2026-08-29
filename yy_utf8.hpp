@@ -198,7 +198,7 @@ utf8_result cp_find_delim(const SpanType p_sv,
       break;
     }
 
-    data.inc_begin(pos);
+    data.remove_prefix(pos);
     if(p_delim.size() > data.size())
     {
       // delim not found.
@@ -210,7 +210,7 @@ utf8_result cp_find_delim(const SpanType p_sv,
       return utf8_result{p_sv.size() - data.size(), utf8_cp_len(data[0]), UTF8State::Ok};
     }
 
-    data.inc_begin(p_delim.size());
+    data.remove_prefix(p_delim.size());
   }
 
   return utf8_result{p_sv.size(), 0, UTF8State::NotFound};
@@ -285,7 +285,7 @@ utf8_result utf8_cp_find_first_not(const SpanType p_sv,
       break;
     }
 
-    data.inc_begin(ch.size());
+    data.remove_prefix(ch.size());
   }
 
   return utf8_result{p_sv.size() - data.size(), ch.size(), state};
@@ -333,7 +333,7 @@ utf8_result utf8_cp_find_first_of(const SpanType sv,
       break;
     }
 
-    data.inc_begin(ch.size());
+    data.remove_prefix(ch.size());
   }
 
   return utf8_result{sv.size() - data.size(), ch.size(), state};
@@ -444,7 +444,7 @@ utf8_result utf8_cp_strlen(SpanType sv)
 
     ++count;
 
-    sv.inc_begin(ch_len);
+    sv.remove_prefix(ch_len);
   }
 
   return utf8_result{count, ch_len, state};
