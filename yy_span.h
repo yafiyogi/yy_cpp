@@ -161,15 +161,22 @@ class span final
     {
       if(size_type{0} != m_size)
       {
-        ++m_begin;
-        --m_size;
+        remove_prefix(size_type{1});
       }
+      return *this;
+    }
+
+    constexpr span & inc_begin(size_type step) noexcept
+    {
+      step = std::min(step, m_size);
+
+      remove_prefix(step);
+
       return *this;
     }
 
     constexpr span & remove_prefix(size_type step) noexcept
     {
-      step = std::min(step, m_size);
       m_begin += step;
       m_size -= step;
 
@@ -190,14 +197,23 @@ class span final
     {
       if(size_type{0} != m_size)
       {
-        --m_size;
+        remove_suffix(size_type{1});
       }
+      return *this;
+    }
+
+    constexpr span & dec_end(size_type step) noexcept
+    {
+      step = std::min(step, size());
+
+      remove_suffix(step);
+
       return *this;
     }
 
     constexpr span & remove_suffix(size_type step) noexcept
     {
-      m_size -= std::min(step, m_size);
+      m_size -= step;
 
       return *this;
     }
@@ -309,9 +325,18 @@ class span final
       return span{m_begin + pos, len};
     }
 
-    constexpr size_type find_pos(const value_type & p_value) const noexcept
+    constexpr size_type find_first(const value_type & p_value) const noexcept
     {
       return yy_data::find_pos_linear(m_begin, m_size, p_value).pos;
+    }
+
+    constexpr size_type find_first_not(const value_type & p_value) const noexcept
+    {
+      auto found = std::find_if(m_begin, m_begin + m_size, [&p_value](const value_type & p_item) -> bool {
+        return p_value != p_item;
+      });
+
+      return static_cast<size_type>(found - m_begin);
     }
 
     [[nodiscard]]
@@ -379,6 +404,7 @@ class const_span final
     using value_const_l_value_ref = typename traits::value_const_l_value_ref;
     using value_r_value_ref = typename traits::value_r_value_ref;
     using ptr = typename traits::const_ptr;
+    using const_ptr = typename traits::const_ptr;
     using iterator = yy_data::iterator_detail::const_iterator_ptr<const_span>;
 
     template<typename T>
@@ -468,15 +494,22 @@ class const_span final
     {
       if(size_type{0} != m_size)
       {
-        ++m_begin;
-        --m_size;
+        remove_prefix(size_type{1});
       }
+      return *this;
+    }
+
+    constexpr const_span & inc_begin(size_type step) noexcept
+    {
+      step = std::min(step, m_size);
+
+      remove_prefix(step);
+
       return *this;
     }
 
     constexpr const_span & remove_prefix(size_type step) noexcept
     {
-      step = std::min(step, m_size);
       m_begin += step;
       m_size -= step;
 
@@ -497,14 +530,23 @@ class const_span final
     {
       if(size_type{0} != m_size)
       {
-        --m_size;
+        remove_suffix(size_type{1});
       }
+      return *this;
+    }
+
+    constexpr const_span & dec_end(size_type step) noexcept
+    {
+      step = std::min(step, size());
+
+      remove_suffix(step);
+
       return *this;
     }
 
     constexpr const_span & remove_suffix(size_type step) noexcept
     {
-      m_size -= std::min(step, size());
+      m_size -= step;
 
       return *this;
     }
@@ -588,9 +630,18 @@ class const_span final
       return const_span{m_begin + pos, len};
     }
 
-    constexpr size_type find_pos(const value_type & p_value) const noexcept
+    constexpr size_type find_first(const value_type & p_value) const noexcept
     {
       return yy_data::find_pos_linear(m_begin, m_size, p_value).pos;
+    }
+
+    constexpr size_type find_first_not(const value_type & p_value) const noexcept
+    {
+      auto found = std::find_if(m_begin, m_begin + m_size, [&p_value](const value_type & p_item) -> bool {
+        return p_value != p_item;
+      });
+
+      return static_cast<size_type>(found - m_begin);
     }
 
     [[nodiscard]]
@@ -766,26 +817,20 @@ constexpr auto make_span(T (&p_array)[N])
 }
 
 template<typename T>
-  requires yy_traits::is_span_v<T>
+  requires yy_traits::is_span_type_v<T>
 constexpr auto make_span(T p_span)
 {
   return T{p_span};
 }
 
 template<typename T>
-  requires yy_traits::is_vector_v<T>
-           || yy_traits::is_std_string_v<T>
-           || yy_traits::is_array_v<T>
+requires(yy_traits::is_vector_v<T>
+  || yy_traits::is_std_string_v<T>
+  || yy_traits::is_std_string_view_v<T>
+  || yy_traits::is_array_v<T>)
 constexpr auto make_const_span(const T & container)
 {
   return typename span_traits_helper<T>::const_span_type{container.data(), container.size()};
-}
-
-template<typename T>
-  requires yy_traits::is_std_string_view_v<T>
-constexpr auto make_const_span(const T p_sv)
-{
-  return typename span_traits_helper<T>::const_span_type{p_sv.data(), p_sv.size()};
 }
 
 template<typename T>
@@ -810,10 +855,17 @@ constexpr auto make_const_span(T (&p_array)[N])
 }
 
 template<typename T>
-  requires yy_traits::is_span_v<T>
+  requires yy_traits::is_span_type_v<T>
 constexpr auto make_const_span(T p_span)
 {
   return T{p_span};
+}
+
+template<typename T>
+  requires yy_traits::is_const_span_type_v<T>
+constexpr auto make_const_span(T p_span)
+{
+  return p_span;
 }
 
 } // namespace yafiyogi::yy_quad

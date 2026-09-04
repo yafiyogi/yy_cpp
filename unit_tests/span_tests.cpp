@@ -64,8 +64,8 @@ TEST_F(TestSpan, span_inc_begin)
   EXPECT_EQ(str.substr(1), yafiyogi::yy_quad::make_span(str).inc_begin());
   EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_span(str).remove_prefix(2));
   EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_span(str).remove_prefix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_prefix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_prefix(4));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).inc_begin(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).inc_begin(4));
 }
 
 TEST_F(TestSpan, span_dec_end)
@@ -75,8 +75,8 @@ TEST_F(TestSpan, span_dec_end)
   EXPECT_EQ(str.substr(0, str.size() - 1), yafiyogi::yy_quad::make_span(str).dec_end());
   EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_span(str).remove_suffix(2));
   EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_span(str).remove_suffix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_suffix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).remove_suffix(4));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).dec_end(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).dec_end(4));
 }
 
 TEST_F(TestSpan, span_subspan)
@@ -90,13 +90,13 @@ TEST_F(TestSpan, span_subspan)
   EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_span(str).subspan(10, 2));
 }
 
-TEST_F(TestSpan, span_find_pos)
+TEST_F(TestSpan, span_find_first)
 {
   std::string str = "1234567890";
   const auto span = yafiyogi::yy_quad::make_span(str);
 
-  EXPECT_EQ(4, span.find_pos('5'));
-  EXPECT_EQ(span.size(), span.find_pos('A'));
+  EXPECT_EQ(4, span.find_first('5'));
+  EXPECT_EQ(span.size(), span.find_first('A'));
 }
 
 TEST_F(TestSpan, span_lt)
@@ -184,8 +184,8 @@ TEST_F(TestSpan, const_span_inc_begin)
   EXPECT_EQ(str.substr(1), yafiyogi::yy_quad::make_const_span(str).inc_begin());
   EXPECT_EQ(str.substr(2), yafiyogi::yy_quad::make_const_span(str).remove_prefix(2));
   EXPECT_EQ(str.substr(3), yafiyogi::yy_quad::make_const_span(str).remove_prefix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_prefix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_prefix(4));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).inc_begin(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).inc_begin(4));
 }
 
 TEST_F(TestSpan, const_span_dec_end)
@@ -195,8 +195,8 @@ TEST_F(TestSpan, const_span_dec_end)
   EXPECT_EQ(str.substr(0, str.size() - 1), yafiyogi::yy_quad::make_const_span(str).dec_end());
   EXPECT_EQ(str.substr(0, str.size() - 2), yafiyogi::yy_quad::make_const_span(str).remove_suffix(2));
   EXPECT_EQ(str.substr(0, str.size() - 3), yafiyogi::yy_quad::make_const_span(str).remove_suffix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_suffix(3));
-  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).remove_suffix(4));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).dec_end(3));
+  EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).dec_end(4));
 }
 
 TEST_F(TestSpan, const_span_subspan)
@@ -210,13 +210,13 @@ TEST_F(TestSpan, const_span_subspan)
   EXPECT_EQ(std::string_view{}, yafiyogi::yy_quad::make_const_span(str).subspan(10, 2));
 }
 
-TEST_F(TestSpan, const_span_find_pos)
+TEST_F(TestSpan, const_span_find_first)
 {
   std::string str = "1234567890";
   const auto span = yafiyogi::yy_quad::make_const_span(str);
 
-  EXPECT_EQ(4, span.find_pos('5'));
-  EXPECT_EQ(span.size(), span.find_pos('A'));
+  EXPECT_EQ(4, span.find_first('5'));
+  EXPECT_EQ(span.size(), span.find_first('A'));
 }
 
 TEST_F(TestSpan, const_span_lt)
