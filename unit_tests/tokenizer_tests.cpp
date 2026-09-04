@@ -79,10 +79,10 @@ TEST_F(TestTokenizer, TokenizeAllSimple)
   EXPECT_EQ(token, std::string_view{""});
 }
 
-TEST_F(TestTokenizer, TokenizeSkipBlankSimple)
+TEST_F(TestTokenizer, TokenizeSkipEmptySimple)
 {
   std::string_view str{"/abc///def"};
-  using tokenizer_type = yy_util::tokenizer_detail::tokenizer<std::string_view::value_type, yy_util::tokenizer_detail::ScanType::SkipBlank>;
+  using tokenizer_type = yy_util::tokenizer_detail::tokenizer<std::string_view::value_type, yy_util::tokenizer_detail::ScanType::SkipEmpty>;
   tokenizer_type tokenizer{yy_quad::make_const_span(str), delim};
   yy_quad::const_span<char> token{tokenizer.scan()};
 

@@ -39,7 +39,7 @@ namespace tokenizer_detail {
 
 enum class ScanType
 {
-  SkipBlank,
+  SkipEmpty,
   All
 };
 
@@ -69,12 +69,6 @@ struct default_scanner final
 
       return token_type{source_begin, token_end};
     }
-
-    static constexpr token_type skip(const token_type p_source,
-                                     value_type p_delim) noexcept
-    {
-      return skip_not_char<token_type>(p_source, p_delim);
-    }
 };
 
 template<typename T>
@@ -102,12 +96,6 @@ struct default_scanner<T> final
 
       return token_type{l_source_begin, token_end};
     }
-
-    static constexpr token_type skip(const token_type p_source,
-                                     value_type p_delim) noexcept
-    {
-      return skip_not_char<token_type>(p_source, p_delim);
-    }
 };
 
 template<typename T,
@@ -124,7 +112,7 @@ class tokenizer
 
     constexpr explicit tokenizer(token_type p_source, value_type p_delim) noexcept :
       m_source(p_source),
-      m_token(p_source.begin(), p_source.begin()),
+      m_token(p_source.begin(), 0),
       m_delim(p_delim)
     {
     }
@@ -140,15 +128,12 @@ class tokenizer
     constexpr token_type scan() noexcept
     {
       m_token = Scanner::scan(m_source, m_delim);
-      m_source = token_type{m_token.end(), m_source.end()};
+      m_source.remove_prefix(m_token.size());
       m_source.inc_begin();
 
-      if constexpr(ScanType::SkipBlank == t_scan_type)
+      if constexpr(ScanType::SkipEmpty == t_scan_type)
       {
-        if(!m_source.empty())
-        {
-          m_source = Scanner::skip(m_source, m_delim);
-        }
+        m_source = skip_char(m_source, m_delim);
       }
 
       return m_token;
