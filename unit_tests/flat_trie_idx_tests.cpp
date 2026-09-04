@@ -65,7 +65,7 @@ TEST_F(TestFlatTrieIdx, TrieNodeGetAfterAdd)
   // Add 'a' node, but not 'b' node.
   trie_node node{no_data};
 
-  node.add_edge(node.find_edge('a').edge, 'a', 1);
+  node.add_edge(node.find_edge('a').pos, 'a', 1);
 
   EXPECT_TRUE(node.find_edge('a').found);
   EXPECT_FALSE(node.find_edge('b').found);
@@ -75,11 +75,11 @@ TEST_F(TestFlatTrieIdx, TrieNodeAddDuplicate)
 {
   // Add 2 'b' nodes.
   trie_node node{no_data};
-  node.add_edge(node.find_edge('b').edge, 'b', 668);
-  node.add_edge(node.find_edge('b').edge, 'b', 777);
+  node.add_edge(node.find_edge('b').pos, 'b', 668);
+  node.add_edge(node.find_edge('b').pos, 'b', 777);
 
   ASSERT_TRUE(node.find_edge('b').found);
-  // EXPECT_EQ(777, edge_idx);
+  //EXPECT_EQ(777, edge_idx);
 }
 
 TEST_F(TestFlatTrieIdx, TestNodeChildOrder)
@@ -91,10 +91,10 @@ TEST_F(TestFlatTrieIdx, TestNodeChildOrder)
   const size_t idxs[] = {2, 1, 4, 3};
   const size_t * idx = idxs;
 
-  node.add_edge(node.find_edge('b').edge, 'b', 1);
-  node.add_edge(node.find_edge('a').edge, 'a', 2);
-  node.add_edge(node.find_edge('d').edge, 'd', 3);
-  node.add_edge(node.find_edge('c').edge, 'c', 4);
+  node.add_edge(node.find_edge('b').pos, 'b', 1);
+  node.add_edge(node.find_edge('a').pos, 'a', 2);
+  node.add_edge(node.find_edge('d').pos, 'd', 3);
+  node.add_edge(node.find_edge('c').pos, 'c', 4);
 
   node.visit([&result, &idx](const auto & k, const auto & node_idx) {
     EXPECT_TRUE(k == *result);
