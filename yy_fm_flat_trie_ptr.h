@@ -102,8 +102,8 @@ class Automaton final
 
     constexpr explicit Automaton(trie_vector && p_nodes,
                                  data_vector && p_data) noexcept:
-      m_nodes(std::move(p_nodes)),
-      m_data(std::move(p_data))
+      m_nodes(std::forward<trie_vector>(p_nodes)),
+      m_data(std::forward<data_vector>(p_data))
     {
       reset();
     }
@@ -118,7 +118,7 @@ class Automaton final
 
     template<typename InputSpanType>
     [[nodiscard]]
-    constexpr bool find(InputSpanType && label) noexcept
+    constexpr bool find(const InputSpanType & label) noexcept
     {
       return find_span(yy_quad::make_const_span(label));
     }
@@ -390,7 +390,7 @@ class fm_flat_trie_ptr final
                                             const data_idx_type value_idx)
     {
       node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
-      node->add_edge(pos, std::move(label), node_idx);
+      node->add_edge(pos, std::forward<label_type>(label), node_idx);
 
       nodes.emplace_back(idx_node_type{value_idx});
 
