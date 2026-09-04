@@ -52,7 +52,7 @@ struct bits
 };
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr int pop(value_type val) noexcept
+constexpr int pop(value_type val) noexcept
 {
   val = val - ((val >> 1) & bits::five_five);
   val = (val & bits::three_three) + ((val >> 2) & bits::three_three);
@@ -62,25 +62,25 @@ inline constexpr int pop(value_type val) noexcept
 }
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr int ntz(value_type val) noexcept
+constexpr int ntz(value_type val) noexcept
 {
   return bits::digits - pop<value_type>(static_cast<value_type>(val | -val));
 }
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr value_type has_zero_raw(value_type v) noexcept
+constexpr value_type has_zero_raw(value_type v) noexcept
 {
   return (v - bits::zero_one) & (v) &bits::eight_zero;
 }
 
 template<typename T, typename value_type = typename bits<T>::value_type>
-inline constexpr bool has_zero(value_type v) noexcept
+constexpr bool has_zero(value_type v) noexcept
 {
   return 0 != has_zero_raw(v);
 }
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr bool has_value(value_type v, uint8_t n) noexcept
+constexpr bool has_value(value_type v, uint8_t n) noexcept
 {
   return value_type{0} != (has_zero_raw(v) ^ (bits::multiplier * n));
 }
@@ -111,7 +111,7 @@ struct BitsShift<T, 0>
 };
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr value_type round_up_pow2(value_type val) noexcept
+constexpr value_type round_up_pow2(value_type val) noexcept
 {
   --val;
 
@@ -123,7 +123,7 @@ inline constexpr value_type round_up_pow2(value_type val) noexcept
 }
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr value_type round_down_pow2(value_type val) noexcept
+constexpr value_type round_down_pow2(value_type val) noexcept
 {
   val = BitsShift<value_type, bits::digits>::shift(val);
 
@@ -131,7 +131,7 @@ inline constexpr value_type round_down_pow2(value_type val) noexcept
 }
 
 template<typename T, typename bits = bits<T>, typename value_type = typename bits::value_type>
-inline constexpr int nlz(value_type val) noexcept
+constexpr int nlz(value_type val) noexcept
 {
   val = BitsShift<value_type, bits::digits>::shift(val);
 
@@ -141,43 +141,43 @@ inline constexpr int nlz(value_type val) noexcept
 } // namespace bits_detail
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr int pop(T val)
+constexpr int pop(T val)
 {
   return bits_detail::pop<value_type>(static_cast<value_type>(val));
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr int ntz(T val)
+constexpr int ntz(T val)
 {
   return bits_detail::ntz<value_type>(static_cast<value_type>(val));
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr value_type has_zero(T val)
+constexpr value_type has_zero(T val)
 {
   return bits_detail::has_zero<value_type>(static_cast<value_type>(val));
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr value_type has_value(T val)
+constexpr value_type has_value(T val)
 {
   return bits_detail::has_value<value_type>(static_cast<value_type>(val));
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr value_type round_up_pow2(T val) noexcept
+constexpr value_type round_up_pow2(T val) noexcept
 {
   return bits_detail::round_up_pow2<value_type>(val);
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr value_type round_down_pow2(T val) noexcept
+constexpr value_type round_down_pow2(T val) noexcept
 {
   return bits_detail::round_down_pow2<value_type>(static_cast<value_type>(val));
 }
 
 template<typename T, typename value_type = typename bits_detail::bits<T>::value_type>
-inline constexpr int nlz(T val) noexcept
+constexpr int nlz(T val) noexcept
 {
   return bits_detail::nlz<value_type>(static_cast<value_type>(val));
 }

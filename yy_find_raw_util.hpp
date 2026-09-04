@@ -36,9 +36,9 @@ namespace yafiyogi::yy_data {
 template<typename KeyType,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto lower_bound_raw(KeyType * p_begin,
-                                      KeyType * p_end,
-                                      const InputKeyType & p_key) noexcept
+constexpr auto lower_bound_raw(KeyType * p_begin,
+                               KeyType * p_end,
+                               const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::raw_traits_type<KeyType>;
   using key_ptr = typename traits::key_ptr;
@@ -53,9 +53,9 @@ constexpr inline auto lower_bound_raw(KeyType * p_begin,
 template<typename KeyType,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto lower_bound_raw(const KeyType * p_begin,
-                                      const KeyType * p_end,
-                                      const InputKeyType & p_key) noexcept
+constexpr auto lower_bound_raw(const KeyType * p_begin,
+                               const KeyType * p_end,
+                               const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::raw_traits_type<KeyType>;
   using const_key_ptr = typename traits::const_key_ptr;
@@ -71,10 +71,10 @@ template<typename KeyType,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto lower_bound_raw(KeyType * p_begin,
-                                      KeyType * p_end,
-                                      const InputKeyType & p_key,
-                                      Compare && compare) noexcept
+constexpr auto lower_bound_raw(KeyType * p_begin,
+                               KeyType * p_end,
+                               const InputKeyType & p_key,
+                               Compare && compare) noexcept
 {
   using traits = find_util_detail::raw_traits_type<KeyType>;
   using key_ptr = typename traits::key_ptr;
@@ -91,10 +91,10 @@ template<typename KeyType,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto lower_bound_raw(const KeyType * p_begin,
-                                      const KeyType * p_end,
-                                      const InputKeyType & p_key,
-                                      Compare && compare) noexcept
+constexpr auto lower_bound_raw(const KeyType * p_begin,
+                               const KeyType * p_end,
+                               const InputKeyType & p_key,
+                               Compare && compare) noexcept
 {
   using traits = find_util_detail::raw_traits_type<KeyType>;
   using const_key_ptr = typename traits::const_key_ptr;
@@ -109,8 +109,8 @@ constexpr inline auto lower_bound_raw(const KeyType * p_begin,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto lower_bound_raw_pos(const KeyStore & p_key_store,
-                                          const InputKeyType & p_key) noexcept
+constexpr auto lower_bound_raw_pos(const KeyStore & p_key_store,
+                                   const InputKeyType & p_key) noexcept
 {
   auto l_begin{p_key_store.data()};
   auto [iter, is_end] = lower_bound_raw(l_begin, l_begin + p_key_store.size(), p_key);
@@ -121,8 +121,8 @@ constexpr inline auto lower_bound_raw_pos(const KeyStore & p_key_store,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto find_raw(KeyStore & p_key_store,
-                               const InputKeyType & p_key) noexcept
+constexpr auto find_raw(KeyStore & p_key_store,
+                        const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using key_ptr = typename traits::key_ptr;
@@ -140,8 +140,8 @@ constexpr inline auto find_raw(KeyStore & p_key_store,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto find_raw(const KeyStore & p_key_store,
-                               const InputKeyType & p_key) noexcept
+constexpr auto find_raw(const KeyStore & p_key_store,
+                        const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using const_key_ptr = typename traits::const_key_ptr;
@@ -160,9 +160,9 @@ template<typename KeyStore,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto find_raw(KeyStore & p_key_store,
-                               const InputKeyType & p_key,
-                               Compare && compare) noexcept
+constexpr auto find_raw(KeyStore & p_key_store,
+                        const InputKeyType & p_key,
+                        Compare && compare) noexcept
 {
   using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using key_ptr = typename traits::key_ptr;
@@ -185,9 +185,9 @@ template<typename KeyStore,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto find_raw(const KeyStore & p_key_store,
-                               const InputKeyType & p_key,
-                               Compare && compare) noexcept
+constexpr auto find_raw(const KeyStore & p_key_store,
+                        const InputKeyType & p_key,
+                        Compare && compare) noexcept
 {
   using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using const_key_ptr = typename traits::const_key_ptr;
@@ -210,8 +210,8 @@ template<size_type size_threshold = find_util_detail::default_size_threshold,
          typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto find_raw_pos(const KeyStore & p_key_store,
-                                   const InputKeyType & p_key) noexcept
+constexpr auto find_raw_pos(const KeyStore & p_key_store,
+                            const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::raw_traits_type<typename KeyStore::value_type>;
   using found_type = typename traits::const_found_type;

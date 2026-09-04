@@ -161,8 +161,8 @@ constexpr auto range_iter(const Container & p_container,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto lower_bound_iter_pos(const KeyStore & p_key_store,
-                                           const InputKeyType & p_key) noexcept
+constexpr auto lower_bound_iter_pos(const KeyStore & p_key_store,
+                                    const InputKeyType & p_key) noexcept
 {
   auto l_begin{p_key_store.begin()};
   auto [iter, is_end] = lower_bound_iter(l_begin, p_key_store.end(), p_key);
@@ -173,8 +173,8 @@ constexpr inline auto lower_bound_iter_pos(const KeyStore & p_key_store,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto find_iter(KeyStore & p_key_store,
-                                const InputKeyType & p_key) noexcept
+constexpr auto find_iter(KeyStore & p_key_store,
+                         const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                     typename KeyStore::iterator>;
@@ -190,8 +190,8 @@ constexpr inline auto find_iter(KeyStore & p_key_store,
 template<typename KeyStore,
          typename InputKeyType>
 [[nodiscard]]
-constexpr inline auto find_iter(const KeyStore & p_key_store,
-                                const InputKeyType & p_key) noexcept
+constexpr auto find_iter(const KeyStore & p_key_store,
+                         const InputKeyType & p_key) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                     typename KeyStore::const_iterator>;
@@ -208,9 +208,9 @@ template<typename KeyStore,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto find_iter(KeyStore & p_key_store,
-                                const InputKeyType & p_key,
-                                Compare && compare) noexcept
+constexpr auto find_iter(KeyStore & p_key_store,
+                         const InputKeyType & p_key,
+                         Compare && compare) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                     typename KeyStore::iterator>;
@@ -234,9 +234,9 @@ template<typename KeyStore,
          typename InputKeyType,
          typename Compare>
 [[nodiscard]]
-constexpr inline auto find_iter(const KeyStore & p_key_store,
-                                const InputKeyType & p_key,
-                                Compare && compare) noexcept
+constexpr auto find_iter(const KeyStore & p_key_store,
+                         const InputKeyType & p_key,
+                         Compare && compare) noexcept
 {
   using traits = find_util_detail::iter_traits_type<typename KeyStore::value_type,
                                                     typename KeyStore::const_iterator>;

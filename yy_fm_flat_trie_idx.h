@@ -128,15 +128,15 @@ class Automaton final
 
   private:
     [[nodiscard]]
-    static inline constexpr node_type * get_node(node_type * raw_nodes,
-                                                 const node_idx_type idx) noexcept
+    static constexpr node_type * get_node(node_type * raw_nodes,
+                                          const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
 
     [[nodiscard]]
-    static inline constexpr const node_type * get_node(const node_type * raw_nodes,
-                                                       const node_idx_type idx) noexcept
+    static constexpr const node_type * get_node(const node_type * raw_nodes,
+                                                const node_idx_type idx) noexcept
     {
       return raw_nodes + idx;
     }
@@ -334,7 +334,7 @@ class fm_flat_trie_idx final
 
     [[nodiscard]]
     static constexpr value_ptr get_data_ptr(data_vector & data,
-                                               const data_idx_type idx) noexcept
+                                            const data_idx_type idx) noexcept
     {
       YY_ASSERT(idx < data.size());
 
@@ -376,7 +376,7 @@ class fm_flat_trie_idx final
     {
       node_idx_type node_idx = node_type::root_idx;
       auto next_node_do = [&node_idx](auto * p_edge,
-                                  size_type /* p_pos */) {
+                                      size_type /* p_pos */) {
         node_idx = *p_edge;
       };
 

@@ -92,9 +92,9 @@ struct find_pos_linear<ValueType>
 
 template<typename Iterator,
          typename ValueType>
-constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
-                                                const Iterator & p_end,
-                                                const ValueType & p_value) noexcept
+constexpr pos_found_type find_pos_linear(const Iterator & p_begin,
+                                         const Iterator & p_end,
+                                         const ValueType & p_value) noexcept
 {
   return find_util_detail::find_pos_linear<ValueType>::find(p_begin,
                                                             p_end,
@@ -103,9 +103,9 @@ constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
 
 template<typename Iterator,
          typename ValueType>
-constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
-                                                const size_type & p_size,
-                                                const ValueType & p_value) noexcept
+constexpr pos_found_type find_pos_linear(const Iterator & p_begin,
+                                         const size_type & p_size,
+                                         const ValueType & p_value) noexcept
 {
   return find_util_detail::find_pos_linear<ValueType>::find(p_begin,
                                                             p_size,
@@ -114,8 +114,8 @@ constexpr inline pos_found_type find_pos_linear(const Iterator & p_begin,
 
 template<typename ValueStore>
 requires yy_traits::is_container_v<ValueStore>
-constexpr inline pos_found_type find_pos_linear(const ValueStore & p_store,
-                                                const typename ValueStore::value_type & p_value) noexcept
+constexpr pos_found_type find_pos_linear(const ValueStore & p_store,
+                                         const typename ValueStore::value_type & p_value) noexcept
 {
   using value_type = typename ValueStore::value_type;
 
