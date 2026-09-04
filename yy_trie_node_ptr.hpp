@@ -26,7 +26,8 @@
 
 #pragma once
 
-#include "yy_find_raw_util.hpp"
+#include "yy_trie_common.h"
+#include "yy_flat_map.h"
 
 namespace yafiyogi::yy_data::trie_node_ptr_detail {
 
@@ -75,6 +76,10 @@ class trie_node_ptr final
     using const_node_ptr = typename traits::const_node_ptr;
     using edge_ptr = typename traits::edge_ptr;
 
+    using edges_type = flat_map<label_type, node_ptr>;
+    using value_pos_type = edges_type::value_pos_type;
+    using const_value_pos_type = edges_type::const_value_pos_type;
+
     constexpr explicit trie_node_ptr(value_ptr p_data) noexcept:
       m_data(p_data)
     {
@@ -88,72 +93,65 @@ class trie_node_ptr final
     constexpr trie_node_ptr & operator=(const trie_node_ptr & node) noexcept = default;
     constexpr trie_node_ptr & operator=(trie_node_ptr && node) noexcept = default;
 
-    constexpr void add_edge(edge_ptr p_edge,
-                            label_r_value_ref p_label,
-                            node_ptr p_node_ptr)
+    constexpr void add_edge(size_type pos,
+                            label_r_value_ref label,
+                            node_ptr && node)
     {
-      auto pos = p_edge - m_edges.data();
-
-      std::ignore = m_labels.emplace(m_labels.begin() + pos, std::move(p_label));
-      std::ignore = m_edges.emplace(m_edges.begin() + pos, p_node_ptr);
+      std::ignore = m_edges.emplace(pos,
+                                    std::forward<label_type>(label),
+                                    std::forward<node_ptr>(node));
     }
 
-    constexpr void add_edge(label_r_value_ref p_label,
-                            node_ptr p_node_ptr)
+    constexpr void add_edge(label_r_value_ref label,
+                            node_ptr && node)
     {
-      add_edge(m_edges.data() + m_edges.size(),
-               std::move(p_label),
-               p_node_ptr);
-    }
+      size_type pos = m_edges.lower_bound_pos(label).pos;
 
-    struct found_edge_type final
-    {
-        edge_ptr edge = nullptr;
-        bool found = false;
-    };
+      add_edge(pos,
+               std::forward<label_type>(label),
+               std::forward<node_ptr>(node));
+    }
 
     template<typename InputLabelType>
     [[nodiscard]]
-    constexpr found_edge_type find_edge(const InputLabelType & p_label) noexcept
+    constexpr value_pos_type find_edge(const InputLabelType & p_label) noexcept
     {
-      auto [label, found] = find_raw(m_labels, p_label);
-
-      auto pos = label - m_labels.data();
-
-      return found_edge_type{m_edges.data() + pos, found};
+      return m_edges.find(p_label);
     }
-
-    struct const_found_edge_type final
-    {
-        const_node_ptr edge = nullptr;
-        bool found = false;
-    };
 
     template<typename InputLabelType>
     [[nodiscard]]
-    constexpr const_found_edge_type find_edge(const InputLabelType & p_label) const noexcept
+    constexpr value_pos_type find_edge(const InputLabelType & p_label) const noexcept
     {
-      auto [label, found] = find_raw(m_labels, p_label);
+      return m_edges.find(p_label);
+    }
 
-      auto pos = label - m_labels.data();
+    template<typename InputLabelType,
+             typename Visitor>
+    [[nodiscard]]
+    constexpr pos_found_type find_value(Visitor && visitor,
+                                        const InputLabelType & p_label) noexcept
+    {
+      return m_edges.find_value(std::forward<Visitor>(visitor), p_label);
+    }
 
-      return const_found_edge_type{m_edges.data() + pos, found};
+    template<typename InputLabelType,
+             typename Visitor>
+    [[nodiscard]]
+    constexpr pos_found_type find_value(Visitor && visitor,
+                                        const InputLabelType & p_label) const noexcept
+    {
+      return m_edges.find_value(std::forward<Visitor>(visitor), p_label);
     }
 
     template<typename Visitor>
     constexpr void visit(Visitor && visitor) noexcept
     {
-      auto edge = m_edges.data();
-      for(auto & label : m_labels)
-      {
-        visitor(label, *edge);
-        ++edge;
-      }
+      m_edges.visit(visitor);
     }
 
     constexpr void reserve(size_type capacity) noexcept
     {
-      m_labels.reserve(capacity);
       m_edges.reserve(capacity);
     }
 
@@ -182,8 +180,8 @@ class trie_node_ptr final
 
   private:
     value_ptr m_data{};
-    yy_quad::simple_vector<label_type> m_labels;
-    yy_quad::simple_vector<node_ptr> m_edges;
+    edges_type m_edges{};
+
 };
 
 } // yafiyogi::yy_data::trie_node_idx_detail::trie_node_ptr_detail
