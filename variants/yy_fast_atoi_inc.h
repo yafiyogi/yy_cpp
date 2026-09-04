@@ -84,7 +84,7 @@ struct fast_atoi final
 
         // Add next digit.
         val += static_cast<value_type>(*p_str.begin() - '0');
-        p_str.inc_begin();
+        p_str.remove_prefix(size_type{1});
       };
 
       switch(p_str.size())
