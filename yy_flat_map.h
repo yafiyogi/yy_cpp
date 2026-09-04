@@ -52,14 +52,16 @@ template<typename Key,
 struct traits_type final
 {
     using key_type = yy_traits::remove_cvr_t<Key>;
-    using key_l_value_ref = typename yy_traits::ref_traits<key_type>::l_value_ref;
-    using key_r_value_ref = typename yy_traits::ref_traits<key_type>::r_value_ref;
+    using key_ref_traits = yy_traits::ref_traits<key_type>;
+    using key_l_value_ref = key_ref_traits::l_value_ref;
+    using key_r_value_ref = key_ref_traits::r_value_ref;
     using key_vector = yy_quad::simple_vector<key_type, KeyClearAction>;
     using key_ptr =  std::add_pointer_t<typename key_vector::value_type>;
     using const_key_ptr =  std::add_pointer_t<std::add_const_t<typename key_vector::value_type>>;
     using value_type = yy_traits::remove_cvr_t<Value>;
-    using value_l_value_ref = typename yy_traits::ref_traits<value_type>::l_value_ref;
-    using value_r_value_ref = typename yy_traits::ref_traits<value_type>::r_value_ref;
+    using value_ref_traits = yy_traits::ref_traits<value_type>;
+    using value_l_value_ref = value_ref_traits::l_value_ref;
+    using value_r_value_ref = value_ref_traits::r_value_ref;
     using value_vector = yy_quad::simple_vector<value_type, ValueClearAction>;
     using value_ptr = std::add_pointer_t<typename value_vector::value_type>;
     using const_value_ptr = std::add_pointer_t<std::add_const_t<typename value_vector::value_type>>;
@@ -188,7 +190,7 @@ class flat_map final
     {
       auto [pos, found] = find_raw_pos<SearchSizeThreshold>(m_keys, p_key);
 
-      return value_pos_type{value(pos), pos, found};
+      return const_value_pos_type{value(pos), pos, found};
     }
 
     template<typename KeyParamType,
