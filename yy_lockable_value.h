@@ -172,7 +172,7 @@ class lockable_value final
     {
       LockType lck(m_mtx);
 
-      return m_value = std::move(value);
+      return m_value = std::forward<value_type>(value);
     }
 
     template<typename LockType>
