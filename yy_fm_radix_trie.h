@@ -134,7 +134,9 @@ class trie_node
                             label_r_value_ref label,
                             node_ptr && node)
     {
-      std::ignore = m_edges.emplace(pos, std::move(label), std::move(node));
+      std::ignore = m_edges.emplace(pos,
+                                    std::forward<label_type>(label),
+                                    std::forward<node_ptr>(node));
     }
 
     constexpr void add_edge(const label_r_value_ref label,
@@ -144,8 +146,8 @@ class trie_node
       size_type pos = m_edges.lower_bound_pos(label_span).pos;
 
       std::ignore = m_edges.emplace(pos,
-                                    std::move(label),
-                                    std::move(node));
+                                    std::forward<label_type>(label),
+                                    std::forward<node_ptr>(node));
     }
 
     [[nodiscard]]
@@ -254,7 +256,7 @@ class Payload final:
     }
 
     constexpr explicit Payload(value_type && payload) noexcept:
-      m_payload(std::move(payload))
+      m_payload(std::forward<value_type>(payload))
     {
     }
 
@@ -300,7 +302,7 @@ class Automaton final
     using root_node_ptr = typename traits::root_node_ptr;
 
     constexpr explicit Automaton(root_node_ptr p_root) noexcept:
-      m_root(std::move(p_root)),
+      m_root(std::forward<root_node_ptr>(p_root)),
       m_state()
     {
       reset();
@@ -351,7 +353,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool find_span(InputSpanType label_target) noexcept
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "Automaton::find_span(): InputScanType is not a yy_quad::span<>");
       reset();
 
@@ -439,7 +441,7 @@ class fm_radix_trie final
     constexpr void add_span(InputSpanType label,
                             InputValueType && value)
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "fm_radix_trie::add_span(): InputSpanType is not a yy_quad::span<>");
 
       node_type * node = m_root.get();
