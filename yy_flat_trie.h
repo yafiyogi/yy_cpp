@@ -352,7 +352,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool find_span(const InputSpanType label) noexcept
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "flat_trie::find_span(): InputSpanType is not a yy_quad::span<>");
 
       reset();
@@ -504,7 +504,7 @@ class flat_trie final
     constexpr node_idx_type add_empty_nodes(trie_container_type & nodes,
                                             InputSpanType label)
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "fm_flat_trie::find_span(): InputSpanType is not a yy_quad::span<>");
 
       node_idx_type node_idx{traits::root_idx};
@@ -544,7 +544,7 @@ class flat_trie final
     constexpr void add_span(InputSpanType label,
                             InputValueType && value)
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "flat_trie::add_span(): InputSpanType is not a yy_quad::span<>");
 
       if(!label.empty())

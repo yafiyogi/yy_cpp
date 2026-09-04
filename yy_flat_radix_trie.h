@@ -212,7 +212,7 @@ class trie_node final
     [[nodiscard]]
     constexpr found_value_type find(InputLabelType label_target) noexcept
     {
-      static_assert(yy_traits::is_span_v<InputLabelType>,
+      static_assert(yy_traits::is_const_span_type_v<InputLabelType>,
                     "trie_node::find(): InputLabelType is not a yy_quad::span<>");
 
       auto edge_iter = std::lower_bound(m_edges.begin(),
@@ -393,7 +393,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool find_span(InputSpanType label_target) noexcept
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "Automaton::find_span(): InputScanType is not a yy_quad::span<>");
       reset();
 
@@ -525,7 +525,7 @@ class flat_radix_trie final
     constexpr void add_span(InputSpanType label,
                             InputValueType && value)
     {
-      static_assert(yy_traits::is_span_v<InputSpanType>,
+      static_assert(yy_traits::is_const_span_type_v<InputSpanType>,
                     "flat_radix_trie::add_span(): InputSpanType is not a yy_quad::span<>");
 
       auto nodes = m_nodes->data();

@@ -67,12 +67,6 @@ struct span_traits<yy_quad::span<T>>:
 };
 
 template<typename T>
-struct span_traits<yy_quad::const_span<T>>:
-      std::true_type
-{
-};
-
-template<typename T>
 struct const_span_traits:
       std::false_type
 {
@@ -87,22 +81,25 @@ struct const_span_traits<yy_quad::const_span<T>>:
 } // namespace traits_detail
 
 template<typename T>
-using is_span = traits_detail::span_traits<T>;
+using is_span_type = traits_detail::span_traits<T>;
 
 template<typename T>
-using is_span_t = typename is_span<T>::type;
+using is_span_type_t = typename is_span_type<T>::type;
 
 template<typename T>
-inline constexpr bool is_span_v = is_span<T>::value;
+inline constexpr bool is_span_type_v = is_span_type<T>::value;
 
 template<typename T>
-using is_const_span = traits_detail::const_span_traits<T>;
+using is_const_span_type = traits_detail::const_span_traits<T>;
 
 template<typename T>
-using is_const_span_t = typename is_const_span<T>::type;
+using is_const_span_type_t = typename is_const_span_type<T>::type;
 
 template<typename T>
-inline constexpr bool is_const_span_v = is_const_span<T>::value;
+inline constexpr bool is_const_span_type_v = is_const_span_type<T>::value;
+
+template<typename T>
+inline constexpr bool is_span_v = is_span_type_v<T> || is_const_span_type_v<T>;
 
 } // namespace yy_traits
 } // namespace yafiyogi
