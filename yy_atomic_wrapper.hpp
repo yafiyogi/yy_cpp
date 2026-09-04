@@ -46,7 +46,7 @@ class AtomicWrapper
 
     constexpr AtomicWrapper(AtomicWrapper && other) noexcept
     {
-      move(std::move(other));
+      move(std::forward<AtomicWrapper>(other));
     }
 
     constexpr AtomicWrapper & operator=(const AtomicWrapper & other) noexcept
@@ -57,7 +57,7 @@ class AtomicWrapper
 
     constexpr AtomicWrapper & operator=(AtomicWrapper && other) noexcept
     {
-      move(std::move(other));
+      move(std::forward<AtomicWrapper>(other));
       return *this;
     }
 
