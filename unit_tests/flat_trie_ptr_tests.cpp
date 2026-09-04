@@ -27,8 +27,8 @@
 #include <cstdio>
 #include <string>
 
-#include <gtest/gtest.h>
-#include <fmt/format.h>
+#include "fmt/format.h"
+#include "gtest/gtest.h"
 
 #include "yy_flat_trie_ptr.h"
 
@@ -64,11 +64,9 @@ TEST_F(TestFlatTriePtr, TrieNodeGetBeforeAdd)
 
 TEST_F(TestFlatTriePtr, TrieNodeGetAfterAdd)
 {
-  //auto edge_getter = [](auto &){};
-
   // Add 'a' node, but not 'b' node.
   ptr_node_type ptr_node{nullptr};
-  ptr_node.add_edge(ptr_node.find_edge('a').edge, 'a', ptr_node_ptr{});
+  ptr_node.add_edge(ptr_node.find_edge('a').pos, 'a', ptr_node_ptr{});
 
   EXPECT_TRUE(ptr_node.find_edge('a').found);
   EXPECT_FALSE(ptr_node.find_edge('b').found);
@@ -83,11 +81,12 @@ TEST_F(TestFlatTriePtr, TrieNodeAddDuplicate)
   int d2 = 777;
   ptr_node_type node_2{&d2};
 
-  node.add_edge(node.find_edge('b').edge, 'b', ptr_node_ptr{&node_1});
-  node.add_edge(node.find_edge('b').edge, 'b', ptr_node_ptr{&node_2});
+  node.add_edge(node.find_edge('b').pos, 'b', ptr_node_ptr{&node_1});
+  node.add_edge(node.find_edge('b').pos, 'b', ptr_node_ptr{&node_2});
 
   ASSERT_TRUE(node.find_edge('b').found);
-  EXPECT_EQ(777, *((*node.find_edge('b').edge)->data()));
+
+  EXPECT_EQ(777, (*(*node.find_edge('b').value)->data()));
 }
 
 TEST_F(TestFlatTriePtr, TestNodeChildOrder)
@@ -109,10 +108,10 @@ TEST_F(TestFlatTriePtr, TestNodeChildOrder)
   const int data[] = {a, b, c, d};
   int idx = 0;
 
-  node.add_edge(node.find_edge('b').edge, 'b', ptr_node_ptr{&node_b});
-  node.add_edge(node.find_edge('a').edge, 'a', ptr_node_ptr{&node_a});
-  node.add_edge(node.find_edge('d').edge, 'd', ptr_node_ptr{&node_d});
-  node.add_edge(node.find_edge('c').edge, 'c', ptr_node_ptr{&node_c});
+  node.add_edge(node.find_edge('b').pos, 'b', ptr_node_ptr{&node_b});
+  node.add_edge(node.find_edge('a').pos, 'a', ptr_node_ptr{&node_a});
+  node.add_edge(node.find_edge('d').pos, 'd', ptr_node_ptr{&node_d});
+  node.add_edge(node.find_edge('c').pos, 'c', ptr_node_ptr{&node_c});
 
   node.visit([&result, &data, &idx](const auto & k, const auto & edge) {
     EXPECT_TRUE(k == *result);

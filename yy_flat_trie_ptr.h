@@ -52,6 +52,7 @@ struct trie_traits final
     using idx_node_ptr = typename idx_traits::node_ptr;
     using idx_const_node_ptr = typename idx_traits::const_node_ptr;
     using idx_node_idx_ptr = typename idx_traits::node_idx_ptr;
+    using idx_node_idx_type = typename idx_traits::node_idx_type;
     using idx_data_vector = yy_quad::simple_vector<idx_value_type>;
     using idx_trie_vector = yy_quad::simple_vector<idx_node_type>;
 
@@ -119,7 +120,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool find(InputSpanType && p_label) noexcept
     {
-      return find_span(yy_quad::make_const_span(p_label));
+      return find_span(yy_quad::make_const_span(std::forward<InputSpanType>(p_label)));
     }
 
     constexpr void reset() noexcept
@@ -136,7 +137,7 @@ class Automaton final
     [[nodiscard]]
     constexpr bool has_payload() const noexcept
     {
-      return !empty() && !m_state->empty();
+      return !empty() && (nullptr != m_state) && !m_state->empty();
     }
 
     template<typename Visitor>
@@ -156,18 +157,25 @@ class Automaton final
 
       tokenizer_type tokenizer{p_label};
 
+      auto l_node = m_state;
+
+      auto assign_edge = [&l_node](auto p_node, auto /* pos */) {
+        l_node = *p_node;
+      };
+
       while(!tokenizer.empty())
       {
-        auto [edge, found] = m_state->find_edge(tokenizer.scan());
+        const token_type token = tokenizer.scan();
 
-        if(!found)
+        if(auto [ignore, found] = l_node->find_value(assign_edge, token);
+           !found)
         {
-          m_state = nullptr;
+          l_node = nullptr;
           return false;
         }
-
-        m_state = *edge;
       }
+
+      m_state = l_node;
 
       return has_payload();
     }
@@ -250,7 +258,7 @@ class flat_trie_ptr final
     {
       // Copy nodes & data.
       ptr_trie_vector ptr_nodes{};
-      ptr_nodes.reserve(m_nodes.size());
+      ptr_nodes.resize(m_nodes.size());
 
       ptr_data_vector ptr_data{};
       ptr_data.reserve(m_data.size());
@@ -293,6 +301,7 @@ class flat_trie_ptr final
     using data_idx_type = typename traits::data_idx_type;
     using node_idx_type = typename traits::node_idx_type;
     using idx_node_type = typename traits::idx_node_type;
+    using idx_node_idx_type = typename traits::idx_node_idx_type;
     using idx_node_ptr = typename traits::idx_node_ptr;
     using idx_const_node_ptr = typename traits::idx_const_node_ptr;
     using idx_node_idx_ptr = typename traits::idx_node_idx_ptr;
@@ -369,28 +378,28 @@ class flat_trie_ptr final
     template<typename InternalValueType>
     [[nodiscard]]
     static constexpr data_idx_type add_data(idx_data_vector & data,
-                                             InternalValueType && value)
+                                            InternalValueType && value)
     {
-      // static_assert(std::is_same_v<idx_value_type, yy_traits::remove_cvr_t<InternalValueType>>,
-      //               "The data type of value is not 'value_type'");
-      data_idx_type value_idx = data.size();
+      static_assert(std::is_same_v<value_type, yy_traits::remove_cvr_t<InternalValueType>>,
+                    "The data type of value is not 'value_type'");
+      data_idx_type data_idx = data.size();
 
       data.emplace_back(std::forward<InternalValueType>(value));
 
-      return value_idx;
+      return data_idx;
     }
 
     [[nodiscard]]
-    static constexpr node_idx_type add_node(idx_trie_vector & nodes,
-                                            idx_node_ptr node,
-                                            idx_node_idx_ptr edge,
-                                            label_type && label,
-                                            const data_idx_type value_idx)
+    static constexpr node_idx_type add_node(idx_trie_vector & p_nodes,
+                                            idx_node_type * p_parent_node,
+                                            data_idx_type p_edge_idx,
+                                            label_type p_label,
+                                            const data_idx_type p_data_idx)
     {
-      node_idx_type node_idx{static_cast<node_idx_type>(nodes.size())};
-      node->add_edge(edge, std::move(label), node_idx);
+      node_idx_type node_idx{static_cast<node_idx_type>(p_nodes.size())};
+      p_parent_node->add_edge(p_edge_idx, std::forward<label_type>(p_label), node_idx);
 
-      nodes.emplace_back(idx_node_type{value_idx});
+      p_nodes.emplace_back(idx_node_type{p_data_idx});
 
       return node_idx;
     }
@@ -405,22 +414,24 @@ class flat_trie_ptr final
       // Skip exising nodes.
       while(!p_tokenizer.empty())
       {
-        auto [edge, found] = get_node(p_nodes.data(), node_idx)->find_edge(token);
+        idx_node_ptr parent_node = get_node(p_nodes.data(), node_idx);
+
+        auto [idx, ignore, found] = parent_node->find_edge(token);
         if(!found)
         {
           break;
         }
-        node_idx = *edge;
+        node_idx = *idx;
         token = p_tokenizer.scan();
       }
 
       // Add new nodes;
       while(!p_tokenizer.empty())
       {
-        auto node = get_node(p_nodes.data(), node_idx);
-        auto [edge, ignore] = node->find_edge(token);
+        idx_node_ptr parent_node = get_node(p_nodes.data(), node_idx);
+        auto [ignore_1, edge_idx, ignore_2] = parent_node->find_edge(token);
 
-        node_idx = add_node(p_nodes, node, edge, tokenizer_type::create(token), no_data);
+        node_idx = add_node(p_nodes, parent_node, edge_idx, tokenizer_type::create(token), no_data);
 
         token = p_tokenizer.scan();
       }
@@ -437,15 +448,15 @@ class flat_trie_ptr final
         tokenizer_type l_tokenizer{p_label};
 
         node_idx_type node_idx = add_empty_nodes(m_nodes, l_tokenizer);
-        idx_node_ptr node{get_node(m_nodes.data(), node_idx)};
+        idx_node_ptr node = get_node(m_nodes.data(), node_idx);
 
         auto payload_label{l_tokenizer.token()};
-        auto [edge, found] = node->find_edge(payload_label);
+        auto [idx, edge_idx, found] = node->find_edge(payload_label);
 
         if(found)
         {
           // Overwrite an existing node.
-          auto & edge_node = *get_node(m_nodes.data(), *edge);
+          auto & edge_node = *get_node(m_nodes.data(), *idx);
           if(!edge_node.empty())
           {
             // Data node exists.
@@ -454,19 +465,19 @@ class flat_trie_ptr final
           }
 
           // Add new data item, & update node data idx
-          auto value_idx = add_data(m_data, std::forward<InputValueType>(p_value));
-          edge_node.data(value_idx);
+          auto data_idx = add_data(m_data, std::forward<InputValueType>(p_value));
+          edge_node.data(data_idx);
 
           return data_added_type{get_data_ptr(edge_node.data()), true};
         }
 
         // No data node exists.
         // Add data node.
-        auto value_idx = add_data(m_data, std::forward<InputValueType>(p_value));
+        auto data_idx = add_data(m_data, std::forward<InputValueType>(p_value));
         label_type node_label{tokenizer_type::create(payload_label)};
-        std::ignore = add_node(m_nodes, node, edge, std::move(node_label), value_idx);
+        std::ignore = add_node(m_nodes, node, edge_idx, std::move(node_label), data_idx);
 
-        return data_added_type{get_data_ptr(value_idx), true};
+        return data_added_type{get_data_ptr(data_idx), true};
       }
 
       return data_added_type{};
