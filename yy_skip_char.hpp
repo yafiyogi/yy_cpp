@@ -32,76 +32,70 @@
 
 namespace yafiyogi::yy_util {
 
-template<typename SpanType,
-         typename span_type = yy_traits::remove_cvr_t<SpanType>>
-  requires yy_traits::is_span_v<span_type>
-    || yy_traits::is_std_string_v<span_type>
-    || yy_traits::is_std_string_view_v<span_type>
-inline span_type skip_not_char(span_type src,
-                               const typename span_type::value_type c)
+template<typename SpanType>
+requires yy_traits::is_span_v<SpanType>
+constexpr SpanType skip_not_char(SpanType & src,
+                                 const typename SpanType::value_type c) noexcept
 {
-  while(!src.empty())
-  {
-    if(src[0] != c)
-    {
-      break;
-    }
+  const auto pos = src.find_first(c);
 
-    src.inc_begin();
-  }
+  src.remove_prefix(pos);
 
   return src;
 }
 
-template<typename T>
-inline const T * skip_not_char(const T * src,
-                               size_type size, T c)
+template<typename T,
+         typename span_type = yy_quad::const_span<T>>
+constexpr span_type skip_not_char(const T * src,
+                                  size_type size, const typename span_type::value_type c) noexcept
 {
-  return skip_not_char(yy_quad::const_span<T>(src, size), c).data();
+  yy_quad::const_span<T> span{src, size};
+
+  return skip_not_char(span, c);
 }
 
-template<typename T>
-inline const T * skip_not_char(const T * begin,
-                               const T * end, T c)
+template<typename T,
+         typename span_type = yy_quad::const_span<T>>
+constexpr span_type skip_not_char(const T * begin,
+                                  const T * end, const typename span_type::value_type c) noexcept
 {
-  return skip_not_char(yy_quad::const_span<T>(begin, end), c).data();
+  yy_quad::const_span<T> span{begin, end};
+
+  return skip_not_char(span, c);
 }
 
-template<typename SpanType,
-         typename span_type = yy_traits::remove_cvr_t<SpanType>>
-  requires yy_traits::is_span_v<span_type>
-    || yy_traits::is_std_string_v<span_type>
-    || yy_traits::is_std_string_view_v<span_type>
-inline span_type skip_char(span_type src,
-                           typename span_type::value_type c)
+template<typename SpanType>
+requires yy_traits::is_span_v<SpanType>
+constexpr SpanType skip_char(SpanType & src,
+                             const typename SpanType::value_type c) noexcept
 {
-  while(!src.empty())
-  {
-    if(src[0] == c)
-    {
-      break;
-    }
+  const auto pos = src.find_first_not(c);
 
-    src.inc_begin();
-  }
+  src.remove_prefix(pos);
 
   return src;
 }
 
-template<typename T>
-inline const T * skip_char(const T * src,
-                           size_type size,
-                           T c)
+template<typename T,
+         typename span_type = yy_quad::const_span<T>>
+constexpr span_type skip_char(const T * src,
+                              size_type size,
+                              const typename span_type::value_type c) noexcept
 {
-  return skip_char(yy_quad::const_span<T>(src, size), c).data();
+  yy_quad::const_span<T> span{src, size};
+
+  return skip_char(span, c);
 }
 
-template<typename T>
-inline const T * skip_char(const T * begin,
-                           const T * end,
-                           T c)
+template<typename T,
+         typename span_type = yy_quad::const_span<T>>
+constexpr span_type skip_char(const T * begin,
+                              const T * end,
+                              const typename span_type::value_type c) noexcept
 {
-  return skip_char(yy_quad::const_span<T>(begin, end), c).data();
+  yy_quad::const_span<T> span{begin, end};
+
+  return skip_char(span, c);
 }
 
 } // namespace yafiyogi::yy_util
